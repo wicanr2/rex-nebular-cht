@@ -111,10 +111,34 @@ TTF 縮到這個尺寸筆劃比例會跑掉、複雜字糊成一團。
 
 ## 怎麼玩
 
-需要自備遊戲（本專案不含遊戲資料）。把 `rex_cht.tsv` 與 `rex_big5.fnt` 兩個檔複製到遊戲目錄，
-用本專案的 ScummVM 執行即可。**中文的開關就是這兩個檔在不在**——移走就變回英文原版，
-不需要任何設定，也不必改 `--language`（MADS 的 detection table 全是 `EN_ANY`，
-設非英文語言反而會改變 detector 行為）。
+需要自備遊戲（本專案不含遊戲資料）。
+
+**Windows**：下載 `rexnebular-cht-win64.zip`，解開，把遊戲檔複製進 `game` 資料夾，
+雙擊 `PLAY-REX-CHT.bat`。設定只寫在包內的 `scummvm.ini`，不會動到你系統上其他 ScummVM。
+
+**macOS**：下載 `RexNebular-CHT-macos-universal.dmg`（arm64 + Intel 通用），
+第一次開啟前先解隔離：`xattr -dr com.apple.quarantine /Applications/ScummVM.app`。
+
+**Linux**：`RexNebular-CHT-x86_64.AppImage`，`chmod +x` 後直接執行。
+
+**已經有自己編的 ScummVM**：套 `patches/rex-cht-engine.patch`（基準 ScummVM v2.8.0），
+再把 `cht-data/` 兩個檔放進遊戲目錄或用 `--extrapath` 指過去。
+
+**中文的開關就是那兩個檔在不在**——移走就變回英文原版，不需要任何設定，
+也不必改 `--language`（MADS 的 detection table 全是 `EN_ANY`，設非英文語言反而會改變
+detector 行為）。
+
+### 包裡帶了什麼、為什麼
+
+Windows 與 macOS 的 ScummVM 都是為這款重編的：只含 MADS 引擎，SDL2 從原始碼自編
+（不用預編譯包——macOS 那邊的 `brew sdl2` 從 2026 起是架在 SDL3 上的 shim，
+玩家端會黑畫面，而開發機測不出來），外部媒體庫全關（這款是 1992 floppy 版，
+音樂走 AdLib、動畫自帶解碼，用不到 vorbis/flac/theora）。
+
+`cht-data/ENGINE.txt` 裡是引擎指紋——`engines/mads/` 底下所有 `.cpp`/`.h` 排序後的
+sha256 前 12 碼。三平台由同一份 patch 套出，指紋必須相同。
+只比中文資料的 md5 對「只改引擎」是完全的盲區：資料全對、包卻裝著修正前的引擎，
+檢查照樣全綠。
 
 ## 專案結構
 
