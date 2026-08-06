@@ -114,6 +114,22 @@ jobs:
         run: |
           set -euo pipefail
           bash workplace/tools/apply_patches.sh "$RUNNER_TEMP/scummvm-arm64"
+
+          # [雷] ports.mk 的 scummvm-static target 硬寫了 -force_cpusubtype_ALL，
+          # 註解自己說是「to ensure the binary runs on every PowerPC machine」——
+          # PowerPC 時代的遺物。Xcode 15+ 的新 linker 已經移除這個選項：
+          #     ld: unknown options: -force_cpusubtype_ALL
+          # 整包 .o 都編完了才倒在最後的連結那一步，特別浪費。
+          # 這不動引擎 patch（ports.mk 不在 engines/mads/，不影響引擎指紋）。
+          cd "$RUNNER_TEMP/scummvm-arm64"
+          sed -i.bak 's/ -force_cpusubtype_ALL//' ports.mk
+          # 只看非註解行 —— 那個字串在上一行的註解裡也有，連註解一起比會永遠誤判
+          if grep -v '^#' ports.mk | grep -q 'force_cpusubtype_ALL'; then
+            echo "### sed 沒生效，連結還是會倒 ###"; exit 1
+          fi
+          grep -A2 '^scummvm-static:' ports.mk | head -4
+          cd "$GITHUB_WORKSPACE"
+
           rm -rf "$RUNNER_TEMP/scummvm-x86_64"
           cp -a "$RUNNER_TEMP/scummvm-arm64" "$RUNNER_TEMP/scummvm-x86_64"
 

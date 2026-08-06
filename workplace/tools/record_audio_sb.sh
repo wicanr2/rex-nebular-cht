@@ -29,7 +29,7 @@ sleep 2
 
 /w/scummvm-src/scummvm --path=/w/game --auto-detect --no-fullscreen \
     -e adlib --music-volume=255 --sfx-volume=255 --speech-volume=255 \
-    --output-rate=44100 > /tmp/audio-sb.log 2>&1 &
+    --output-rate=44100 > "$OUT/scummvm.log" 2>&1 &
 GAME_PID=$!
 sleep 8
 
@@ -56,13 +56,13 @@ sleep 1
 # [HARD] DSR 沒載到時 audio.cpp:94 會 warning「DSR file not loaded, not playing sound」。
 # 沒有這行才代表數位音效真的有播 —— 不要靠「我設了 sfx-volume」就當它成立。
 echo "=== 數位音效載入狀況 ==="
-if grep -q "DSR file not loaded" /tmp/audio-sb.log; then
+if grep -q "DSR file not loaded" "$OUT/scummvm.log"; then
     echo "  ### DSR 沒載入，錄到的只有 FM 音樂 ###"
-    grep -c "DSR file not loaded" /tmp/audio-sb.log
+    grep -c "DSR file not loaded" "$OUT/scummvm.log"
 else
     echo "  ✓ log 沒有 'DSR file not loaded'"
 fi
-grep -iE "sound|dsr|invalid sound index" /tmp/audio-sb.log | head -10
+grep -iE "sound|dsr|invalid sound index" "$OUT/scummvm.log" | head -10
 
 [ -s "$OUT/cap.raw" ] || { echo "錄音失敗"; exit 1; }
 

@@ -98,6 +98,20 @@ detection table 裡全部登記為英文，設成別的語言反而會讓辨識�
 
 存檔放哪：跟 scummvm.ini 同一層的 saves 資料夾。
 
+聲音
+----
+
+預設是 Sound Blaster 配置，音樂與音效都開：
+
+  音樂   AdLib FM 合成（SB 卡上就是這顆 YM3812 晶片）
+  音效   數位取樣音效（SB 的 DAC 那一層）
+
+想調音量改 scummvm.ini 裡的 music_volume / sfx_volume（0-255）。
+
+這款不支援 MT-32：遊戲雖然附了 Roland 驅動（rsound.*），但那是 DOS
+執行檔，ScummVM 的 MADS 引擎只重新實作了 AdLib 那一支，沒有 MIDI 輸出路徑。
+設成 MT-32 不會有效果，會安靜地退回 AdLib。
+
 
 授權
 ----
@@ -106,11 +120,22 @@ detection table 裡全部登記為英文，設成別的語言反而會讓辨識�
 遊戲原作 (c) 1992 MicroProse Software, Inc.，不包含在本包內。
 """
 
+# Sound Blaster 在這款是兩層，兩層 ScummVM 都有實作，這裡明確寫死免得靠預設值：
+#   音樂  SB 卡上的 YM3812（跟 AdLib 是同一顆 FM 晶片）
+#         → engines/mads/sound.cpp:45 的 OPL 模擬，資料是 asound.001-009
+#   音效  SB 的 DAC
+#         → engines/mads/audio.cpp:92 playSound() → FAB 解壓 → makeRawStream → mixer
+#           資料是 REX009.DSR（22 筆）與 ACT002.DSR（13 筆），封在 HAG 內
+# MADS 沒有 MIDI 路徑，所以 music_driver 除了 adlib 沒有別的有意義的選擇（見 docs/40-packaging.md）。
 INI = """[scummvm]
 gui_language=en
 gfx_mode=surfacesdl
 fullscreen=false
 savepath=./saves
+music_driver=adlib
+music_volume=192
+sfx_volume=255
+speech_volume=255
 """
 
 
