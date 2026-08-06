@@ -97,6 +97,43 @@ ScummVM v2.8.0 **沒有** `--disable-mpcdec` / `--openmpt` / `--mikmod` / `--mpe
 （同一輪腳本裡 SDL2 是 autoconf 吃得下，很容易誤以為 ScummVM 也吃）。
 macOS 沒有 GNU `sha256sum`，只有 `shasum -a 256`。
 
+### 第五個地雷：`ports.mk` 裡的 PowerPC 遺物
+
+`scummvm-static` target 硬寫了 `-force_cpusubtype_ALL`（`ports.mk:555`），
+註解自己說是「to ensure the binary runs on every PowerPC machine」。
+Xcode 15+ 的新 linker 已經移除這個選項：
+
+```
+ld: unknown options: -force_cpusubtype_ALL
+```
+
+**整包 .o 都編完了才倒在最後的連結那一步**，特別浪費。workflow 裡用 sed 拿掉，
+不動引擎 patch（`ports.mk` 不在 `engines/mads/`，不影響引擎指紋）。
+
+判斷 sed 有沒有生效時**只看非註解行**——那個字串在上一行的註解裡也有，
+連註解一起比會永遠誤判成「沒生效」。
+
+### 這條 CI 跑了三輪才綠，每一輪的根因都不一樣
+
+| 輪 | 倒在哪 | 根因 |
+|---|---|---|
+| 1 | 套 patch | **我的驗證條件寫錯**：grep 的是 `chtEnabled`，但 font.cpp 裡是 `cht->enabled()`。patch 一直是好的 |
+| 2 | 連結 arm64 | `ports.mk` 的 `-force_cpusubtype_ALL` |
+| 3 | — | 全綠 |
+
+第一輪那個特別值得記：那個檢查**從本機第一次執行就在誤報**，而我當時只看了輸出尾巴和
+「cht.cpp 存不存在」，**沒看退出碼**，把 exit 5 當成功，一路帶到 CI 才炸。
+
+教訓有兩層：
+1. **驗證條件本身也要驗證**——拿一份「已知是對的」輸入餵進去，確認它說通過；
+   再拿一份「已知是錯的」，確認它會叫。
+2. **抽查會漏**。單一 grep 只涵蓋一個檔，另外 21 個檔沒套到也看不出來。
+   改成比對引擎指紋，`engines/mads/` 底下 124 個 `.cpp`/`.h` 任何一處不對都會擋下。
+
+順帶：`--force_cpusubtype_ALL` 那次，我第一直覺是去改 SDL2 的 `sdl2-config`
+（因為錯誤訊息裡有 `sdl2-config --static-libs`）。先去 SDL2 2.30.9 原始碼 grep 了一次，
+**零命中**，才回頭找到真正的來源。憑訊息裡最顯眼的字串猜來源，會改錯地方。
+
 ## leak-scan
 
 `tools/leak_scan.py` 掃五類版權素材：遊戲資料、MT-32 ROM、手冊掃描、原版音訊/影片、

@@ -1,0 +1,18 @@
+WARNING: FSNode::createReadStream: 'scummvm.ini' does not exist!
+Default configuration file missing, creating a new one
+ALSA lib seq_hw.c:528:(snd_seq_hw_open) open /dev/snd/seq failed: No such file or directory
+ALSA lib seq_hw.c:528:(snd_seq_hw_open) open /dev/snd/seq failed: No such file or directory
+WARNING: Engine plugin for SCI not present. Fallback detection is disabled.!
+WARNING: Engine plugin for Wintermute not present. Fallback detection is disabled.!
+CRITICAL: You are using the SDL disk i/o audio driver!
+CRITICAL:  Writing to file [/w/out/gameplay/cap.raw].
+WARNING: You are missing a valid 'translations.dat' file. GUI translation will not be available!
+GameID                         Description                                                Full Path
+------------------------------ ---------------------------------------------------------- ---------------------------------------------------------
+mads:nebular                   Rex Nebular and the Cosmic Gender Bender (DOS/English)     /w/game
+User picked target 'nebular' (engine ID 'mads', game ID 'nebular')...
+   Looking for a plugin supporting this target... MADS
+Running Rex Nebular and the Cosmic Gender Bender (DOS/English)
+section1.hag: 6f725eb38660de8af31ec7cdd628d615, 927222 bytes.
+WARNING: generateZipSet: Could not find 'gui-icons.dat'!
+WARNING: Could not find theme 'scummremastered' falling back to builtin!
