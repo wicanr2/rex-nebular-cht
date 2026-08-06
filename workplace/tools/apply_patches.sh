@@ -29,17 +29,38 @@ tar xf "$TARBALL" -C "$DEST" --strip-components=1
 
 echo "=== 套用繁中化 patch ==="
 cd "$DEST"
-# --check 先驗一次：套到一半失敗會留下半套的樹，比乾脆失敗更難查
-git apply --check "$PATCH" 2>/dev/null || patch -p1 --dry-run < "$PATCH" >/dev/null \
+
+# [HARD] 一律走 git apply，不要 fallback 到 patch(1)。
+# 解壓出來的樹不是 git repo，git apply 會直接失敗；原本的寫法是退到 `patch -p1`，
+# 結果 Linux（GNU patch）套得起來、macOS（BSD patch）靜默套不完整 —— cht.cpp/cht.h
+# 這種新增檔進去了，font.cpp 的修改卻沒進去，而 patch 的退出碼是 0。
+# 在開發機上完全測不出來，要燒一輪 mac runner 才會看到。
+# git init 一下讓 git apply 能用，三平台就走同一條程式碼路徑、同樣的語意。
+git init -q .
+git apply --check "$PATCH" \
     || { echo "### patch 套不上 ${SCUMMVM_TAG} —— 上游版本可能 drift 了 ###"; exit 3; }
-git apply "$PATCH" 2>/dev/null || patch -p1 < "$PATCH"
+git apply "$PATCH"
 
 # [HARD] 反查：patch 說套上了，就要看得到它應該產生的東西。
-# 這兩個檔案是中文路徑的核心，缺任何一個都代表 patch 沒真的生效。
 for f in engines/mads/cht.cpp engines/mads/cht.h; do
     [ -s "$f" ] || { echo "### $f 不存在 —— patch 沒有真的套上 ###"; exit 4; }
 done
-grep -q 'chtEnabled' engines/mads/font.cpp \
+# [雷] 這裡原本 grep 的是 'chtEnabled'，但 font.cpp 裡根本沒有那個字串
+# （實際是 `cht->enabled()`，font.cpp:179）。條件憑印象寫、沒驗證過，
+# 結果這個檢查從第一次執行就在誤報 patch 失敗 —— 而我只看了輸出尾巴和
+# 「cht.cpp 存不存在」，沒看退出碼，把 exit 5 當成功，一路帶到 CI 才炸。
+# 教訓：驗證條件本身也要驗證一次（拿一份「已知套好」的樹餵進去，確認它說通過）。
+grep -q 'ChtSupport' engines/mads/font.cpp \
     || { echo "### font.cpp 沒有中文分支 —— patch 套得不完整 ###"; exit 5; }
+
+# 但單一 grep 仍是抽查，會漏掉沒被 grep 到的那 21 個檔。
+# 指紋涵蓋 engines/mads/ 底下每一個 .cpp/.h，任何一處沒套到都會對不上。
+EXPECT="${EXPECT_FINGERPRINT:-b5e9742121ea}"
+if command -v python3 >/dev/null; then
+    python3 "$HERE/engine_fingerprint.py" "$DEST" --expect "$EXPECT" \
+        || { echo "### 引擎指紋不符 —— patch 套得不完整或上游 drift ###"; exit 6; }
+else
+    echo "（無 python3，略過指紋比對）"
+fi
 
 echo "=== patch 套用完成：$DEST ==="
