@@ -94,13 +94,31 @@ sleep 1
 [ -s "$OUT/raw.mkv" ] || { echo "### 沒錄到 ###"; exit 1; }
 
 echo "=== [HARD] 音畫必須等長，差很多就是沒同步 ==="
-VD=$(ffprobe -v error -select_streams v -show_entries stream=duration -of csv=p=0 "$OUT/raw.mkv")
-AD=$(ffprobe -v error -select_streams a -show_entries stream=duration -of csv=p=0 "$OUT/raw.mkv")
-echo "  video ${VD}s / audio ${AD}s"
+# [雷] 不能用 stream=duration —— 邊錄邊被 kill 的 mkv，stream 層沒有 duration，
+# ffprobe 回 "N/A"。而 awk 拿兩個 N/A 相減會算出 0，於是印出「✓ 差 0s，同步」——
+# 檢查在拿不到資料時靜默通過，比沒有檢查更糟。實測踩過一次。
+# format=duration 對同一個檔是有值的；音訊長度用解碼實測。
+# [雷2] 也不能拿「容器長度 vs 音訊長度」比 —— 容器 duration 取的是最長那一軌，
+# 所以影片 110s 配音訊 397s 的檔，容器就是 397s，兩者永遠「一致」。
+# 要比的是 video 軌 vs audio 軌，而且兩邊都要解碼實測。
+track_len() {   # $1 檔案  $2 v|a
+    ffmpeg -v info -i "$1" -map "0:$2" -f null - 2>&1 \
+      | grep -oE 'time=[0-9][0-9:.]+' | tail -1 | cut -d= -f2 \
+      | awk -F: '{print ($1*3600)+($2*60)+$3}'
+}
+VD=$(track_len "$OUT/raw.mkv" v)
+AD=$(track_len "$OUT/raw.mkv" a)
+for pair in "影片:$VD" "音訊:$AD"; do
+    case "${pair##*:}" in
+        ''|0|0.0) echo "### 取不到${pair%%:*}長度 —— 不能當成通過 ###"; exit 8 ;;
+    esac
+done
+echo "  影片 ${VD}s / 音訊 ${AD}s"
 awk -v v="$VD" -v a="$AD" 'BEGIN{d=(v>a?v-a:a-v); if (d>3){print "  ### 差 "d"s，沒同步 ###"; exit 1} else print "  ✓ 差 "d"s，同步"}' || exit 8
+DUR_F="$VD"
 
 echo "=== 音訊逐 15 秒 ==="
-DUR=${VD%.*}
+DUR=${DUR_F%.*}
 for ((t=0; t<DUR; t+=15)); do
     M=$(ffmpeg -v info -ss "$t" -t 15 -i "$OUT/raw.mkv" -map 0:a -af volumedetect -f null /dev/null 2>&1 | grep max_volume | sed 's/.*max_volume: //')
     printf "  %3ds  max %s\n" "$t" "$M"

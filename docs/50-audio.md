@@ -97,12 +97,61 @@ DOSBox + Munt 跑原版這條也不通。
 錄音要送鍵推進（主選單 → 開始新遊戲 → 難度選擇），素材取 30 秒之後。
 `tools/record_audio_sb.sh` 會逐 15 秒掃描印出音量表，換素材時重看一次。
 
-## 推廣片的音訊
+## 推廣片的音訊：錄真實遊玩，不後製混音
 
-兩層都用原版真實素材，沒有一個位元是合成的：
+最終版（`tools/make_promo2.sh`）用 `tools/record_gameplay_sync.sh` 錄真實遊玩，
+畫面與聲音**由同一個 ffmpeg 行程錄**，時間軸天生對齊。遊玩片段裁切時
+畫面與音訊從同一時間點一起裁，音效就落在它該響的那一刻。
 
-- **配樂**：`tools/record_audio_sb.sh` 用 SDL disk audio 實錄的 AdLib FM 輸出
-- **音效**：`tools/extract_dsr.py` 從 `REX009.DSR` 抽出的原版 PCM，放在版面切換點
+### [HARD] 不能用 SDL 的 disk audio driver 錄影片配樂
+
+它是「盡快把 mixer 輸出寫檔」，**不受真實時間約束**——實測 110 秒的遊玩錄出
+**397 秒**音訊，音畫差 3.6 倍。`SDL_DISKAUDIODELAY` 只能減緩，不能讓它變成即時。
+
+正解是 **PulseAudio null sink**（`docker/Dockerfile.record`）：沒有實體硬體，
+但**按真實時間消耗取樣**（模擬音效卡時鐘），所以 ScummVM 以正常速度產生音訊。
+
+```bash
+pulseaudio --start --exit-idle-time=-1 -n \
+    --load="module-null-sink sink_name=rex" --load="module-native-protocol-unix"
+# ScummVM 端：SDL_AUDIODRIVER=pulse PULSE_SINK=rex
+# ffmpeg 端： -f x11grab -i :99  -f pulse -i rex.monitor
+```
+
+disk audio driver 仍適合**只要音訊素材**的場合（`record_audio_sb.sh`），
+那裡不在乎它跑多快。
+
+### [雷] 「音畫等長」這個檢查，我寫錯過兩次
+
+1. 用 `stream=duration` 取長度。邊錄邊被 kill 的 mkv，stream 層沒有 duration，
+   ffprobe 回 `N/A`——而 awk 拿兩個 `N/A` 相減得 0，印出「✓ 差 0s，同步」。
+   **檢查在拿不到資料時靜默通過，比沒有檢查更糟。**
+2. 改用「容器 duration vs 音訊長度」。容器 duration 取的是**最長那一軌**，
+   所以 110s 影片配 397s 音訊的檔，容器就是 397s，兩者永遠一致。
+
+正解是比 **video 軌 vs audio 軌**，兩邊都解碼實測：
+
+```bash
+track_len() {   # $1 檔案  $2 v|a
+    ffmpeg -v info -i "$1" -map "0:$2" -f null - 2>&1 \
+      | grep -oE 'time=[0-9][0-9:.]+' | tail -1 | cut -d= -f2 \
+      | awk -F: '{print ($1*3600)+($2*60)+$3}'
+}
+```
+
+正對照（拿已知沒同步的那份餵進去）：
+
+| 素材 | 影片 | 音訊 | 差 | 判定 |
+|---|---|---|---|---|
+| PulseAudio 版 | 138.9s | 140.0s | 1.1s | ✓ 同步 |
+| SDL disk audio 版 | 110.0s | 397.2s | 287.2s | ✗ 沒同步 |
+
+**這個判準前兩版都是拿真檔測「通過」就收工，正對照一做就露餡。**
+
+### 另一條路：直接抽 DSR 音效後製混入
+
+`tools/extract_dsr.py` 抽出的音效也可以後製混進靜態卡片版（v1 就是這樣做的）。
+位置是人為指定的，不是遊戲觸發的，但對純卡片式的片子夠用。
 
 > `amix` 之前要先 `aformat=sample_rates=44100:channel_layouts=stereo` 對齊——
 > 音效是 8000 Hz 單聲道，直接混會變調。`normalize=0` 則是避免 amix 因為輸入數量
