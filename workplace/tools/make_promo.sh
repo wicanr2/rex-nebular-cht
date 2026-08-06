@@ -3,7 +3,9 @@
 #
 # [HARD] 不用 zoompan —— 它的 d 是「每個輸入幀輸出 d 幀」，配上前置 fps 會變成
 #        (FPS*S)² 幀，6 秒 25fps ≈ 22500 幀，CPU 燒好幾分鐘。靜態圖 + fade 就夠看。
-# [HARD] 配樂用原版 AdLib 實錄（tools/record_audio.sh），不自產合成音。
+# [HARD] 音樂與音效都用原版實錄／原版資料，不自產合成音：
+#        音樂 tools/record_audio_sb.sh（AdLib FM = SB 卡上的 YM3812）
+#        音效 tools/extract_dsr.py（REX009.DSR，SB 的 DAC 那一層）
 set -eu
 
 # ===== theme：從遊戲截圖萃取，不沿用其他專案 =====
@@ -114,10 +116,29 @@ ffmpeg -y -loglevel error -f concat -safe 0 -i "$LIST" \
 DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$TMP/silent.mp4")
 FO=$(awk "BEGIN{print $DUR-3}")
 
+# ===== 音訊：Sound Blaster 的兩層都要 =====
+# 音樂 = SB 卡上的 YM3812 FM 合成（跟 AdLib 同一顆晶片），SDL disk audio 實錄
+# 音效 = SB 的 DAC，從 REX009.DSR 抽出的原版 8-bit PCM（tools/extract_dsr.py）
+# 兩者都是原版真實素材，沒有一個位元是合成的。
+BGM=/w/out/audio-sb/bgm.wav
+[ -s "$BGM" ] || BGM=/w/out/audio/bgm.wav
+SFX_DIR=/w/out/sfx
+
 # [雷] 配樂比影片短時，-shortest 會把結尾卡整張砍掉。
 # 先 aloop 無限循環再 atrim 到影片長度，並且不要用 -shortest。
-ffmpeg -y -loglevel error -i "$TMP/silent.mp4" -i /w/out/audio/bgm.wav \
-  -filter_complex "[1:a]aloop=loop=-1:size=2000000000,atrim=0:$DUR,afade=t=in:st=0:d=2,afade=t=out:st=$FO:d=3[a]" \
+#
+# 音效放在版面切換點當點綴。音效是 8000Hz 單聲道，amix 前先 aformat 對齊
+# 取樣率與聲道佈局，否則混完會變調。normalize=0 是為了不讓 amix 因為輸入數量
+# 而把整體音量壓下去（預設會除以輸入數）。
+ffmpeg -y -loglevel error -i "$TMP/silent.mp4" -i "$BGM" \
+  -i "$SFX_DIR/sfx-011.wav" -i "$SFX_DIR/sfx-013.wav" -i "$SFX_DIR/sfx-018.wav" \
+  -filter_complex "\
+    [1:a]aloop=loop=-1:size=2000000000,atrim=0:$DUR,afade=t=in:st=0:d=2,afade=t=out:st=$FO:d=3,\
+         aformat=sample_rates=44100:channel_layouts=stereo[music];\
+    [2:a]aformat=sample_rates=44100:channel_layouts=stereo,adelay=6000|6000,volume=0.75[s1];\
+    [3:a]aformat=sample_rates=44100:channel_layouts=stereo,adelay=21000|21000,volume=0.75[s2];\
+    [4:a]aformat=sample_rates=44100:channel_layouts=stereo,adelay=36000|36000,volume=0.75[s3];\
+    [music][s1][s2][s3]amix=inputs=4:duration=first:normalize=0[a]" \
   -map 0:v -map "[a]" -threads 2 -c:v libx264 -preset veryfast \
   -c:a aac -b:a 192k -movflags +faststart "$OUT/rexnebular-cht-promo.mp4"
 
