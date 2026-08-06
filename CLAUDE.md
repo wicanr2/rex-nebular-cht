@@ -276,7 +276,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 - **[HARD] 包驗收要同時比中文資料 md5 **與**引擎指紋**：把引擎目錄所有 `*.cpp`/`*.h` 排序後雜湊成 12 碼寫進 `cht-data/ENGINE.txt`。只比資料的驗收，對「只改引擎」是完全的盲區（Gobliiins 踩過：六個包全 ✓，其中兩個裝的是修正前的引擎）。macOS 的指紋要由 CI 從 runner 上實際編出那顆 binary 的樹算，且 macOS **沒有 `sha256sum`**（用 `shasum -a 256`）。
 - **Windows zip 六條**（每條在 Linux 上都測不出來）：`zip -UN=UTF8` ＋ 包內檔名純 ASCII｜`.bat` 換行 CRLF｜`.bat` 內容純 ASCII（中文放 README）｜`.bat` 要 `if errorlevel 1` ＋ `pause`｜README 補 UTF-8 BOM｜附 `scummvm.ini` 鎖 `gui_language=en`。細節見 kb `cjk-package-encoding`。
 - **啟動器跨平台通則**：啟動器是「程式旁邊的一支腳本」，**不要動平台自己的啟動機制**（不改 `Info.plist`、不把 script 塞進 `Contents/MacOS/`）；失敗必須讓玩家看得到訊息；設定檔用預先寫好的 UTF-8 靜態 ini ＋ 啟動器只負責複製（不要在 `.bat` 裡 `echo` 中文）；ini 走相對路徑；設定檔寫在包內、不要污染玩家全域 ScummVM 設定。
-- **MT-32**：`--enable-mt32emu` 只是把 Munt 編進去。**ROM 與 mt32 預設一定要一起設**——只設 `--music-driver=mt32` 卻沒 ROM，開場會彈一次阻擋框再退回 AdLib。本機完整包附 ROM（`MT32_CONTROL.ROM`/`MT32_PCM.ROM` 放遊戲夾，launcher 加 `--extrapath`）；**公開／patch-only 版不附 ROM、不設 mt32 預設**。`*.ROM` 一律 gitignore。
+- **[HARD] MT-32 在這款做不到，`--enable-mt32emu` 一律關掉**（2026-08-07 實測定案，別再試）。三條路全堵：
+  - ScummVM 的 **MADS 引擎沒有 MIDI 路徑**。`SoundManager` 建構子直接 `_opl = OPL::Config::create()`（`engines/mads/sound.cpp:45`），那是唯一的音樂裝置；全引擎 grep `MidiDriver` / `MidiParser` / `detectDevice` / `MT_MT32` **零命中**。`_preferRoland` 在 `sound.cpp:43` 寫死 `false`，且只有 `phantom/` 讀它（選音效編號用），nebular 完全不碰。**`-e mt32` 對這款是靜默無效的**——不報錯、不退化提示，就是照放 AdLib。
+  - 遊戲 zip 裡 **56 個檔全是資料，沒有 `.EXE`** → DOSBox + Munt 跑原版這條也不通。
+  - `rsound.001–009`（Roland 驅動）**不是音樂資料，是 16-bit DOS 執行檔**：檔頭 `4d 5a`（MZ），內含 `RLND AGAdemo 9-13-92`；`asound.*` 同型（`AGAAdlibOvl1`）。ScummVM 是把 asound 的行為**重新實作**成 C++，沒人做 rsound。要 MT-32 等於逆向那九支驅動重寫 MIDI 輸出，是獨立專案的規模。
+  - **驗證方法（下次遇到類似狀況照做）**：不要信「我設了參數」，錄一份 AdLib、錄一份宣稱 MT-32 的，`showspectrumpic` 產兩張頻譜圖比對。諧波結構與脈衝間隔同型 = 根本沒切換。本次就是這樣抓到的。
+  - Munt 對這款完全無用，編進去只是把 binary 撐肥 → 三平台一律 `--disable-mt32emu`，並反向反查 `config.mk` 沒有 `USE_MT32EMU = 1`。`*.ROM` 仍一律 gitignore。
 - **[HARD] 防呆腳本寫完做正對照**：造一個「六條全違反」的 zip 餵進檢查腳本，確認每條都叫得出來。「沒有紅字」有兩種可能——包是好的，或**檢查自己壞了**。
 - [雷] `pkill -f <pattern>` 會命中 bash 自己的命令列、把執行中的那行 shell 殺掉（無聲中止、exit 144，看起來像 docker 壞掉）。收尾清理用 `pkill -x <程序名>` 或先取 PID。
 - 打包／等 CI 這類機械活**派 sonnet/haiku subagent 前景阻塞、有界執行**（`rulebook/45`）；旗艦只看「進遊戲」截圖 ＋ leak-scan。
@@ -310,7 +315,8 @@ README 本體：在地代理史（**這款當年只有中文手冊、沒有中�
 
 - 宣傳片：x11grab 錄**真實遊玩片段** → ffmpeg 合成標題卡＋片段＋中文字幕（靜態 + fade，**不用 zoompan**）。
 - **[HARD] 配樂用原版真實音訊**（`SDL_AUDIODRIVER=disk` 錄原版 AdLib/MT-32），**不自產合成配樂**（`rulebook/93`）。公開只嵌**靜音 GIF ＋ 連 YouTube**。
-- [雷] MADS 的 MT-32 錄音進點未經驗證。SCUMM/iMUSE 的教訓是「標題期在上傳音色、本來就靜音，要送鍵推進到開場才有樂」——**MADS 是不是同樣行為要自己實測**，別直接套 SCUMM 的結論，也別拿 SCI 專案當 oracle。診斷方式：`volumedetect` 逐段掃找音樂進點，再驗整檔。
+- **這款只有 AdLib 可錄**（MT-32 做不到，理由見 §12）。使用者 2026-08-07 定案：推廣片用 AdLib 原版錄音。
+- **音樂進點實測結果：前 30 秒是靜音**，之後穩定在 −37～−39 dB。錄音要送鍵推進（主選單 → 開始新遊戲 → 難度），取 30s 之後的片段。這是實測值，不是套 SCUMM 的結論。診斷方式：`volumedetect` 逐 15 秒掃描。
 
 ---
 
