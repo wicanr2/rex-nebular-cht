@@ -1,0 +1,300 @@
+0	game	遊戲
+1	qsave	快存
+2	look	觀看
+3	take	拿取
+4	push	推
+5	open	打開
+6	put	放置
+7	talk to	交談
+8	give	給
+9	pull	拉
+10	close	關上
+11	throw	丟
+12	walk to	走到
+13	activate	啟動
+14	admire	欣賞
+15	adsm	
+16	air vent	通風口
+17	aloe plant	蘆薈
+18	anemone	海葵
+19	anomometer	風速計
+20	area around hut	小屋周圍
+21	area to south	南邊區域
+22	area to west	西邊區域
+23	aromatic meat	芳香肉
+24	attach	接上
+25	audio tape	錄音帶
+26	auxiliary power	輔助電源
+27	badmitton brat	羽球頑童
+28	bag	袋子
+29	bamboo tree	竹子
+30	bats	蝙蝠
+31	bawlemer oriole-hun	包爾摩黃鸝
+32	bear rug	熊皮地毯
+33	beastly trophy	野獸戰利品
+34	big leaves	大葉子
+35	big pipes	大管子
+36	big sky	大天空
+37	big stone	大石頭
+38	binoculars	望遠鏡
+39	birdies	小鳥
+40	blowgun	吹箭筒
+41	bomb	炸彈
+42	bombs	炸彈
+43	bone	骨頭
+44	bones	骨頭
+45	bottle	瓶子
+46	boulder	巨石
+47	boulders	巨石
+48	bra	胸罩
+49	break	弄壞
+50	breathe air	呼吸空氣
+51	bulkhead	艙壁
+52	burger	漢堡
+53	burn	燒
+54	burnt out warp coil	燒毀曲速線圈
+55	bush-like formation	灌木狀地形
+56	bushes	灌木叢
+57	bushy fern	茂密蕨類
+58	cactus	仙人掌
+59	card	卡片
+60	cast	拋出
+61	cauldron	大鍋
+62	cave	洞穴
+63	cave ceiling	洞穴頂
+64	cave entrance	洞穴入口
+65	cave exit	洞穴出口
+66	cave floor	洞穴地面
+67	cave to east	東邊洞穴
+68	cave wall	洞穴牆壁
+69	ceiling	天花板
+70	chair	椅子
+71	charge cases	充電盒
+72	chicken	雞
+73	chicken bomb	雞炸彈
+74	clearing to east	東邊林間空地
+75	clearing to south	南邊林間空地
+76	cliff face	崖壁
+77	climb down	爬下
+78	climb through	爬過
+79	climb up	爬上
+80	clock	時鐘
+81	closet	壁櫥
+82	clothesline	曬衣繩
+83	clump of trees	樹叢
+84	coal	煤炭
+85	cocoanut	椰子
+86	compact case	化妝盒
+87	computer game	電動玩具
+88	control panel	控制面板
+89	coral	珊瑚
+90	crab	螃蟹
+91	credit chip	信用晶片
+92	cumulous cloud	積雲
+93	curious weed patch	奇特雜草叢
+94	curtain	窗簾
+95	curtains	窗簾
+96	cut	切
+97	damage control	損害管制
+98	damage control panel	損害管制面板
+99	dampen	弄濕
+100	dead fish	死魚
+101	dead purple monster	死紫怪物
+102	declivitous chasm	陡峭深谷
+103	deep dark forest	幽暗森林
+104	dense forest	茂密森林
+105	detonators	雷管
+106	dino mite	恐龍炸藥
+107	disassemble	拆解
+108	dive into	潛入
+109	door	門
+110	door key	門鑰匙
+111	doorway	門口
+112	drawer	抽屜
+113	drink	喝
+114	durafail cells	勁掛電池
+115	eastern cliff face	東邊崖壁
+116	eat	吃
+117	eject	彈出
+118	empty	倒空
+119	engineering controls	工程控制台
+120	engineering section	工程艙
+121	enter key	輸入鍵
+122	escape hatch	逃生艙
+123	estrotoxin	雌激素毒素
+124	examine	檢查
+125	experiment cage	實驗籠
+126	extinguish	熄滅
+127	face id	臉部辨識
+128	fern	蕨類
+129	field to north	北邊田野
+130	field to south	南邊田野
+131	field to west	西邊田野
+132	fill	裝滿
+133	fire pit	火坑
+134	fishing line	釣魚線
+135	fishing rod	釣竿
+136	floor	地板
+137	floor of hut	小屋地板
+138	floor tile	地磚
+139	fondle	撫摸
+140	forest to east	東邊森林
+141	front window	前窗
+142	fungoids	真菌類
+143	furnace	火爐
+144	fuzzy dice	絨毛骰子
+145	gaze	凝視
+146	gaze at	凝視
+147	gaze in	望入
+148	glance at	瞥視
+149	glove	手套
+150	gnarly shrub	糾結灌木
+151	gnaw on	啃咬
+152	gorge on	大吃
+153	grain alchohol	穀物酒精
+154	grassland to east	東邊草原
+155	grassland to south	南邊草原
+156	grassy area	草地
+157	grassy area to north	北邊草地
+158	grassy knoll	草丘
+159	grind	研磨
+160	groovilactic tree	乳膠樹
+161	guards arm	守衛的手臂
+162	hatchway	艙口
+163	hook up	連接
+164	horizon	地平線
+165	hose down	沖洗
+166	hotpants	熱褲
+167	hull	船殼
+168	hurl	猛丟
+169	hut	小屋
+170	hut area	小屋區域
+171	hut to east	東邊小屋
+172	hut to south	南邊小屋
+173	hut to the south	南方小屋
+174	hut to west	西邊小屋
+175	huts to north	北邊小屋群
+176	hydrospanner	液壓扳手
+177	hyperdrive jump unit	躍遷裝置
+178	id card	身分卡
+179	ignite	點燃
+180	inflate	充氣
+181	insert	插入
+182	inspect	檢視
+183	jungle	叢林
+184	jungle to east	東邊叢林
+185	jungle to west	西邊叢林
+186	key 1	鑰匙1
+187	key 2	鑰匙2
+188	key 3	鑰匙3
+189	key 4	鑰匙4
+190	key 5	鑰匙5
+191	key 6	鑰匙6
+192	key 7	鑰匙7
+193	key 8	鑰匙8
+194	key 9	鑰匙9
+195	keypad	鍵盤
+196	kneeling woman	跪地女子
+197	knife	刀子
+198	ladder	梯子
+199	large stalagmite	大石筍
+200	leer at	斜眼看
+201	library computer	圖書館電腦
+202	lick	舔
+203	life support section	生命維持艙
+204	light	燈
+205	load	裝填
+206	lock	鎖
+207	log	船長日誌
+208	look at	看
+209	look in	往內看
+210	look through	看穿
+211	lounge area	交誼廳
+212	love altar	愛神祭壇
+213	lowlands	低地
+214	machine	機器
+215	magnet	磁鐵
+216	main airlock	主氣閘
+217	manta ray	鬼蝠魟
+218	marshy wetlands	沼澤濕地
+219	match	火柴
+220	medical waste	醫療廢棄物
+221	medicine cabinet	藥櫃
+222	men who came before	先民
+223	mine	礦坑
+224	mirror	鏡子
+225	monitor	監視器
+226	monkey	猴子
+227	monkey liver juice	猴肝汁
+228	monster sludge	怪物黏液
+229	mountain	山
+230	mountain range	山脈
+231	mountains	群山
+232	mtam	
+233	mushrooms	蘑菇
+234	navigation controls	導航控制台
+235	north path	北邊小徑
+236	northern exposure	北向區域
+237	northern sea cliff	北方海崖
+238	obstacle	障礙物
+239	ocean floor	海底
+240	odd rock formation	奇特岩層
+241	oogly-boogly juice	詭異汁液
+242	open area to east	東邊開闊地
+243	open area to north	北邊開闊地
+244	open area to south	南邊開闊地
+245	open area to west	西邊開闊地
+246	open field	開闊原野
+247	outer hull	外部船殼
+248	outside	外面
+249	oven	烤箱
+250	overhang to east	東邊岩簷
+251	overhang to west	西邊岩簷
+252	overhead lamp	頭頂燈
+253	pad of paper	便條紙
+254	padlock key	掛鎖鑰匙
+255	palm tree	棕櫚樹
+256	passage way to south	南邊通道
+257	passion puss	多情貓
+258	peer through	窺視
+259	pencil	鉛筆
+260	pendulous crag	懸垂峭壁
+261	penlight	筆型手電筒
+262	phone cells	電話電池
+263	phone handset	電話聽筒
+264	pile of rocks	石堆
+265	pillow	枕頭
+266	pilot's chair	駕駛椅
+267	pipe	管子
+268	piranha	食人魚
+269	plant	植物
+270	plant stalk	植物莖
+271	plants	植物
+272	plastic jesus	塑膠耶穌像
+273	play	播放
+274	plunger	吸把
+275	poison darts	毒鏢
+276	polycement	強力膠
+277	pool	水池
+278	poster	海報
+279	power status panel	電源面板
+280	precipice	懸崖
+281	press	按
+282	pressure gauge	壓力計
+283	pry	撬開
+284	raging river	湍急河流
+285	ramolyan rugby rats	橄欖球鼠
+286	read	閱讀
+287	rearview mirror	後視鏡
+288	rebreather	水中呼吸器
+289	refrigerator	冰箱
+290	remote	遙控器
+291	repair list	維修清單
+292	river	河流
+293	river to west	西邊河流
+294	robo-kitchen	機器廚房
+295	rock	岩石
+296	rocks	岩石
+297	rocky area	岩石區
+298	rolling hill	起伏山丘
+299	scalpel	手術刀

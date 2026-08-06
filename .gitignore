@@ -1,0 +1,65 @@
+# [HARD] 這個 repo 是 patch-only：只放譯文、碼表、字型、工具、文件與引擎 patch。
+# 遊戲本體、手冊掃描、MT-32 ROM、含原版配樂的影片一律不入庫。
+
+# --- 版權素材，絕不入庫 ---
+# 倚天中文系統的原始字庫（第三方商業資產）。烘出來的 cht-data/rex_big5.fnt
+# 只含譯文用到的 2394 字，是衍生物，那個可以進。
+workplace/font-src/
+*.ROM
+*.zip
+*.pdf
+workplace/game/
+workplace/mt32-rom/
+!workplace/build/mingw-tree/gui/themes/*.zip
+
+# --- 遊戲資料 ---
+# [雷] gitignore 的比對區分大小寫。原本只寫了大寫 *.RES，結果 AppImage staging 裡的
+# rexopen.res / rexend1-3.res（小寫）整組躲過，被 leak-scan 在 push 前抓到。
+# 兩種大小寫都列，別靠記憶挑一種。
+*.hag
+*.HAG
+*.res
+*.RES
+[aipRrx]sound.*
+[AIPRX]SOUND.*
+digital.aga
+DIGITAL.AGA
+
+# --- 打包 staging 與快取（含 build 出來的 binary、系統 .so、appimagetool）---
+workplace/tools/pkg/build/
+workplace/tools/pkg/cache/
+
+# --- 中間產物：中文資料以 cht-data/ 為單一真相，out/ 的副本不入庫 ---
+workplace/out/rex_big5.fnt
+workplace/out/rex_cht.tsv
+workplace/out/win-verify/
+workplace/out/appimage-verify/
+
+# --- 錄音與影片（配樂是 MicroProse 著作權）---
+workplace/out/audio/
+workplace/out/audio-mt32/
+workplace/out/audio-verify/
+workplace/out/promo/
+*.mp4
+*.wav
+*.raw
+
+# --- build 產物與大型中間物 ---
+workplace/scummvm-src/
+workplace/build/
+workplace/dist-all/
+dist-all/
+*.o
+*.a
+*.d
+*.dwo
+.deps/
+
+# --- 截圖：只有 docs/img/ 底下的進版控 ---
+workplace/out/*.png
+workplace/out/scenes/
+
+# --- 雜項 ---
+__pycache__/
+*.pyc
+.DS_Store

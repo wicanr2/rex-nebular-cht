@@ -1,0 +1,130 @@
+1	[title26][sentence]\nWhy would you want to do a wretched thing\nlike that?	
+2	[title32][sentence]\nGreat.  Just great.  Now you're trying to talk to\ninanimate objects.  Pretty soon you'll be \nGIVEing the DOOR to the CEILING and trying\nto CLOSE the CHAIR.\nA free hint:  Try talking to something that at least\nstands a chance of talking back.	
+3	[title32][sentence]\nDammit!  Now how did I just KNOW you'd go and\ntry to do something stupid like that.  Stop it,\nalready!	
+4	[title32][sentence]\nYou take a moment to look through your\npossessions.  Suddenly you realize that\nthe [noun1] [noun1:is:are] not among them.  How could\nyou have forgotten to bring [noun1:it:them], you fool?\nIf you don't HAVE the [noun1], you can\nhardly throw [noun1:it:them] at the [noun2], can you?	
+5	[title32][sentence]\nYou take a moment to look through your\npossessions.  Suddenly you realize that\nthe [noun1] [noun1:is:are] not among them.  How could\nyou have forgotten to bring [noun1:it:them], you fool?\nIf you don't HAVE the [noun1], you can\nhardly throw [noun1:it:them] at the [noun2], can you?	
+6	[title32][sentence]\nThere's really no need to throw the\n[noun1] at the [noun2].  Besides, if\nyou start throwing things around, you\nmight break them.	
+7	[title32][sentence]\nYou look carefully at the [noun1] and\nmake a mental note that [noun1:it is:they are], in fact,\n[noun1:a :][noun1].  Further revelations are not\nimmediately forthcoming, however.	
+8	[title32][sentence]\nYou can't take the [noun1], and even if you\ncould, you would have no way of carrying\n[noun1:it:them] around with you.	
+9	[title17][sentence]\nWell, it's like mama always used\nto say--"if it ain't open, you can't\nclose it, and that's that."	
+10	[title30][sentence]\nYou turn the magnifier to maximum and\nget a great big image of the [noun2], but\ngain no new insights from this procedure.	
+12	[title27][sentence]\nYech!  You don't feel like spending the next\nfew days picking scales out of your gums.	
+13	[title27][sentence]\nPutrid.  (What did you expect?)	
+14	[title21][sentence]\nIt looks like a beautiful day up there.  Of course\nthe rather large ship taking occasional shots at\nyou ruins the aesthetics.  Better not try\nto break surface.	
+15	[title22][sentence]\nThe sea floor scintillates with refracted sunlight.	
+16	[title32][sentence]\nYou already have the [noun1], oh\nwise one.  Any other bright ideas?	
+18	[title32][sentence]\nYou grab the [noun1] and yank on [noun1:it:them]\na few times.  Nothing particularly\ninteresting happens and your interest\nin the project quickly lapses.	
+19	[title32][sentence]\nYou shove on the [noun1].  Nothing\nin particular happens.  Maybe you\nshould push on [noun1:it:them] a few more times\njust in case, though.	
+20	[title32][sentence]\nYou shove on the [noun1].  Nothing\nin particular happens.	
+21	[title32][sentence]\nYou stare intently at the [noun1]\nfor several minutes.  A yawn noisily\nescapes your mouth.	
+22	[title32][sentence]\nYou have no need for the [noun1]\nright now.	
+23	[title17][sentence]\nYou can't take [noun1:THAT:THOSE]!	
+24	[title32][sentence]\nYou take a moment to look through your\npossessions.  Suddenly you realize that\nthe [noun1] [noun1:is:are] not among them.  How could\nyou have forgotten to bring [noun1:it:them], you fool?\nIf you don't HAVE the [noun1], you can\nhardly put [noun1:it:them] somewhere, can you?	
+25	[title32][sentence]\nPicture yourself cramming the [noun1]\ninto the [noun2].  Picture yourself accomplishing\nsomething through this process.  Now count\nto ten slowly and think of something else.	
+26	[title32][sentence]\nYou take a moment to look through your\npossessions.  Suddenly you realize that\nthe [noun1] [noun1:is:are] not among them.  How could\nyou have forgotten to bring [noun1:it:them], you\nfool?  At any rate, you can't give what\nyou don't have.	
+28	[title32][sentence]\nThe [noun2] makes no discernible moves\ntoward the [noun1].  After several minutes\nit begins to dawn on you that the [noun2]\nisn't the least bit interested in your "gift."	
+29	[title32][sentence]\nYou wave your hands wildly and point\nemphatically at the [noun1].  When the\ndust settles, however, it becomes clear\nthat you have failed to convince the\n[noun2] that it needs [noun1:a :the ][noun1].	
+30	[title32][sentence]\nYou can't think of any way to\nget [noun1:this:these] particular [noun1] open.	
+31	[title32][sentence]\nYou can't think of any way to\nget [noun1:this:these] particular [noun1] open.\nMaybe a great big hammer would help.	
+32	[title32][sentence]\nYou can't think of any way to\nget [noun1:this:these] particular [noun1] open.\nMaybe a great big lever would help.	
+33	[title32][sentence]\nYou can't close [noun1:a :][noun1].  Not\n[noun1:this one:these] at least.	
+34	[title26][sentence]\nYou really don't need to do that.	
+35	[title26][sentence]\nYou can't [sentence].  Not in this\ngame, at least.	
+36	[title26][sentence]\nHave you gone mad?  What kind of a\nperson would try to [sentence]?\nPerhaps you'd better scrape some\nbrain tissue into a cup and think\nof something else.	
+37	[title26][sentence]\nThat won't get you anywhere right\nnow.  Perhaps you should devise a\ndifferent plan.	
+38	[title32][sentence]\nBlowguns don't work underwater.  Apparently\nyour brain doesn't either.	
+39	[title32][sentence]\nWhile it might be good practice for you to\nshoot a few darts into the [noun2], you really\ncan't afford to waste your limited supply of\nammunition.	
+40	[title32][sentence]\nNow what did the poor [noun2] ever do to you\nthat it deserves to be shot with head-shrinking\ndarts?	
+41	[title32][sentence]\nThe piranhas are moving too quickly for you to\nbe able to get in a good shot at them.	
+42	[title32][sentence]\nBe careful with those bombs!  Not only\ndo you have a limited supply of them, but\nyou also should consider the consequences\nof being too near when one goes off.	
+99	[title26][sentence]\n[center](NOT AVAILABLE IN DEMO)	
+800	[title20]BINOCULARS\nThis is a handy pair of StarTech\n"Planetary Explorer" binoculars, adjustable\nfor 10x through 30x magnification.	
+801	[title15]BURGER\nThis is a festering mass of congealed\nfungus that you knew in former times as a\nhamburger.	
+802	[title24]DEAD FISH\nThis is your basic, bloated, dead fish.\nAlthough it is of an alien species, it is\njust as disgusting as any dead fish you\nhave encountered on more familiar worlds.	
+803	[title26]STUFFED FISH\nApparently the dead fish wasn't disgusting\nenough for you, so you have jammed that\nfestering burger down its throat, with\ntruly appalling results.	
+804	[title26]REBREATHER\nThis is an oxygen rebreather you picked up on\nCowplug VIII while you were stranded there\nfixing your hyperdrive shunt.  Easily the\nclassiest way to see the Great Bovine Reefs\nup close.	
+805	[title22]TIMER MODULE\nThis timer module was an integral part of your\nship until you crash landed here.  It still works,\nbut you probably shouldn't bet your life on it's\naccuracy.	
+806	[title32]BIG LEAVES\nThe large green leaves barely fit in your\npockets.  They have strong veins and\nlook a bit like spinach leaves.	
+807	[title32]POISON DARTS\nThe tips of these blowgun darts have\nbeen treated with chemical that when\nintroduced into the bloodstream causes\nrapid cranial contractions.	
+808	[title32]PLANT STALK\nThis plant stalk has been lying on the ground\nfor a while.  The center has rotted out, leaving\na long round tube-like outer shell.	
+809	[title32]BLOWGUN\nThis handy little blowgun is the perfect\ntool for propelling darts toward a target.	
+810	[title32]TWINKIFRUIT\nThis luscious little fruit looks almost too good\nto be organic.  Something this tasty ought to\ncome in a cellophane wrapper.  It's a safe bet\nthat this is the tastiest, yummiest, most delicious\nsnack on the entire island.	
+811	[title32]BONE\nIt's not big enough to be a femur, nor is it\nsmall enough to be a finger.  You're not exactly\nsure what kind of bone this is.	
+812	[title32]CHICKEN\nThis juicy, golden-brown, roasted chicken makes\nyour mouth water.	
+813	[title32]SCALPEL\nThis surgical steel scalpel is quite sharp.  It also\nappears to be very strong.  You should be careful\nwith this.	
+814	[title32]AUDIO TAPE\nThis standard ninety-minute audio tape is light\nand compact.	
+815	[title32]CREDIT CHIP\nThis looks like an honest-to-goodness credit\nchip!  If you started paying all your bills you\ncould probably qualify for one of these--in about 20 years.	
+816	[title32]SECURITY CARD\nThe woman on the card has a cold stare.  You take\ncomfort in the fact that she's monster food now.  The\nsecurity card has a small magnetic strip on it.	
+817	[title32]CHARGE CASES\nThese military compression cases are normally\nused to contain explosive charges.  In their\ncurrent state of emptiness they are about as\ndangerous as coffee cans.	
+818	[title32]<Deleted: Estrotoxin>\nOne day, this object will have a name.	
+819	[title32]BOMB\nThe detonator on this bomb looks sensitive.\nYou should be careful that you don't drop it.	
+820	[title32]TIME BOMB\nBy wiring your old timer module to the detonator\non this baby you have created a makeshift time bomb.	
+821	[title32]REPAIR LIST\nRight now you SHOULD be reading it.	
+822	[title32]ALIEN LIQUOR\nThis looks like punchy stuff.  You never know what\nto expect with booze from other planets.  From the\nclarity of the liquor, you assume it to be about 195\nproof.	
+823	[title32]TARGET MODULE\nThe quality of the target module impresses you.  With\nthis thing running a small ship's fire control computer,\nyou would be able to hit almost anything--hard and fast.	
+824	[title21]SHIELD MODULATOR\nThis type of shield modulator can increase the performance\nof defensive screens by rapidly diverting power to the\npoint of impact.  Without one of these on the Pig,\nyou probably wouldn't be alive right now.	
+825	[title32]TAPE PLAYER\nThis state-of-the-art stereophonic tape player features\nlong-throw titanium-cone woofers, a 26-band tuner which\nincludes those hard to find bands such as gamma and graviton wave,\nand a built-in atomic power plant that renders batteries\nobsolete.	
+826	[title32]PHONE CELLS\nThese look like standard double-Q sized batteries,	
+827	[title32]PENLIGHT\nThis hand-held penlight would be convenient if\nit weren't quite so large.  They must have big\npens on this planet.	
+828	[title32]"DURAFAIL" CELLS\nThis pair of double-Q batteries bear the\n"only name to trust your battery needs to."\nRight.	
+829	[title32]FAKE ID CARD\nThe quality of this ID appalls you.  That\nit may actually work around here strikes you\nas nothing less than miraculous.	
+830	[title32]ID CARD\nNow this is a decent ID.  It appears that\nBuck had a decent security clearance too.	
+831	[title32]POLYCEMENT\nThis fast-drying all-purpose cement can be\nused to repair broken plates, broken auto body panels,\nbroken teeth, and possibly broken marriages.	
+832	[title32]FISHING ROD\nThis quaint little fishing rod reminds you of\nweekends spent fishing with your uncle.\nOf course, all you ever caught was the flu.	
+833	[title32]FISHING LINE\nThis is the thin nylon line you removed\nfrom the fishing rod.	
+834	[title32]PADLOCK KEY\nManufactured from something vaguely resembling\nbrass, this key has fared well over the years.\nIt is heavy for it's size.	
+835	[title32]DOOR KEY\nThis thin door key has the word "Schludge" engraved\non it.	
+836	[title32]REARVIEW MIRROR\nYou lifted this mirror from a\nrepair shop.  It is too small for a spaceship,\nbut it could be useful as a shaving mirror.	
+837	[title32]COMPACT\nYou never expected to find yourself carrying\none of these around.  The blush is a little dark\nfor you, but the mirror is in good shape.	
+838	[title32]<Deleted: Magnet>\nOne day, this object will have a name.	
+839	[title32]DETONATORS\nThese are military-grade detonators; they\nare extremely sensitive.  An electrical charge\nin the right place or a sudden jolt would set\nthese right off.  The four-prong design ensures proper\nignition of an explosive charge.	
+840	[title32]BOTTLE\nThis dirty old bottle had the audacity to be\nfloating around without a message in it.	
+841	[title32]CHICKEN BOMB\nThis incendiary fowl is sufficiently\ndangerous to warrant great care.  You\nmay want to stop nibbling off of it now.	
+842	[title32]VASE\nThe beautiful lavender vase is worth\na lot of money to you.  After all you\nwent through to get hold of it you\nwouldn't want to drop it.	
+843	[title32]REMOTE\nThis odd-looking remote control has only\none button on it.  It also has a small\ninscription on the side: "Please return\nto Goldenpipe Space Port".  Hmmm.	
+844	[title32]<Deleted: Game>\nOne day, this object will have a name.	
+845	[title32]HANDSET\nThe telephone handset is small and light,\nas you would expect something portable\nto be.	
+846	[title32]BONES\nThey're not big enough to be femurs, nor are they\nsmall enough to be fingers.  You're not exactly\nsure what kind of bones these are.	
+847	[title32]GUARD'S ARM\nYech!  This arm is starting to get stiff.\nYou instinctively notice the lack of a\nwedding band.	
+848	[title32]Voice-Activated Auto-Transcribing Audio Log\n[center]Beezlebody's Novelty Shop\n[center]Asteroid 80791-G (orbiting Bageljuice IX)\n[center]\n[center]Cover: 100% Genuine Leather	
+849	[title32]BOMBS\nThe detonators on these bombs look rather sensitive.\nYou should be careful that you don't drop them.	
+850	[title32]NOTE\nIf you can read this then you should call Brian Reynolds\nat MicroProse Software and tell him you found a bug.	
+851	[title32]COMBINATION\nAh ha!  You have a pretty good idea what\nthis is!  Right, left, right, left, these must be\ndirections to somewhere in the city.	
+852	[title32]FORMALDEHYDE\nYou get a whiff of the formaldehyde, and begin\nto have an olfactory flashback.  Images of\nlong-dead frogs flash through your mind.	
+853	[title32]PETROX\nThis stuff can be used to power spacecraft.\nYou should be VERY careful with it.	
+854	[title32]LECITHIN\nHmmm. Phosphatides extracted from\negg-yolk no doubt.	
+860	[title32]CHARGE CASES\nThese military compression cases are normally\nused to contain explosive charges.  They are\ncurrently full of "Pyro's special".  Remember\nwhat happened to her when she dropped some\nof this stuff . . . .	
+861	[title32]HANDSET\nThe telephone handset is small and light,\nas you would expect something portable\nto be, particularly with the batteries out.	
+862	[title32]FISHING ROD\nThis quaint little fishing rod reminds you of\nweekends spent fishing with your uncle.\nIt is not currently of any use, since you\nremoved the fishing line.	
+863	[title32]BOTTLE\nThis dirty old bottle had the audacity to be\nfloating around without a message in it.\nThe bottle is about one quarter full of water.	
+864	[title32]BOTTLE\nThis dirty old bottle had the audacity to be\nfloating around without a message in it.\nThe bottle is about half full of water.	
+865	[title32]BOTTLE\nThis dirty old bottle had the audacity to be\nfloating around without a message in it.\nThe bottle is about three quarters full of water, which\nis starting to make it too heavy to carry around.	
+866	[title32]BOTTLE\nThis dirty old bottle had the audacity to be\nfloating around without a message in it.\nThe bottle is full of water, which is starting to\nmake it too heavy to carry around.	
+867	[title32]TAPE PLAYER\nThis state-of-the-art stereophonic tape player features\nlong-throw titanium-cone woofers, a 26 band-tuner which\nincludes those hard to find bands like gamma and graviton wave,\nand a built-in atomic power plant that renders batteries\nobsolete.  There is a small audio tape in the tape player.	
+401	[title32]PLAY AUDIO TAPE\nYou hear a feminine voice dictating:\n[center]\n"Entry 21 . . . 28 Bicuspidor 90919 . . . Project KABLOOEY . . . Professor\nIhma Pyro reporting.  This batch will be called 'LOT 7'.  It is essentially\nLOT 6 with a higher petrox concentration.  I'll start by adding a [index0]\nof [index4] . . . O.K., then a [index1] of [index5] and a gentle stir.  That\nlooks pretty good.  Now the [index6]; just a [index2].  Another gentle stir.\nAll right.  Finally, a [index3] of [index7].  O.K., this batch looks good.\nI am transporting the mixture to the processing bench where I will--OOPS!"\n[center]<BLAM!>\n[center]\nThe rest of the tape is silent.	
+402	[title32][sentence]\nThis computer printout appears to be a list of teleporters and their\nmaintenance status.  Reading the list you learn that teleporters [number0],\n[number1], [number2], and [number3] have been taken off-line pending repairs;\nunits [number4] and [number5] have been recently tuned; units [number6] and\n[number7] are in need of minor adjustments; and that the gender-security\nmodule in unit [number8] is due for scheduled maintenance.	
+403	[title32][sentence]\nYou wire the detonators to the explosives\ninside the charge cases.  You now have a\nfine pair of bombs.	
+404	[title32][sentence]\nYou hook the timer module onto the end\nof the bomb, and wire it to the detonator.\nThis should now function as a crude time\nbomb once you activate the timer module.	
+405	[title32][sentence]\nThe charge cases currently contain no\nexplosive material.  Therefore, there is\nno point in attaching the detonators.	
+406	[title32][sentence]\nYou press the "PLAY" button, but nothing\nhappens.  Apparently there is no tape\ninside.	
+407	[title32][sentence]\nYou press the "EJECT" button, but nothing\nhappens.  Apparently there is no tape inside.	
+408	[title32][sentence]\nThe tape player has no obvious screws\nor other latching devices.  You can't\neven find a battery slot, so it must\nhave some permanent internal power source.	
+409	[title32][sentence]\nYou pop open the case and remove the\nfishing line cassette.  There is a LOT\nof fishing line on this cassette--probably\nseveral hundred yards of micro thin fiber.	
+428	[title32][sentence]\nYou have already removed all of the fishing\nline from this rod.	
+410	[title32][sentence]\nYou gently stroke the plant stalk a few\ntimes, but nothing happens.  Perhaps you'd\nbetter think of something more productive\nto do.	
+411	[title32][sentence]\nYou unscrew the cap of the penlight.  Inside,\nyou find a pair of "DURAFAIL" cells.  There\nis no apparent corrosion, but the cells have\ncompletely lost their charge.	
+429	[title32][sentence]\nYou unscrew the cap of the penlight.  Inside,\nyou find a pair of "DURAFAIL" cells.  This must\nbe your lucky day, because not only are there\nno signs of corrosion, but the cells appear to\nbe fully charged.	
+412	[title32][sentence]\nYou unscrew the cap of the penlight and once\nagain remove the "DURAFAIL" cells.	
+413	[title32][sentence]\nYou unscrew the cap of the penlight and\nremove the phone cells that you put there.	
+414	[title32][sentence]\nYou open the battery slot on the handset and\nremove your "DURAFAIL" cells.  Leaving them in\nthe phone seems to have paid off, because they\neach now show a full charge.	
+415	[title32][sentence]\nYou open the battery slot on the handset and\nremove your "DURAFAIL" cells.  They each still show\na full charge.	
+416	[title32][sentence]\nYou open the battery slot on the handset and\nremove your "DURAFAIL" cells.  They are still\nuncharged.	
+417	[title32][sentence]\nYou pry open the battery slot on the handset and\ndiscover two phone cell batteries inside.  The power\nsource for this phone must still be active, because\nit seems to have kept the batteries fully charged.\nYou pocket the phone cells for future reference.	
+418	[title32][sentence]\nYou pry open the battery slot on the handset and\nonce again remove the fully-charged phone cells.\nYou again pocket them for future reference.	
+419	[title32][sentence]\nYou put the phone cells into the penlight, and\nscrew on the cap.	
+420	[title32][sentence]\nYou cannot put the phone cells into the penlight\nwhile the "DURAFAIL" cells are already inside.	
+421	[title32][sentence]\nYou slip the phone cells back into the handset\nfor safekeeping.	
+422	[title32][sentence]\nYou cannot put the phone cells back into the\nhandset, because the "DURAFAIL" cells are currently\ninside.	
+423	[title32][sentence]\nYou slip the "DURAFAIL" cells back into the penlight\nfor safekeeping, and screw on the cap.	
+424	[title32][sentence]\nYou cannot return the "DURAFAIL" cells to the\npenlight while the phone cells are inside of it.	
+425	[title32][sentence]\nYou slip the "DURAFAIL" cells into the phone\nhandset.  They fit snugly against the contacts.	

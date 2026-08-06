@@ -1,0 +1,804 @@
+1	DONE
+2	CANCEL
+3	SAVE
+4	RESTORE
+5	CLEAR
+6	YES
+7	NO
+8	OK
+9	(Empty)
+10	REX NEBULAR GAME MENU
+11	Save Game
+12	Restore Game
+13	Game Play Options
+14	Resume Current Game
+15	Exit From Game
+16	REX NEBULAR GAME OPTIONS MENU
+17	Music is @
+18	Sound is @
+19	Interface is @
+20	Inventory is @
+21	Text Window is @
+22	Screen Fade is @
+23	Storyline is @
+24	ON
+25	OFF
+26	ON
+27	OFF
+28	STANDARD
+29	EASY
+30	SPINNING
+31	STILL
+32	ANIMATED
+33	STILL
+34	SMOOTH
+35	MEDIUM
+36	FAST
+37	NAUGHTY
+38	NICE
+39	DESCRIBE GAME TO BE SAVED
+40	SELECT GAME TO BE RESTORED
+41	SELECT A DIFFICULTY LEVEL
+42	Novice - Easy
+43	Advanced - Difficult
+44	Expert - Very Difficult
+45	Save Complete
+46	Restore Complete
+47	Save Failed
+48	Restore Failed
+49	"LOG ON.~
+50	~LOG OFF."
+51	"Gads!"
+52	"Yikes!"
+53	"But that crazy woman is up there!"
+54	~Geez. What an awful dream!
+55	~I dreamed I was shot down . . .
+56	~. . . and crashed into the . . . Uh oh!
+57	"Dang!"
+58	"Ahhhhh . . ."
+59	"Urgh!
+60	"Yag!
+61	"Gads!
+62	"Uulge!
+63	"Gak!
+64	It's alive!"
+65	"Hubba hubba!"
+66	"Get a load of this babe!"
+67	"Oh baby!"
+68	"Look at those maracas!"
+69	"Check THIS out!"
+70	"Uh oh . . ."
+71	"Hi, Binky."
+72	"Greetings, Commander Rex."
+73	"Manual labor!? Me!?"
+74	"I already have a dead fish."
+75	"I don't want another one."
+76	"No thanks."
+77	~Okay, that crazy woman is still up there.
+78	~I'd better keep away from the surface,
+79	~and find another way to dry land.
+80	~I hope I find it soon.  This stupid
+81	~rebreather is hurting my mouth.
+82	"Belch!"
+83	"Burp!"
+84	"Hic!"
+85	"Interesting . . ."
+86	"Intriguing . . ."
+87	"Fascinating . . ."
+88	"Hmmmmm . . ."
+89	"Crabs! Cool!"
+90	"Hi! I'm Rex!"
+91	"Hi. I'm Zatox."
+92	"Peeeeyeew!"
+93	"Bogus odor!"
+94	"Offensive to my olfactories!"
+95	"Barf City!"
+96	"El Stinko!"
+97	"Great view!"
+98	"Whoops!"
+99	"This ladder's had it."
+100	"All right!"
+101	"That's right, go inside . . ."
+102	"Whoa! Beam me up!"
+103	"I thought I heard something behind . . ."
+104	"Something's weird . . ."
+105	"Something's wrong . . ."
+106	"Could someone be following me?"
+107	"That sure looks tasty!"
+108	"Bawk!"
+109	"Cluck."
+110	"Gluk."
+111	"BWAAAAAAK!"
+112	"Hiie-ya!"
+113	"Oof."
+114	"Your kind are not welcome in our village."
+115	"Er, excuse me . . ."
+116	"Seen a vase anywhere?"
+117	"Wanna buy a used starship?"
+118	"Mind if I borrow that roast chicken?"
+119	"Gotta run. Bye."
+120	"What's a Keeper, anyway?"
+121	"Good morning, Keeper."
+122	"Nice clothes, Keeper."
+123	"Don't you belong somewhere else?"
+124	"No."
+125	"Sure, Keeper, take what you want."
+126	"You always do."
+127	"So long, Keeper."
+128	"Hey! That's my dinner, Keeper!"
+129	"Now where did that monkey get to?"
+130	"Bawwwwwp!"
+131	"Eeeep!"
+132	"He's got a helluva curve!"
+133	"You shouldn't have done that!"
+134	"Gotcha!"
+135	"Dang!  Missed him!"
+136	"Blast!  Missed him again!"
+137	"Ugh!"
+138	"Okay, hold still for just a second . . ."
+139	"Hello there, my fine furry friend!"
+140	"Can you understand me?"
+141	"Well, I have a modest request."
+142	"GIVE ME BACK MY DRAM BINOCULARS!!"
+143	"Wait, wrong tactic . . ."
+144	"Be nice, be nice . . ."
+145	"OK, you took something that wasn't yours . . ."
+146	"May I have my binoculars back, please?"
+147	"Fine."
+148	"Give them to me now, you obnoxious inbred!!!"
+149	"Yuk!"
+150	"Nya-nya ni nya-nya"
+151	"Eeep!"
+152	"Cht!"
+153	"Gya-a-a!"
+154	"Nyuk!"
+155	"Nyuk!  Nyuk!"
+156	"Aieeeeeeeeeeeeee-ya!"
+157	"Oot! Oot!"
+158	"Oooooooooo!"
+159	"Ooof!"
+160	"Yipe!"
+161	"Ugh . . . LOG ON."
+162	"Where the . . . HEY!"
+163	"That lousy monkey took my binoculars!"
+164	"LOG OFF.  I'm gonna show him a thing or two!"
+165	"Urrrgh . . . LOG ON."
+166	"Ack . . . Urk . . ."
+167	"Boy, did that hurt!"
+168	"LOG OFF.  They must not like men too much!"
+169	"I've already got one."
+170	"I don't want another one."
+171	"Ummmmm . . . Hello?"
+172	"No, thank you."
+173	"No, I don't want that."
+174	"No, why don't you just keep that."
+175	"Great. Another transmorph.
+176	~I need a REAL man."
+177	"You again.  What now?"
+178	"WHAT!?!"
+179	"WHAT!?! I said I needed a REAL man."
+180	"What's a 'transmorph'?"
+181	"I am a REAL man!"
+182	"What's your sign, baby?"
+183	"(Could we just go to bed immediately, please?)"
+184	"Uh, heh, never mind . . ."
+185	"Oh, like you weren't a woman ten minutes ago.
+186	~How's it feel to have your gender bent, Keeper?"
+187	"Bent? Keeper? What are you talking about?"
+188	"Lady, I'm shipwrecked here.  Seen a vase anywhere?"
+189	"Lady, you've got a screw loose.  Later."
+190	"Your Gender Bender is a curse.
+191	~You Keepers should be getting us some REAL men,
+192	~not playing with silly machines."
+193	"But I am a REAL man!"
+194	"I'm really confused.  What's a Gender Bender?"
+195	"That's nice.  Can I run my fingers through your hair?"
+196	"Ok, sure, I'll get right on it."
+197	"Go jump off a cliff."
+198	"Go sit on a stick."
+199	"Go stick it in a seashell."
+200	"Go stick it in the sand."
+201	"Go suck on a crab."
+202	"You know, that silly machine you Keepers use
+203	~to pretend you're men.  I think it's sick."
+204	"I'm not from around here -- and I'm not a 'Keeper'."
+205	"Let's pretend we're Adam and Eve!"
+206	"Can we talk about this inside?"
+207	"I'm going to have to think this over.  Bye."
+208	"Yeah?  Well you look like a Keeper to me.
+209	~How could you be a REAL man?
+210	~There aren't any left on the whole planet!"
+211	"I'm not from this planet; I'm shipwrecked here."
+212	"How tall are you naked?"
+213	"I'm not a real man; I'm a quiche-eater.  Sorry."
+214	"You're going to have to prove that!
+215	~So, what's a torque wrench?"
+216	"An old pirate's term for a stubborn woman."
+217	"A wrench for tightening baby-delivering birds."
+218	"A device for measuring the angular force applied to a bolt."
+219	"A tool for opening wine bottles."
+220	"Um, I'll have to get back to you on that.  Bye."
+221	"Lucky guess.  O.K., time for a hard one:
+222	~When setting a table, where do the forks go?"
+223	"On the left."
+224	"On the right."
+225	"Wherever they land when I throw them from the kitchen."
+226	"Oh, heck, I don't know."
+227	"Um, I'll have to get back to you on that.  Bye."
+228	"WOW! A REAL MAN!!!
+229	~You said your name was Rex?
+230	~Come here, Rex.  Let me show you my hut."
+231	"Hey, this is a neat hut."
+232	"Look, a bed!"
+233	"I have something to show you, Rex."
+234	"Come here, Mr. Real Man."
+235	"Yikes!"
+236	"That's right, scum! Make like a banana and split!"
+237	"Ahhhhhhhhhhh.  That's much better."
+238	"Can't do that any more; I'm empty."
+239	"Let's see if I can get this grate open."
+240	"Once more into the breach."
+241	"Wow! I actually did it!"
+242	"This scalpel is history, though."
+243	"Well, here I am again."
+244	"Grrrrrrrrrrraaoorrr!"
+245	"Rrrrowwwwll!"
+246	"Arrrrrgh!"
+247	"Mmmmmmmmhhh!"
+248	"Cruuuunnnnchhh!"
+249	"Nraaaaahch!"
+250	"If I go out there, those guards will see me!"
+251	"Uh oh.  I think this is broken."
+252	"This thing is broken."
+253	"What the . . . ?!"
+254	"Grrrraaaoooooorrr!"
+255	"I think I'll leave this arm here . . ."
+256	"It stinks!"
+257	"Dang."
+258	"Yes!"
+259	"Yes!"
+260	"Pssssssssst."
+261	"Yo!"
+262	"Hey!"
+263	"Hey you in the next cell!"
+264	"Yeah, I mean you!"
+265	"Come over here."
+266	"I want to talk to you."
+267	"Hey pal!  Are you there?"
+268	"Yeah, I'm still here."
+269	"Uh, hello?"
+270	"Hey, buddy!"
+271	"Hey, you can talk.
+272	~You're a man, aren't you?"
+273	"Hey, pal, I asked you a question.
+274	~Are you a man?"
+275	"Yeah, I'm a man."
+276	"No, I'm a woman, fool."
+277	"Get lost."
+278	"Be that way."
+279	"I thought so.  You looked like one.
+280	~Boy, are they going to have fun with you."
+281	"I can hear you, pal."
+282	"Who are you?"
+283	"What is this place?"
+284	"Who are all those lovely ladies on the surface?"
+285	"So where are all the men?"
+286	"What's the deal with that psycho doctor?"
+287	"Is there any way out of here?"
+288	"What's that thing in the cell next to you?"
+289	"I'll try to bust us both out of here."
+290	"Well, it's been nice talking to you."
+291	"Fine.  Be that way."
+292	"Call me Bud.  It's easier than trying to
+293	~pronounce my real name.  I am an explorer
+294	~from another sector.  I was checking out
+295	~this system when I discovered a mass reading
+296	~where there shouldn't have been one.  A
+297	~minute later this big ship decloaks and
+298	~blasts me.  They found me unconscious in
+299	~my escape module and brought me down here.
+300	~That was a month ago.  All I can think about
+301	~now is getting out of here."
+302	"This is a small underground complex, inhab-
+303	~ited by female humans who call themselves
+304	~'Keepers'.  What little I know of this place
+305	~I learned overhearing the guards.  It seems
+306	~there are no human males here, so I can
+307	~understand their interest in you."
+308	"I haven't figured that out yet.  I've heard
+309	~people refer to 'The Great War', but I don't
+310	~know what they're talking about.  God I hate
+311	~this place."
+312	"You mean dear Doc Slache.  She's quite a
+313	~lady.  She gave me a working over I won't
+314	~soon forget.  Lucky for me I'm not even
+315	~close to human, or I'd probably end up like
+316	~you--breeding stock.  Boy would I like to
+317	~get out of here."
+318	"You think I'd still be here if there was?
+319	~I've tried everything.  If I could just get
+320	~past this force field I'd teach those guards
+321	~a thing or two about putting sentient beings
+322	~in cages.  I'd kill anything that got between
+323	~me and that teleporter."
+324	"The Keepers refer to them as 'Stock'.  They
+325	~must mean breeding stock.  Beats me how they
+326	~keep reproducing without any men around.  I
+327	~really need to get out of here."
+328	"Whatever he is, he's hungry.  He's got me
+329	~plenty mad, too.  I'm sick of listening to
+330	~screaming and munching noises all day long.
+331	~I asked him to be quiet but he ignored me.
+332	~He asked if I was light meat or dark meat.
+333	~If I get loose I'm gonna bust him up pretty
+334	~good."
+335	"Thanks, pal.  If you can get me out of this
+336	~cage, I can take out these guards and their
+337	~puny machines."
+338	"Just get me out of here."
+339	"Later."
+340	"Hey, buddy!  Up here!"
+341	"Will do."
+342	"Great!  You made it into the air duct!
+343	~Now see if you can find the force field
+344	~controls and get me out of here!"
+345	"Hi! My name's Rex!"
+346	"Hello?"
+347	"Do . . . you . . . speak . . . English?"
+348	"Be careful; we lost a guard
+349	to that one last week."
+350	"I'll be careful, sir."
+351	"So, do you have any history
+352	~of heart trouble?"
+353	"So, once again, do you have any
+354	~history of heart trouble?"
+355	"So, for the last time, do you have
+356	~any history of heart trouble?"
+357	"Yes, a slight murmur."
+358	"Nope.  The ole ticker's in great shape."
+359	"Dunno.  Maybe you should check it."
+360	"Well, there was this gal on Umbilica IX . . ."
+361	"No, really!  She was a bad news babe!"
+362	"Actually she bore an uncanny resemblance to yourself . . ."
+363	"Ahhhh.  Do you have any kidney
+364	~or liver disorders?"
+365	"Once again, do you have any
+366	~kidney or liver disorders?"
+367	"For the last time, do you have any
+368	~kidney or liver disorders?"
+369	"Yes, several."
+370	"No, none that I know of."
+371	"I can't remember."
+372	"You're the doctor; you tell me."
+373	"Go take a flying leap."
+374	"Get stuffed!"
+375	"Are you an inny
+376	~or an outy?"
+377	"Once again, are you an
+378	~inny or an outy?"
+379	"For the last time, are you
+380	~an inny or an outy?"
+381	"An inny."
+382	"An outy, and darn proud of it, too!"
+383	"I forget.  Let's check."
+384	"Forget it.  I'm not talking."
+385	"I'm still not talking."
+386	"GO SIT ON A FLAGPOLE!"
+387	"Okay, 'Hello, Mr. Club.'  Satisfied?"
+388	"Ahhh.  Thank you for
+389	~your cooperation."
+390	"I am Doctor Slache.  I will now ask you
+391	~a series of questions.  If you cooperate,
+392	~this will be easy; if not, it will be,
+393	~well, more entertaining."
+394	"Welcome back.  Once again, I will ask
+395	~you a series of questions."
+396	"Excuse me."
+397	"Hi."
+398	"Ahem."
+399	"What?"
+400	"Hey! Don't touch that!"
+401	"Where am I?"
+402	"Examination!?  What examination?"
+403	"Breeding stock?  That doesn't sound so bad."
+404	"Why do you need me?"
+405	"What is a 'Gender Bender', anyway?"
+406	"Where are all the men?"
+407	"So what's a transmorph?"
+408	"Who are you?"
+409	"Would you mind untying me?"
+410	"Do you know anything about a precious vase?"
+411	"Can you tell me about these art collections?"
+412	"Never mind."
+413	"(Cheat Option)."
+414	"You are in our medical facility,
+415	~awaiting examination."
+416	"We need to determine if your genes
+417	~are worthy to be mixed with ours.
+418	~If so, you will serve as breeding
+419	~stock.  If not, you will serve as
+420	~fertilizer."
+421	"You would probably enjoy it.  Then
+422	~again, there may be some discomfort
+423	~between the 600th and 800th times.
+424	~Naturally, the second day is worse."
+425	"Because we need to continue our
+426	~race.  Since there are no men
+427	~around, we must either use the
+428	~dreaded Gender Bender or capture
+429	~the occasional stranger, such as
+430	~yourself."
+431	"It's a machine that changes the
+432	~user's sex.  We disgrace ourselves
+433	~by using it, but it's the only way
+434	~to continue our race.  Unfortunately,
+435	~the effect wears off at unpredictable
+436	~times, so there are some awkward
+437	~moments."
+438	"They all died when we won the Great
+439	~Gender War.  Thanks to the Gender
+440	~Bender we had no need for their filth.
+441	~Of course the occasional pet such as
+442	~yourself can be useful."
+443	"'Transmorph' is a villager term for
+444	~a Keeper who has had her gender bent.
+445	~They don't think much of our machine,
+446	~and blame us for the lack of men, but
+447	~they serve their purpose."
+448	"I am Doctor Slache's assistant.  I
+449	~provide her with sharp instruments
+450	~and clean up after her 'examinations'.
+451	~This is fun.  I don't talk to many
+452	~REAL men."
+453	"Sorry, I can't do that.  As much as I'd
+454	~like to, you're a patient and we must
+455	~have a look at you."
+456	"Vase?  No.  Sorry.  I'm not much into
+457	~art.  Too bad for you the men are all
+458	~dead.  I heard they used to consider
+459	~art collections a status symbol.  The
+460	~richer ones had huge collections."
+461	"Do I look like a history teacher?
+462	~I don't know who had what; that was
+463	~before I was born."
+464	"Okay."
+465	"Uh oh.  I'll bet that's Professor
+466	~Pyro again.  I had better go see
+467	~what happened.  You stay here."
+468	"Neat . . ."
+469	"Not so neat!"
+470	"Pretty . . ."
+471	"Hi! My names's Rex!"
+472	"Rex, huh?"
+473	"What a manly little name."
+474	"It's been nice talking to you!"
+475	"Come on, I just want to talk."
+476	"Have a nice day . . ."
+477	"Understand what I'm sayin'?"
+478	"Bug off, babe!"
+479	"Why not pull up a stool?"
+480	"Thanks for
+481	fixing mine, Helga."
+482	"You want a mixed
+483	drink or a bottle?"
+484	"What'll it be?"
+485	"What'll ya have?"
+486	"What can I make for you?"
+487	"Nope.  Don't know
+488	how to mix that."
+489	"What?!
+490	Try something normal."
+491	"Never heard of it."
+492	"O.K., what do you want?"
+493	"That'll be 75 kelders.
+494	Cash or charge?"
+495	"What do you want now?"
+496	"Wash dishes?
+497	We don't wash dishes here.
+498	Now get lost, you vagrant!"
+499	"No problem."
+500	"What!?  Sorry, but
+501	we don't barter here."
+502	"Will you give it up already?
+503	No trinkets.  Cash or charge!"
+504	"O.K., pal.  Whatever."
+505	"No way, pal.  One bottle
+506	of that stuff should
+507	last you a week.  Beat it."
+508	"I said beat it!"
+509	"Fine with me."
+510	"What a pain."
+511	"I hate these
+512	screwy machines."
+513	"Soon as ya fix' em,
+514	they break again."
+515	"It may need
+516	a little more work."
+517	"I got a whole list
+518	of broken teleporters
+519	that need to
+520	get fixed first."
+521	"Sorry, Honey,
+522	I don't dance."
+523	"This is not the time."
+524	"Knock it off!"
+525	"EEW! There's something
+526	slimy on this seat!"
+527	"Bartender!"
+528	"Yo, bartender!"
+529	"Wanna dance, hot stuff?"
+530	"Come on, let's cha cha!"
+531	"Let's boogie!"
+532	"I'll have a mixed drink."
+533	"O.K., I'll take a bottle."
+534	"I'd like a 'Sledgehammer', like Bloody Mary's makes.
+535	"I'd like a 'Sledgehammer',
+536	like Bloody Mary's makes."
+537	"I'll have a 'Burning Bunny'."
+538	"Make mine a 'Bar Rag Special'."
+539	"Give me an 'Outhouse Fogger'."
+540	"Never mind."
+541	"How about a 'Drippy Spittoon' with lemon?"
+542	"How about a
+543	'Drippy Spittoon' with lemon?"
+544	"I'd like a 'Flaming Kitten' on the rocks."
+545	"I'd like a
+546	'Flaming Kitten' on the rocks."
+547	"I'll take a 'Priest-On-Pentothal'."
+548	"Make mine a 'Chunky Vomit Puddle' straight up."
+549	"Make mine a 'Chunky Vomit
+550	Puddle' straight up."
+551	"Give me a 'Crunchy Frog' and leave the bones in."
+552	"Give me a 'Crunchy Frog'
+553	and leave the bones in."
+554	"I cound go for a 'Gerbil-In-A-Blender' on ice."
+555	"I could go for a
+556	'Gerbil-In-A-Blender' on ice."
+557	"A 'Forgetful Skydiver' would really hit the spot."
+558	"A 'Forgetful Skydiver' would
+559	really hit the spot."
+560	"I'll have a 'Steaming Turd' please.  Shaken, not stirred
+561	"I'll have a 'Steaming Turd'
+562	please.  Shaken, not stirred."
+563	"Got any Venusian brandy?"
+564	"How about some Andorian squid bile?"
+565	"Got any distilled tribble juice vodka?"
+566	"I'll take some Halicot kidney nectar."
+567	"Nothing, thanks."
+568	"Uh, can I wash dishes for it?"
+569	"Can I put it on this credit chip?"
+570	"Want to trade it for this nifty timer thing?"
+571	"Want to trade it for
+572	this nifty timer thing?"
+573	"Will you take these binoculars?"
+574	"Money?  Ahhh.  I'll see you later."
+575	"Thanks."
+576	"I'd like a shot of whiskey, please."
+577	"How about a glass of your finest grain alcohol - on the rocks.
+578	"Well, maybe I don't feel like a drink now."
+579	"O.K."
+580	"Some People say it's strong -"
+581	"so be carefull."
+582	"That'll be 14.75 credits."
+583	"Here's your chip back."
+584	"Yo! Bartender!"
+585	"How 'bout a drink?"
+586	"Good answer."
+587	"Why don't you have a seat first?"
+588	"I said have a seat!"
+589	"Sorry, but I'll have to hold your chip."
+590	"EEW! There's something slimy on this seat!"
+591	"Ouch!"
+592	"Uh oh."
+593	"Hey, check it out!"
+594	Put in a drop of alien liquor.
+595	Put in a drop of lecithin.
+596	Put in a drop of formaldehyde.
+597	Put in a drop of petrox.
+598	Put in a dash of alien liquor.
+599	Put in a dash of lecithin.
+600	Put in a dash of formaldehyde.
+601	Put in a dash of petrox.
+602	Put in a splash of alien liquor.
+603	Put in a splash of lecithin.
+604	Put in a splash of formaldehyde.
+605	Put in a splash of petrox.
+606	Put in a dollop of alien liquor.
+607	Put in a dollop of lecithin.
+608	Put in a dollop of formaldehyde.
+609	Put in a dollop of petrox.
+610	Never mind.
+611	". . . and a dollop of alien liquor . . ."
+612	". . . and a dollop of formaldehyde . . ."
+613	". . . and a dollop of lecithin . . ."
+614	". . . and a dollop of petrox . . ."
+615	". . . and a dash of alien liquor . . ."
+616	". . . and a dash of formaldehyde . . ."
+617	". . . and a dash of lecithin . . ."
+618	". . . and a dash of petrox . . ."
+619	". . . and a splash of alien liquor . . ."
+620	". . . and a splash of formaldehyde . . ."
+621	". . . and a splash of lecithin . . ."
+622	". . . and a splash of petrox . . ."
+623	". . . and a drop of alien liquor . . ."
+624	". . . and a drop of formaldehyde . . ."
+625	". . . and a drop of lecithin . . ."
+626	". . . and a drop of petrox . . ."
+627	"Let's see what this does."
+628	"x"
+629	"Ugh."
+630	"Ugh.  I guess that isn't going to fool it."
+631	"I guess that didn't fool it."
+632	"Going up, please."
+633	"You dirty rat...Get outta here!"
+634	"Yo Herman!"
+635	"Hey you!"
+636	"Hey buddy!"
+637	"Hi there."
+638	"And I did it..."
+639	"Myyyyyyyyyyyyyyyyyy"
+640	"Waaaaaaaaaaaaaaaaay!"
+641	"What can I
+642	do for you?"
+643	"What is it
+644	young man?"
+645	"Leave me alone."
+646	"Don't hurt me."
+647	"Who are you?"
+648	"What are you doing here?"
+649	"Why aren't there any women around here?"
+650	"Can't the women just use that Gender Bender thing?"
+651	"War?  What war are you talking about?"
+652	"I guess the women won.  How did they do it?"
+653	"What does this city have to do with all this?"
+654	"Do you know anything about a precious vase?"
+655	"So what do you do here?"
+656	"How do you get around?  Everything's locked."
+657	"Do you think I could borrow that ID card?"
+658	"I'll try to find you some batteries."
+659	"Forget it, pal.  Find your own batteries."
+660	"Here, take these batteries."
+661	"Where is the governor's collection?"
+662	"See you later."
+663	"I'm
+664	Herman Spiltmelk..
+665	Who are you?"
+666	"I'm hiding from
+667	them evil women."
+668	"I'm Rex Nebular, God's gift to the galaxy!"
+669	"I'm Rex Nebular, space adventurer and cool guy."
+670	"I'm Rex Nebular, and I'm shipwrecked here."
+671	"Forget it--Nice talking to you."
+672	"You must be a real man.  No woman
+673	could ever be so arrogant."
+674	"Space adventurer eh?  So you're not from
+675	around here.  Good.  I thought you might have
+676	been one of them strange women."
+677	"Shipwrecked?  So you ain't one of
+678	them crazy women after all."
+679	"Yep.  Likewise."
+680	"There's a lot of anti-female security systems
+681	from the War still working around here.
+682	It's not safe for them in this city."
+683	"They almost never use that thing to come
+684	in here.  They hate being men so much that they'd
+685	sooner leave this entire city alone than be
+686	men--even for a few hours."
+687	"I'm speaking of the Great Gender War.
+688	Almost a hundred years ago the sexes
+689	of this planet went to war.  It was horrible.
+690	I was barely a teenager when it ended."
+691	"While the men perfected the physical sciences, the
+692	women worked on biological stuff.  They developed
+693	a virus that would kill off all the men on the planet.
+694	Worked too.  Of course it also fixed them women so
+695	they can't conceive male children.
+696	Now they really need that Gender
+697	Bender to keep the race goin'."
+698	"This is Machopolis.  The city of men.  It
+699	was built a few years into the war as a
+700	safe place for male non-combatants to live.
+701	Of course it didn't help much in the end."
+702	"Vase?  Well if it were a rare one it was
+703	probably part of Bill Bigfish's art collection.
+704	He was governor here when we lost the war.
+705	Word was he had a pretty decent art collection."
+706	"Well I used to walk around and listen to
+707	music all day, but my squalkman hasn't
+708	worked in a month or two.  I used up
+709	every battery I could find in this whole city.
+710	I miss my music . . . a lot."
+711	"It used to be that everyone in this city
+712	had an ID card to let them go places.
+713	I lost my old one, so I had to make one
+714	up.  It isn't very good, but it works."
+715	"I'll tell you what.  I'll give you the ID
+716	to keep if you can find me some batteries
+717	for this here squalkman."
+718	"Great.  I don't get around as easy as I
+719	used to.  Walking 'round this city is a
+720	real chore these days."
+721	"Fine.  Find your
+722	own ID card."
+723	"Wow, thanks a lot!  I've got my music back! I'm
+724	gonna go teleport back to my other home in the
+725	woods--I need some fresh air.  Here's the fake ID I
+726	promised you.  It ain't the best fake ID, but it
+727	works pretty good 'round here.  Music!  Great!"
+728	"Thanks.  Wait a minute!  This here's a
+729	four battery squalkman, and you only gave me
+730	two batteries.  You take these back and
+731	go get some more.  Two batteries.  Hmph!"
+732	"Great.  Hey wait a minute.  Some of these
+733	batteries are dead.  Here, you take them
+734	all back and figure out which ones are bad.
+735	I need four CHARGED batteries to hear my
+736	music!  Dead batteries.  Hmph!"
+737	"The governor lived in the tallest building in
+738	the city.  His penthouse was the only thing
+739	that stuck up above the city rim.  I don't think
+740	you can get there anymore--that part of the city
+741	has all fallen apart.  Too bad you can't fly."
+742	"O.K., Later."
+743	"Later."
+744	"Glurp."
+745	"Blub."
+746	"Blorble."
+747	"Glook."
+748	"Ahh, glurp yourself!"
+749	"Ahh, blub yourself!"
+750	"Ahh, blorble yourself!"
+751	"Ahh, glook yourself!"
+752	"My, what a big tongue you have!"
+753	"Drat. It's locked."
+754	"Wow!"
+755	"Voila!"
+756	"Well, that's one easy way to lower a boat."
+757	"Hmmm, once that boat's lowered, it's lowered!"
+758	"Hey mutt! Occupy yourself!"
+759	"Look at those chompers!"
+760	"So long, sucker!"
+761	"Arf!"
+762	"Whooooops!"
+763	"Yap!"
+764	"For crying out llloou...OUCH!"
+765	"Fetch, ya pesky varmit!"
+766	"Move over, Rover!"
+767	"Blasted mutt!"
+768	"Hey mutt!  Catch THIS!"
+769	"Chow time, pooch!"
+770	"Road kill!"
+771	"Yip!"
+772	"Quick devil, eh?"
+773	"Key . . . door . . . door . . . KEY!!!"
+774	"Let's give it a whirl!"
+775	"I wonder if there are any X-rated videos?!"
+776	"Hmmmm.  Let's check this place out."
+777	"Curses! It's locked!"
+778	"Oh man, I think I threw my back out!"
+779	"Whew, I'm glad that's done!"
+780	"That's a long way down there!"
+781	"Hold that elevator!"
+782	"Quite a panoramic view!"
+783	"Dudes...Look what I've done!"
+784	"Going down!"
+785	Fill bottle 1/4 full.
+786	Fill bottle 1/2 full.
+787	Fill bottle 3/4 full.
+788	Fill bottle to top.
+789	Never mind.
+790	"I'd better get inside first."
+791	"I'm outa here!"
+792	"That was soooo much fun!"
+793	"Check it out..."
+794	"A crack!"
+795	"Not!"
+796	"Ha! Ha! Ha!"
+797	"There's an eye!"
+798	"Sick!"
+799	"Not likely!"
+800	"Putrid!"
+801	"What was it?"
+802	"EEW!  It's still seeping!"
+803	"I don't want that stupid thing."
+804	"Bring me some BATTERIES!"

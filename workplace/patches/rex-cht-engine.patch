@@ -1,0 +1,1226 @@
+diff --git a/engines/mads/action.cpp b/engines/mads/action.cpp
+index abe3b8ab..18b37262 100644
+--- a/engines/mads/action.cpp
++++ b/engines/mads/action.cpp
+@@ -28,6 +28,16 @@
+ 
+ namespace MADS {
+ 
++// [CHT] 指令列的硬寫字串要跟著中文走，否則會出現「中文動詞＋英文介係詞」。
++// 用 helper 集中判斷，呼叫端只改一個名字。
++#define CHT_ON  (_vm->_cht && _vm->_cht->enabled())
++#define CHT_ART(i)      (CHT_ON ? kArticleListCht[i] : kArticleList[i])
++#define CHT_LOOKAROUND  (CHT_ON ? kLookAroundStrCht : kLookAroundStr)
++#define CHT_TO          (CHT_ON ? kToStrCht : kToStr)
++#define CHT_USE         (CHT_ON ? kUseStrCht : kUseStr)
++#define CHT_WALKTO      (CHT_ON ? kWalkToStrCht : kWalkToStr)
++#define CHT_OVER        (CHT_ON ? kOverStrCht : kOverStr)
++
+ void ActionDetails::synchronize(Common::Serializer &s) {
+ 	s.syncAsUint16LE(_verbId);
+ 	s.syncAsUint16LE(_objectNameId);
+@@ -130,7 +140,7 @@ void MADSAction::set() {
+ 		}
+ 	} else if (_lookFlag && (_selectedRow == 0)) {
+ 		// Two 'look' actions in succession, so the action becomes 'Look around'
+-		_statusText = kLookAroundStr;
++		_statusText = CHT_LOOKAROUND;
+ 	} else {
+ 		bool flag = false;
+ 		if ((_commandSource == CAT_INV_VOCAB) && (_selectedRow >= 0)
+@@ -143,9 +153,9 @@ void MADSAction::set() {
+ 			_action._verbId = objEntry._vocabList[_selectedRow]._vocabId;
+ 
+ 			// Set up the status text string
+-			_statusText = kUseStr;
++			_statusText = CHT_USE;
+ 			appendVocab(_action._objectNameId);
+-			_statusText += kToStr;
++			_statusText += CHT_TO;
+ 			appendVocab(_action._verbId);
+ 		} else {
+ 			// Handling for if an action has been selected
+@@ -165,7 +175,7 @@ void MADSAction::set() {
+ 
+ 				if (_action._verbId == VERB_LOOK) {
+ 					// Add in the word 'add'
+-					_statusText += kArticleList[PREP_AT];
++					_statusText += CHT_ART(PREP_AT);
+ 					_statusText += " ";
+ 				}
+ 			}
+@@ -174,7 +184,7 @@ void MADSAction::set() {
+ 			if ((_hotspotId >= 0) && (_selectedRow >= 0) && (_articleNumber > 0) && (_verbType == VERB_THAT)) {
+ 				flag = true;
+ 
+-				_statusText += kArticleList[_articleNumber];
++				_statusText += CHT_ART(_articleNumber);
+ 				_statusText += " ";
+ 			}
+ 
+@@ -198,7 +208,7 @@ void MADSAction::set() {
+ 					} else {
+ 						// Default to a standard 'walk to'
+ 						_action._verbId = VERB_WALKTO;
+-						_statusText += kWalkToStr;
++						_statusText += CHT_WALKTO;
+ 					}
+ 				}
+ 
+@@ -242,15 +252,15 @@ void MADSAction::set() {
+ 						articleNum = scene._dynamicHotspots.get(_secondObject - scene._hotspots.size())._articleNumber;
+ 					}
+ 
+-					_statusText += kArticleList[articleNum];
++					_statusText += CHT_ART(articleNum);
+ 				}
+ 			} else if ((_articleNumber != VERB_LOOK) || (_vm->getGameID() != GType_RexNebular) ||
+-				(_action._indirectObjectId >= 0 && scene.getVocab(_action._indirectObjectId) != kFenceStr)) {
++				(_action._indirectObjectId >= 0 && scene.getVocabOrig(_action._indirectObjectId) != kFenceStr)) {
+ 				// Write out the article
+-				_statusText += kArticleList[_articleNumber];
++				_statusText += CHT_ART(_articleNumber);
+ 			} else {
+ 				// Special case for a 'fence' entry in Rex Nebular
+-				_statusText += kOverStr;
++				_statusText += CHT_OVER;
+ 			}
+ 
+ 			_statusText += " ";
+diff --git a/engines/mads/cht.cpp b/engines/mads/cht.cpp
+new file mode 100644
+index 00000000..92d5ab74
+--- /dev/null
++++ b/engines/mads/cht.cpp
+@@ -0,0 +1,165 @@
++/* ScummVM - Graphic Adventure Engine
++ *
++ * ScummVM is the legal property of its developers, whose names
++ * are too numerous to list here. Please refer to the COPYRIGHT
++ * file distributed with this source distribution.
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
++ *
++ */
++
++#include "common/file.h"
++#include "common/textconsole.h"
++#include "common/debug.h"
++#include "mads/cht.h"
++
++namespace MADS {
++
++#define CHT_FONT_FILE  "rex_big5.fnt"
++#define CHT_TABLE_FILE "rex_cht.tsv"
++#define CHT_FONT_MAGIC "RXCF"
++
++ChtSupport::ChtSupport() : _enabled(false), _glyphW(0), _glyphH(0), _bytesPerRow(0),
++		_count(0), _codes(nullptr), _glyphs(nullptr) {
++}
++
++ChtSupport::~ChtSupport() {
++	delete[] _codes;
++	delete[] _glyphs;
++}
++
++bool ChtSupport::load() {
++	if (!loadFont(CHT_FONT_FILE)) {
++		// 沒有中文字型就是玩家沒裝中文化，維持英文，不是錯誤
++		return false;
++	}
++	if (!loadTable(CHT_TABLE_FILE)) {
++		warning("[CHT] 找到 %s 卻讀不到 %s，維持英文", CHT_FONT_FILE, CHT_TABLE_FILE);
++		return false;
++	}
++
++	_enabled = true;
++	debug(1, "[CHT] 中文化啟用：字型 %d 字 (%dx%d)，替換表 %d 筆",
++		_count, _glyphW, _glyphH, _table.size());
++	return true;
++}
++
++bool ChtSupport::loadFont(const Common::String &filename) {
++	Common::File f;
++	if (!f.open(filename))
++		return false;
++
++	char magic[5] = { 0 };
++	f.read(magic, 4);
++	if (strcmp(magic, CHT_FONT_MAGIC) != 0) {
++		warning("[CHT] %s 不是 RXCF 字型檔", filename.c_str());
++		return false;
++	}
++
++	_glyphW = f.readByte();
++	_glyphH = f.readByte();
++	_count = f.readUint16LE();
++	if (_glyphW == 0 || _glyphH == 0 || _count == 0) {
++		warning("[CHT] %s 標頭不合理 (%dx%d, %d 字)", filename.c_str(), _glyphW, _glyphH, _count);
++		return false;
++	}
++	_bytesPerRow = (_glyphW + 7) / 8;
++
++	_codes = new uint16[_count];
++	for (uint16 i = 0; i < _count; ++i)
++		_codes[i] = f.readUint16LE();
++
++	const uint32 stride = (uint32)_bytesPerRow * _glyphH;
++	_glyphs = new byte[(size_t)stride * _count];
++	f.read(_glyphs, (uint32)stride * _count);
++	f.close();
++	return true;
++}
++
++bool ChtSupport::loadTable(const Common::String &filename) {
++	Common::File f;
++	if (!f.open(filename))
++		return false;
++
++	while (!f.eos()) {
++		Common::String line = f.readLine();
++		if (line.empty() || line.hasPrefix("#"))
++			continue;
++
++		// key <TAB> 譯文
++		uint32 tab = line.findFirstOf('\t');
++		if (tab == Common::String::npos)
++			continue;
++		Common::String key = Common::String(line.c_str(), tab);
++		Common::String value = Common::String(line.c_str() + tab + 1);
++		if (key.empty() || value.empty())
++			continue;
++
++		_table[key] = value;
++	}
++
++	f.close();
++	return !_table.empty();
++}
++
++const byte *ChtSupport::glyph(uint16 big5Code) const {
++	if (!_enabled && _count == 0)
++		return nullptr;
++
++	// _codes 是排序過的，二分搜尋
++	int lo = 0, hi = (int)_count - 1;
++	while (lo <= hi) {
++		const int mid = (lo + hi) / 2;
++		if (_codes[mid] == big5Code)
++			return _glyphs + (size_t)mid * _bytesPerRow * _glyphH;
++		if (_codes[mid] < big5Code)
++			lo = mid + 1;
++		else
++			hi = mid - 1;
++	}
++	return nullptr;
++}
++
++const Common::String *ChtSupport::lookup(const Common::String &key) const {
++	Common::HashMap<Common::String, Common::String>::const_iterator it = _table.find(key);
++	if (it == _table.end())
++		return nullptr;
++	return &it->_value;
++}
++
++const char *ChtSupport::big5Strchr(const char *s, char c, bool chtOn) {
++	if (!chtOn)
++		return strchr(s, c);
++
++	while (*s) {
++		if ((byte)*s >= 0xA1 && *(s + 1)) {
++			s += 2;            // 雙位元組字：整個跳過，不看它的 trail byte
++			continue;
++		}
++		if (*s == c)
++			return s;
++		++s;
++	}
++	return nullptr;
++}
++
++bool ChtSupport::hasWideChar(const Common::String &s) {
++	for (uint i = 0; i < s.size(); ++i) {
++		if ((byte)s[i] >= 0xA1)
++			return true;
++	}
++	return false;
++}
++
++} // End of namespace MADS
+diff --git a/engines/mads/cht.h b/engines/mads/cht.h
+new file mode 100644
+index 00000000..3c06b016
+--- /dev/null
++++ b/engines/mads/cht.h
+@@ -0,0 +1,92 @@
++/* ScummVM - Graphic Adventure Engine
++ *
++ * ScummVM is the legal property of its developers, whose names
++ * are too numerous to list here. Please refer to the COPYRIGHT
++ * file distributed with this source distribution.
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
++ *
++ */
++
++#ifndef MADS_CHT_H
++#define MADS_CHT_H
++
++// [CHT] 繁體中文化支援：Big5 點陣字庫 + 文字替換表。
++//
++// 啟用方式是「遊戲目錄有沒有 rex_big5.fnt + rex_cht.tsv」，不是 --language ——
++// MADS 的 detection table 全部是 EN_ANY，設非英文語言會改變 detector 行為。
++// 兩個檔案任一個開不起來就維持英文原樣，玩家什麼都不會發現。
++
++#include "common/scummsys.h"
++#include "common/str.h"
++#include "common/hashmap.h"
++#include "common/hash-str.h"
++
++namespace MADS {
++
++class ChtSupport {
++private:
++	bool _enabled;
++	byte _glyphW, _glyphH, _bytesPerRow;
++	uint16 _count;
++	uint16 *_codes;      // 已排序的 Big5 碼，供二分搜尋
++	byte *_glyphs;       // count × (bytesPerRow × glyphH)
++	Common::HashMap<Common::String, Common::String> _table;
++
++	bool loadFont(const Common::String &filename);
++	bool loadTable(const Common::String &filename);
++public:
++	ChtSupport();
++	~ChtSupport();
++
++	/**
++	 * 載入字型與替換表；任一失敗則維持停用狀態並回傳 false
++	 */
++	bool load();
++
++	bool enabled() const { return _enabled; }
++	int glyphWidth() const { return _glyphW; }
++	int glyphHeight() const { return _glyphH; }
++	int bytesPerRow() const { return _bytesPerRow; }
++
++	/**
++	 * 取 Big5 字模；找不到回 nullptr（畫面上會是空白，代表字型沒烘到那個字）
++	 */
++	const byte *glyph(uint16 big5Code) const;
++
++	/**
++	 * 查替換表。key 形如 "quote:301"、"vocab:38"、"msg:2"。
++	 * 查無則回 nullptr（呼叫端就照原本的英文走）
++	 */
++	const Common::String *lookup(const Common::String &key) const;
++
++	/**
++	 * 這個字串裡有沒有雙位元組字（決定要不要用中文行高）
++	 */
++	static bool hasWideChar(const Common::String &s);
++
++	/**
++	 * Big5 安全版 strchr：掃描時跳過雙位元組字的 trail byte。
++	 *
++	 * Big5 的 trail byte 落在 '@'(0x40)、'['(0x5B)、'\\'(0x5C)、']'(0x5D) 這些
++	 * ASCII 值上很常見（「作」= A7 40、「一」= A4 40），原版的逐 byte strchr()
++	 * 會在中文字的第二個位元組上誤中，把字從中間切開。
++	 * chtOn 為 false 時行為與 strchr() 完全相同。
++	 */
++	static const char *big5Strchr(const char *s, char c, bool chtOn);
++};
++
++} // End of namespace MADS
++
++#endif /* MADS_CHT_H */
+diff --git a/engines/mads/events.cpp b/engines/mads/events.cpp
+index 1db36042..082019ec 100644
+--- a/engines/mads/events.cpp
++++ b/engines/mads/events.cpp
+@@ -118,10 +118,21 @@ void EventsManager::changeCursor() {
+ 			destP += cursor->w - 1;
+ 		}
+ 
++		// [CHT] 游標也要放大，否則在 2× 螢幕上只剩原本一半大小、幾乎看不見
++		const int cw = cursor->w - 1;
++		const int ch = cursor->h - 1;
++		const int scale = MADS_DISPLAY_SCALE;
++		byte *bigCursor = new byte[(size_t)cw * scale * ch * scale];
++		for (int y = 0; y < ch * scale; ++y) {
++			for (int x = 0; x < cw * scale; ++x)
++				bigCursor[(size_t)y * cw * scale + x] = destCursor[(y / scale) * cw + (x / scale)];
++		}
++
+ 		// Set the raw cursor data to use
+-		CursorMan.replaceCursor(destCursor, cursor->w - 1, cursor->h - 1,
+-			hotspotX, hotspotY, transIndex);
++		CursorMan.replaceCursor(bigCursor, cw * scale, ch * scale,
++			hotspotX * scale, hotspotY * scale, transIndex);
+ 		showCursor();
++		delete[] bigCursor;
+ 		delete[] destCursor;
+ 	}
+ }
+@@ -137,6 +148,14 @@ void EventsManager::pollEvents() {
+ 
+ 	Common::Event event;
+ 	while (g_system->getEventManager()->pollEvent(event)) {
++		// [CHT] 實體螢幕是 MADS_DISPLAY_SCALE 倍放大的，事件回報的是放大後座標。
++		// 這裡是整個引擎唯一的 pollEvent() 入口，就地換回 320×200 遊戲空間，
++		// 下游全部不必各自處理——包括直接拿 event.mouse 去比對 320 空間 Rect 的
++		// menu_nebular.cpp（getHighlightedItem、Rect(290,165,300,185).contains）。
++		// 在每個使用點各除一次遲早會漏掉一個，漏掉的症狀是「看得到卻點不到」。
++		event.mouse.x /= MADS_DISPLAY_SCALE;
++		event.mouse.y /= MADS_DISPLAY_SCALE;
++
+ 		// If an event target is specified, pass the event to it
+ 		if (_eventTarget) {
+ 			_eventTarget->onEvent(event);
+@@ -186,6 +205,7 @@ void EventsManager::pollEvents() {
+ 			}
+ 			return;
+ 		case Common::EVENT_MOUSEMOVE:
++			// 座標已在 pollEvent() 入口統一換算過，這裡照原樣用
+ 			_mousePos = event.mouse;
+ 			_currentPos = event.mouse;
+ 			_mouseMoved = true;
+diff --git a/engines/mads/font.cpp b/engines/mads/font.cpp
+index d1414838..5ef32c26 100644
+--- a/engines/mads/font.cpp
++++ b/engines/mads/font.cpp
+@@ -161,7 +161,7 @@ int Font::writeString(BaseSurface *surface, const Common::String &msg, const Com
+ 		y = 0;
+ 	}
+ 
+-	int height = MAX(0, _maxHeight - skipY);
++	int height = MAX(0, getHeight() - skipY);
+ 	if (height == 0)
+ 		return x;
+ 
+@@ -175,8 +175,68 @@ int Font::writeString(BaseSurface *surface, const Common::String &msg, const Com
+ 
+ 	int xPos = x;
+ 
++	ChtSupport *cht = _vm->_cht;
++	const bool chtOn = cht && cht->enabled();
++
+ 	const char *text = msg.c_str();
+ 	while (*text) {
++		// [CHT] Big5 雙位元組字。原版這裡是 `(*text++) & 0x7F`，
++		// 任何 >= 0x80 的位元組都會被折成一個 ASCII 字元 —— 這正是
++		// 中文在 MADS 非改引擎不可的根本原因（見 docs/30-engine-design.md §2）。
++		if (chtOn && (byte)text[0] >= 0xA1 && (byte)text[1] >= 0x40) {
++			const uint16 code = ((byte)text[0] << 8) | (byte)text[1];
++			const byte *g = cht->glyph(code);
++			const int cw = cht->glyphWidth();           // 字模寬（顯示像素）
++			const int gh = cht->glyphHeight();
++			const int scale = MADS_DISPLAY_SCALE;
++			const int logicalW = cw / scale;            // 320 空間的等效寬度
++
++			if (xPos + logicalW > xEnd)
++				return xPos;
++
++			if (g) {
++				// [CHT] 中文不畫進 320 的 surface，而是畫進「放大後」的文字層。
++				// 畫進 320 再被 Screen::update() 放大的話，16×15 的字會變成 32×30
++				// 的巨無霸；畫在文字層則是 1:1，尺寸跟放大後的英文相當。
++				Graphics::Surface *layer = _vm->_screen->chtLayer();
++				Graphics::Surface *mask = _vm->_screen->chtMask();
++				const Common::Point ofs = surface->getOffsetFromOwner();
++				const int ax = (xPos + ofs.x) * scale;
++				const int ay = (y + ofs.y) * scale;
++				const int bpr = cht->bytesPerRow();
++
++				// 先清掉這一格的舊內容，免得同位置重繪時疊字
++				const Common::Rect cell(xPos + ofs.x, y + ofs.y,
++					xPos + ofs.x + logicalW, y + ofs.y + (gh + scale - 1) / scale);
++				_vm->_screen->chtClear(cell);
++				_vm->_screen->chtTouch(cell);
++
++				for (int i = 0; i < gh; ++i) {
++					const int ly = ay + i;
++					if (ly < 0 || ly >= layer->h)
++						continue;
++					byte *dstP = (byte *)layer->getBasePtr(0, ly);
++					byte *maskP = (byte *)mask->getBasePtr(0, ly);
++					const byte *rowP = g + (size_t)i * bpr;
++					for (int col = 0; col < cw; ++col) {
++						const int lx = ax + col;
++						if (lx < 0 || lx >= layer->w)
++							continue;
++						if (rowP[col >> 3] & (0x80 >> (col & 7))) {
++							dstP[lx] = _fontColors[1];
++							maskP[lx] = 1;      // 顏色可能就是 0，得靠遮罩才知道這裡有字
++						}
++					}
++				}
++			}
++
++			// 字型沒烘到這個字時一樣往前推進，畫面留白，
++			// 不要 fallthrough 去畫 ASCII（那會吐出兩個亂碼字元）
++			text += 2;
++			xPos += logicalW + spaceWidth;
++			continue;
++		}
++
+ 		char theChar = (*text++) & 0x7F;
+ 		int charWidth = _charWidths[(byte)theChar];
+ 
+@@ -223,15 +283,33 @@ int Font::getWidth(const Common::String &msg, int spaceWidth) {
+ 	int width = 0;
+ 	const char *text = msg.c_str();
+ 
++	// [CHT] 這一支被 100 個地方呼叫來算換行、置中、對話框大小。
++	// 只要它認得雙位元組，那 100 處的排版就全部自動正確——不必逐一去改。
++	ChtSupport *cht = _vm->_cht;
++	const bool chtOn = cht && cht->enabled();
++
+ 	if (msg.size() > 0) {
+-		while (*text)
+-			width += _charWidths[*text++ & 0x7F] + spaceWidth;
++		while (*text) {
++			if (chtOn && (byte)text[0] >= 0xA1 && (byte)text[1] >= 0x40) {
++				width += cht->glyphWidth() / MADS_DISPLAY_SCALE + spaceWidth;
++				text += 2;
++			} else {
++				width += _charWidths[*text++ & 0x7F] + spaceWidth;
++			}
++		}
+ 		width -= spaceWidth;
+ 	}
+ 
+ 	return width;
+ }
+ 
++int Font::getHeight() const {
++	// [CHT] 中文走文字層、以「放大後」的解析度顯示（16×15 顯示像素
++	// ＝ 320 空間的 8×7.5），與原版英文行高相當，所以行高不必動 ——
++	// 對話框大小、換行、置中全部維持原版排版。
++	return _maxHeight;
++}
++
+ int Font::getBpp(int charWidth) {
+ 	if (charWidth > 12)
+ 		return 4;
+diff --git a/engines/mads/font.h b/engines/mads/font.h
+index 4ef1c69b..489ef782 100644
+--- a/engines/mads/font.h
++++ b/engines/mads/font.h
+@@ -84,7 +84,7 @@ public:
+ 
+ 	int maxWidth() const { return _maxWidth; }
+ 	int getWidth(const Common::String &msg, int spaceWidth = -1);
+-	int getHeight() const { return _maxHeight; }
++	int getHeight() const;   // [CHT] 有中文時回中文字模高，見 font.cpp
+ 	int writeString(BaseSurface *surface, const Common::String &msg, const Common::Point &pt,
+ 		int spaceWidth = 0, int width = 0);
+ };
+diff --git a/engines/mads/game.cpp b/engines/mads/game.cpp
+index 54755722..af9799c3 100644
+--- a/engines/mads/game.cpp
++++ b/engines/mads/game.cpp
+@@ -363,6 +363,16 @@ void Game::loadQuotes() {
+ 	}
+ 
+ 	f.close();
++
++	// [CHT] 用譯文覆蓋。getQuote(index) 取的是 _quotes[index - 1]，
++	// 所以替換表的 key 從 1 起算（與 tools/extract_text.py 產出的一致）。
++	if (_vm->_cht && _vm->_cht->enabled()) {
++		for (uint i = 0; i < _quotes.size(); ++i) {
++			const Common::String *tr = _vm->_cht->lookup(Common::String::format("quote:%u", i + 1));
++			if (tr)
++				_quotes[i] = *tr;
++		}
++	}
+ }
+ 
+ Common::StringArray Game::getMessage(uint32 id) {
+@@ -405,6 +415,28 @@ Common::StringArray Game::getMessage(uint32 id) {
+ 
+ 			delete[] bufferIn;
+ 			delete[] bufferOut;
++
++			// [CHT] 整組替換成中文。原文的換行是按英文寬度手動斷的，
++			// 中文寬度不同必須重排，所以譯文以「組」為單位、用 \n 自帶斷行。
++			if (_vm->_cht && _vm->_cht->enabled()) {
++				const Common::String *tr = _vm->_cht->lookup(Common::String::format("msg:%u", id));
++				if (tr) {
++					Common::StringArray zh;
++					Common::String cur;
++					for (uint ci = 0; ci < tr->size(); ++ci) {
++						if ((*tr)[ci] == '\\' && (ci + 1) < tr->size() && (*tr)[ci + 1] == 'n') {
++							zh.push_back(cur);
++							cur.clear();
++							++ci;
++						} else {
++							cur += (*tr)[ci];
++						}
++					}
++					zh.push_back(cur);
++					return zh;
++				}
++			}
++
+ 			return result;
+ 		}
+ 	}
+diff --git a/engines/mads/mads.cpp b/engines/mads/mads.cpp
+index be5ece8e..6378dc07 100644
+--- a/engines/mads/mads.cpp
++++ b/engines/mads/mads.cpp
+@@ -49,6 +49,7 @@ MADSEngine::MADSEngine(OSystem *syst, const MADSGameDescription *gameDesc) :
+ 	_dithering = false;
+ 	_disableFastwalk = false;
+ 
++	_cht = nullptr;
+ 	_dialogs = nullptr;
+ 	_events = nullptr;
+ 	_font = nullptr;
+@@ -62,6 +63,7 @@ MADSEngine::MADSEngine(OSystem *syst, const MADSGameDescription *gameDesc) :
+ }
+ 
+ MADSEngine::~MADSEngine() {
++	delete _cht;
+ 	delete _dialogs;
+ 	delete _events;
+ 	delete _font;
+@@ -85,6 +87,12 @@ void MADSEngine::initialize() {
+ 			SearchMan.add("mpslabs", arch);
+ 	}
+ 
++	// [CHT] 中文資源要在所有子系統之前載入：Font 與 UI 物件會在建構期就
++	// 依賴「有沒有中文」決定行高與字串，晚一步載入就不會生效。
++	// 找不到中文檔案時 load() 回 false，全部維持英文原樣。
++	_cht = new ChtSupport();
++	_cht->load();
++
+ 	// Initial sub-system engine references
+ 	MSurface::setVm(this);
+ 	MSprite::setVm(this);
+@@ -166,7 +174,9 @@ void MADSEngine::saveOptions() {
+ }
+ 
+ Common::Error MADSEngine::run() {
+-	initGraphics(MADS_SCREEN_WIDTH, MADS_SCREEN_HEIGHT);
++	// [CHT] 實體螢幕開 2×，遊戲內部仍是 320×200（見 screen.h 的 MADS_DISPLAY_SCALE）
++	initGraphics(MADS_SCREEN_WIDTH * MADS_DISPLAY_SCALE,
++		MADS_SCREEN_HEIGHT * MADS_DISPLAY_SCALE);
+ 	initialize();
+ 
+ 	// Run the game
+diff --git a/engines/mads/mads.h b/engines/mads/mads.h
+index 1971f212..2a74a120 100644
+--- a/engines/mads/mads.h
++++ b/engines/mads/mads.h
+@@ -29,6 +29,7 @@
+ #include "common/util.h"
+ #include "engines/engine.h"
+ #include "graphics/surface.h"
++#include "mads/cht.h"
+ #include "mads/conversations.h"
+ #include "mads/debugger.h"
+ #include "mads/dialogs.h"
+@@ -84,6 +85,7 @@ protected:
+ 	Common::Error run() override;
+ 	bool hasFeature(EngineFeature f) const override;
+ public:
++	ChtSupport *_cht;          // [CHT] 繁中支援（字型 + 替換表）
+ 	Debugger *_debugger;
+ 	Dialogs *_dialogs;
+ 	EventsManager *_events;
+diff --git a/engines/mads/menu_views.cpp b/engines/mads/menu_views.cpp
+index d2d0034b..08d6dd77 100644
+--- a/engines/mads/menu_views.cpp
++++ b/engines/mads/menu_views.cpp
+@@ -29,6 +29,7 @@
+ 
+ namespace MADS {
+ 
++
+ MenuView::MenuView(MADSEngine *vm) : FullScreenDialog(vm) {
+ 	_breakFlag = false;
+ 	_redrawFlag = true;
+@@ -120,6 +121,9 @@ TextView::TextView(MADSEngine *vm) : MenuView(vm) {
+ }
+ 
+ TextView::~TextView() {
++	// [CHT] 片尾／語錄畫面結束時清掉文字層，否則中文會殘留到主選單上
++	_vm->_screen->chtClearAll();
++
+ 	// Turn off palette cycling as well as any playing sound
+ 	Scene &scene = _vm->_game->_scene;
+ 	scene._cyclingActive = false;
+@@ -131,6 +135,7 @@ void TextView::load() {
+ 	scriptName += ".txr";
+ 
+ 	_filename = scriptName;
++	_chtLineNo = 0;
+ 	if (!_script.open(scriptName))
+ 		error("Could not open resource %s", _resourceName);
+ 
+@@ -148,16 +153,30 @@ void TextView::processLines() {
+ 		if (*p == '\n')
+ 			*p = '\0';
+ 
++		// [CHT] 片尾／製作名單的文字替換。key 是「資源名.行號」，
++		// 行號由 _chtLineNo 自己數（TXR 是串流讀的，沒有現成行號）。
++		// 指令行（[background=962] 這類）本來就不會進替換表，查不到就照原樣走。
++		const int chtCurLine = _chtLineNo++;
++		if (_vm->_cht && _vm->_cht->enabled()) {
++			Common::String resUpper(_resourceName);
++			resUpper.toUppercase();
++			const Common::String *chtTr = _vm->_cht->lookup(
++				Common::String::format("txr:%s.TXR.%d", resUpper.c_str(), chtCurLine));
++			if (chtTr) {
++				Common::strlcpy(_currentLine, chtTr->c_str(), sizeof(_currentLine));
++			}
++		}
++
+ 		// Commented out line, so go loop for another
+ 		if (_currentLine[0] == '#')
+ 			continue;
+ 
+ 		// Process the line
+-		char *cStart = strchr(_currentLine, '[');
++		char *cStart = (char *)ChtSupport::big5Strchr(_currentLine, '[', _vm->_cht && _vm->_cht->enabled());
+ 		if (cStart) {
+ 			while (cStart) {
+ 				// Loop for possible multiple commands on one line
+-				char *cEnd = strchr(_currentLine, ']');
++				char *cEnd = (char *)ChtSupport::big5Strchr(_currentLine, ']', _vm->_cht && _vm->_cht->enabled());
+ 				if (!cEnd)
+ 					error("Unterminated command '%s' in response file", _currentLine);
+ 
+@@ -167,7 +186,7 @@ void TextView::processLines() {
+ 				// Copy rest of line (if any) to start of buffer
+ 				Common::strlcpy(_currentLine, cEnd + 1, sizeof(_currentLine));
+ 
+-				cStart = strchr(_currentLine, '[');
++				cStart = (char *)ChtSupport::big5Strchr(_currentLine, '[', _vm->_cht && _vm->_cht->enabled());
+ 			}
+ 
+ 			if (_currentLine[0]) {
+@@ -302,7 +321,7 @@ void TextView::processText() {
+ 
+ 	// Lines are always centered, except if line contains a '@', in which case the
+ 	// '@' marks the position that must be horizontally centered
+-	char *centerP = strchr(_currentLine, '@');
++	char *centerP = (char *)ChtSupport::big5Strchr(_currentLine, '@', _vm->_cht && _vm->_cht->enabled());
+ 	if (centerP) {
+ 		*centerP = '\0';
+ 		xStart = (MADS_SCREEN_WIDTH / 2) - _font->getWidth(_currentLine);
+diff --git a/engines/mads/menu_views.h b/engines/mads/menu_views.h
+index 471232eb..7557c8c3 100644
+--- a/engines/mads/menu_views.h
++++ b/engines/mads/menu_views.h
+@@ -80,6 +80,10 @@ private:
+ 	int _translationX;
+ 	Common::File _script;
+ 	char _currentLine[80];
++
++	/** [CHT] 目前讀到第幾行。TXR 是串流逐行讀的，替換表的 key 用行號，
++	 *  所以得自己數——抽字工具那邊也是按行號編 key（見 tools/extract_text.py）。 */
++	int _chtLineNo;
+ 	MSurface *_spareScreen;
+ 	Font *_font;
+ private:
+diff --git a/engines/mads/module.mk b/engines/mads/module.mk
+index 9d80ac35..fd6fcd99 100644
+--- a/engines/mads/module.mk
++++ b/engines/mads/module.mk
+@@ -32,6 +32,7 @@ MODULE_OBJS := \
+ 	assets.o \
+ 	audio.o \
+ 	camera.o \
++	cht.o \
+ 	compression.o \
+ 	conversations.o \
+ 	debugger.o \
+diff --git a/engines/mads/nebular/dialogs_nebular.cpp b/engines/mads/nebular/dialogs_nebular.cpp
+index 7f7ac80a..fd3588ba 100644
+--- a/engines/mads/nebular/dialogs_nebular.cpp
++++ b/engines/mads/nebular/dialogs_nebular.cpp
+@@ -112,7 +112,9 @@ bool DialogsNebular::show(int messageId, int objectId) {
+ 						if (!textNoun(dialogText, 2, valStr))
+ 							dialogText += getVocab(action._activeAction._indirectObjectId);
+ 					} else if (commandCheck("PREP", valStr, commandText)) {
+-						dialogText += kArticleList[action._savedFields._articleNumber];
++						dialogText += (_vm->_cht && _vm->_cht->enabled())
++							? kArticleListCht[action._savedFields._articleNumber]
++							: kArticleList[action._savedFields._articleNumber];
+ 					} else if (commandCheck("SENTENCE", valStr, commandText)) {
+ 						dialogText += action._sentence;
+ 					} else if (commandCheck("WIDTH", valStr, commandText)) {
+@@ -780,7 +782,10 @@ void GameDialog::addLine(const Common::String &msg, DialogTextAlign align,
+ 
+ 	case ALIGN_AT_CENTER: {
+ 		const char *msgP = msg.c_str();
+-		const char *ch = strchr(msgP, '@');
++		// [CHT] 不能用裸 strchr：Big5 trail byte 會撞到 '@'(0x40)，
++		// 例如「作」= A7 40，掃到那裡會把字從中間切開（見 docs/30-engine-design.md）
++		const char *ch = ChtSupport::big5Strchr(msgP, '@',
++			_vm->_cht && _vm->_cht->enabled());
+ 		if (ch) {
+ 			xOffset = (MADS_SCREEN_WIDTH / 2) - font->getWidth(
+ 				Common::String(msgP, ch), line->_widthAdjust);
+diff --git a/engines/mads/nebular/game_nebular.cpp b/engines/mads/nebular/game_nebular.cpp
+index f0538556..6ea0626f 100644
+--- a/engines/mads/nebular/game_nebular.cpp
++++ b/engines/mads/nebular/game_nebular.cpp
+@@ -118,6 +118,16 @@ void GameNebular::startGame() {
+ 	_scene._currentSceneId = -1;
+ 	_scene._nextSceneId = 101;
+ 
++	// [CHT] 驗證用：接上 ScummVM 標準的 --boot-param 指定起始場景，
++	// 讓 headless 能逐場景截圖驗收（MADS 原本沒用這個參數，
++	// 而 debugger 在 Xvfb 無 window manager 的環境開不起來）。
++	// 不帶參數時完全照原本走，對玩家零影響。
++	if (ConfMan.hasKey("boot_param")) {
++		const int sceneId = ConfMan.getInt("boot_param");
++		if (sceneId > 0)
++			_scene._nextSceneId = sceneId;
++	}
++
+ 	initializeGlobals();
+ 
+ 	if (_loadGameSlot >= 0)
+diff --git a/engines/mads/scene.cpp b/engines/mads/scene.cpp
+index 491a7916..a91eeb45 100644
+--- a/engines/mads/scene.cpp
++++ b/engines/mads/scene.cpp
+@@ -270,6 +270,19 @@ void Scene::loadVocabStrings() {
+ 	}
+ 
+ 	f.close();
++
++	// [CHT] 先留一份英文原文，給「拿 vocab 做比對」的引擎邏輯用（見 getVocabOrig）
++	_vocabStringsOrig = _vocabStrings;
++
++	// [CHT] 用譯文覆蓋。getVocab(id) 取 _vocabStrings[id - 1]，
++	// 替換表 key 用陣列索引（0 起算），與 tools/extract_text.py 一致。
++	if (_vm->_cht && _vm->_cht->enabled()) {
++		for (uint i = 0; i < _vocabStrings.size(); ++i) {
++			const Common::String *tr = _vm->_cht->lookup(Common::String::format("vocab:%u", i));
++			if (tr)
++				_vocabStrings[i] = *tr;
++		}
++	}
+ }
+ 
+ uint32 Scene::getVocabStringsCount() const {
+diff --git a/engines/mads/scene.h b/engines/mads/scene.h
+index 18ab1073..5091a02f 100644
+--- a/engines/mads/scene.h
++++ b/engines/mads/scene.h
+@@ -109,6 +109,7 @@ public:
+ 	Common::Array<uint32> _cycleTicks;
+ 	Common::Array<PaletteCycle> _paletteCycles;
+ 	Common::StringArray _vocabStrings;
++	Common::StringArray _vocabStringsOrig;   // [CHT] 替換前的英文原文
+ 	Animation *_animationData;
+ 	Animation *_animation[10];
+ 	bool _freeAnimationFlag;
+@@ -219,6 +220,16 @@ public:
+ 	 */
+ 	Common::String getVocab(int vocabId) { return _vocabStrings[vocabId - 1]; }
+ 
++	/**
++	 * [CHT] 取未翻譯的原文 vocab。引擎有幾處拿 vocab 字串去「比對」而不是顯示
++	 * （action.cpp 的 kFenceStr），翻成中文後那些比對會永遠不成立、改變遊戲行為。
++	 * 通則：顯示用譯文，邏輯用原文。
++	 */
++	Common::String getVocabOrig(int vocabId) {
++		return (vocabId - 1) < (int)_vocabStringsOrig.size()
++			? _vocabStringsOrig[vocabId - 1] : _vocabStrings[vocabId - 1];
++	}
++
+ 	/**
+ 	 * Clear the data for the currently loaded scene
+ 	 */
+diff --git a/engines/mads/screen.cpp b/engines/mads/screen.cpp
+index 309eca48..e24ce183 100644
+--- a/engines/mads/screen.cpp
++++ b/engines/mads/screen.cpp
+@@ -558,12 +558,79 @@ Screen::Screen(): BaseSurface() {
+ 	// Create the screen surface separately on another surface, since the screen
+ 	// surface will be subject to change as the clipping area is altered
+ 	_rawSurface.create(MADS_SCREEN_WIDTH, MADS_SCREEN_HEIGHT);
++
++	// [CHT] 中文文字層是「放大後」的解析度：中文字模 1:1 畫在這裡，
++	// 不跟著底圖一起被放大 —— 這樣中文的顯示尺寸才會跟放大後的英文相當，
++	// 而不是變成 32×30 的巨大字。0 = 透明。
++	_chtLayer.create(MADS_SCREEN_WIDTH * MADS_DISPLAY_SCALE,
++		MADS_SCREEN_HEIGHT * MADS_DISPLAY_SCALE, Graphics::PixelFormat::createFormatCLUT8());
++	_chtLayer.fillRect(Common::Rect(0, 0, _chtLayer.w, _chtLayer.h), 0);
++	_chtMask.create(_chtLayer.w, _chtLayer.h, Graphics::PixelFormat::createFormatCLUT8());
++	_chtMask.fillRect(Common::Rect(0, 0, _chtMask.w, _chtMask.h), 0);
+ 	resetClipBounds();
+ 
+ 	_shakeCountdown = -1;
+ 	_random = 0x4D2;
+ }
+ 
++// [CHT] 把 320 空間的一塊矩形做 nearest 2× 放大後送到實體螢幕。
++// 底圖是 pixel art，一律最近鄰，不可用雙線性（rulebook/81）。
++void Screen::copyRectScaled(const Common::Rect &r) {
++	const int scale = MADS_DISPLAY_SCALE;
++	const int dw = r.width() * scale;
++	const int dh = r.height() * scale;
++	if (dw <= 0 || dh <= 0)
++		return;
++
++	byte *tmp = new byte[dw * dh];
++	for (int y = 0; y < dh; ++y) {
++		const byte *srcP = (const byte *)getBasePtr(r.left, r.top + y / scale);
++		byte *dstP = tmp + (size_t)y * dw;
++		for (int x = 0; x < r.width(); ++x) {
++			const byte v = srcP[x];
++			for (int s = 0; s < scale; ++s)
++				*dstP++ = v;
++		}
++	}
++
++	// [CHT] 疊上中文文字層（原生解析度，非 0 即不透明）
++	const int ox = r.left * scale;
++	const int oy = r.top * scale;
++	for (int y = 0; y < dh; ++y) {
++		const int ly = oy + y;
++		if (ly < 0 || ly >= _chtLayer.h)
++			continue;
++		const byte *layerP = (const byte *)_chtLayer.getBasePtr(0, ly);
++		const byte *maskP = (const byte *)_chtMask.getBasePtr(0, ly);
++		byte *dstP = tmp + (size_t)y * dw;
++		for (int x = 0; x < dw; ++x) {
++			const int lx = ox + x;
++			if (lx < 0 || lx >= _chtLayer.w)
++				continue;
++			if (maskP[lx])
++				dstP[x] = layerP[lx];
++		}
++	}
++
++	g_system->copyRectToScreen(tmp, dw, ox, oy, dw, dh);
++	delete[] tmp;
++}
++
++void Screen::chtClear(const Common::Rect &r320) {
++	const int scale = MADS_DISPLAY_SCALE;
++	Common::Rect r(r320.left * scale, r320.top * scale, r320.right * scale, r320.bottom * scale);
++	r.clip(Common::Rect(0, 0, _chtLayer.w, _chtLayer.h));
++	if (r.isValidRect()) {
++		_chtLayer.fillRect(r, 0);
++		_chtMask.fillRect(r, 0);
++	}
++}
++
++void Screen::chtClearAll() {
++	_chtLayer.fillRect(Common::Rect(0, 0, _chtLayer.w, _chtLayer.h), 0);
++	_chtMask.fillRect(Common::Rect(0, 0, _chtMask.w, _chtMask.h), 0);
++}
++
+ void Screen::update() {
+ 	if (_shakeCountdown >= 0) {
+ 		_random = _random * 5 + 1;
+@@ -575,11 +642,11 @@ void Screen::update() {
+ 		// offset width shown at the very right. The offset changes to give
+ 		// an effect of shaking the screen
+ 		offset *= 4;
+-		const byte *buf = (const byte *)getBasePtr(offset, 0);
+-		g_system->copyRectToScreen(buf, this->pitch, 0, 0, this->pitch - offset, this->h);
++		// [CHT] 搖晃效果同樣走放大路徑，否則搖動時畫面尺寸會跳一下
++		copyRectScaled(Common::Rect(offset, 0, this->w, this->h));
+ 		if (offset > 0)
+-			g_system->copyRectToScreen(getPixels(), this->pitch,
+-				this->pitch - offset, 0, offset, this->h);
++			copyRectScaled(Common::Rect(0, 0, offset, this->h));
++		g_system->updateScreen();
+ 		return;
+ 	}
+ 
+@@ -587,14 +654,59 @@ void Screen::update() {
+ 	Common::Rect clipBounds = getClipBounds();
+ 	resetClipBounds();
+ 
+-	// Update the screen
+-	Graphics::Screen::update();
++	// [CHT] 取代 Graphics::Screen::update()：一樣走 dirty rect，但每塊放大 2× 再送出。
++	// 遊戲邏輯完全不知道有這回事，所有 sprite / hotspot / 場景座標維持 320×200。
++	mergeDirtyRects();
++
++	// [CHT] 分辨兩種 dirty：一種是文字自己重畫（本幀有 chtTouch），
++	// 一種是背景把文字蓋掉了（沒有 touch）。後者要把文字層一起清掉，
++	// 否則舊字會永遠留在畫面上。
++	for (Common::List<Common::Rect>::iterator i = _dirtyRects.begin(); i != _dirtyRects.end(); ++i) {
++		bool touched = false;
++		for (uint t = 0; t < _chtTouched.size(); ++t) {
++			if (_chtTouched[t].intersects(*i)) {
++				touched = true;
++				break;
++			}
++		}
++		if (!touched) {
++			// [CHT] 只有 scene 區能靠 dirty 驅動清除：那裡的文字（kernel message）
++			// 每幀都會重畫，清了立刻補回來。
++			// UI 區（y >= MADS_SCENE_HEIGHT）不行——物品旋轉動畫每幀都讓整個
++			// UI 變 dirty，但 verb 列與物品名只在內容變動時才重畫，
++			// 一起清掉的話 UI 文字會整片消失。UI 區改由 writeString 自己清自己那格。
++			Common::Rect r = *i;
++			r.bottom = MIN<int16>(r.bottom, MADS_SCENE_HEIGHT);
++			if (r.isValidRect() && r.height() > 0)
++				chtClear(r);
++		}
++	}
++	_chtTouched.clear();
++
++	// [CHT] 中文啟用時整屏合成，不走 dirty rect。
++	// 理由：文字層的內容不見得整片落在 dirty 範圍內，只疊 dirty 區域會讓
++	// 一行字中間某段沒被送上螢幕（症狀是「字被底圖切掉一塊」）。
++	// 代價是每幀多一次 640×400 合成，換來的是「畫出來的字一定看得到」。
++	if (_vm->_cht && _vm->_cht->enabled()) {
++		copyRectScaled(Common::Rect(0, 0, this->w, this->h));
++	} else {
++		for (Common::List<Common::Rect>::iterator i = _dirtyRects.begin(); i != _dirtyRects.end(); ++i)
++			copyRectScaled(*i);
++	}
++	g_system->updateScreen();
++	_dirtyRects.clear();
+ 
+ 	// Revert back to whatever clipping is active
+ 	setClipBounds(clipBounds);
+ }
+ 
+ void Screen::transition(ScreenTransition transitionType, bool surfaceFlag) {
++	// [CHT] 轉場時清掉 scene 區的舊中文字（新場景不會有人來重畫它們）。
++	// **只清 scene 區**：轉場發生在 UI 文字畫完之後，連 UI 一起清掉的話
++	// verb 列與物品名會整片消失、而且不會被重畫（實測踩過）。
++	// 全螢幕的清除留給 TextView 解構（片尾播完回主選單那種情況）。
++	chtClear(Common::Rect(0, 0, MADS_SCREEN_WIDTH, MADS_SCENE_HEIGHT));
++
+ 	Palette &pal = *_vm->_palette;
+ 	Scene &scene = _vm->_game->_scene;
+ 	byte palData[PALETTE_SIZE];
+diff --git a/engines/mads/screen.h b/engines/mads/screen.h
+index 3a1e4e44..0a01d497 100644
+--- a/engines/mads/screen.h
++++ b/engines/mads/screen.h
+@@ -32,6 +32,12 @@ namespace MADS {
+ #define MADS_SCREEN_WIDTH 320
+ #define MADS_SCREEN_HEIGHT 200
+ 
++// [CHT] 顯示放大倍率。遊戲邏輯、sprite、hotspot 全部維持 320×200 不動，
++// 只在送畫面時做 2× nearest 放大，讓 UI 格線（寫死 8px 高，見 user_interface.cpp
++// getBounds）在顯示層變成 16px，容得下 16×15 的中文字模。
++// 詳細取捨見 docs/30-engine-design.md §4。
++#define MADS_DISPLAY_SCALE 2
++
+ enum ScreenMode {
+ 	SCREENMODE_VGA = 19
+ };
+@@ -217,8 +223,43 @@ private:
+ 	void swapForeground(byte newPalette[PALETTE_SIZE], byte *paletteMap);
+ 
+ 	void swapPalette(const byte palData[PALETTE_SIZE], byte swapTable[PALETTE_COUNT], bool foreground);
++
++	/**
++	 * [CHT] 把 320 空間的一塊矩形以 nearest 放大 MADS_DISPLAY_SCALE 倍送到實體螢幕，
++	 * 並把中文文字層（原生解析度，不放大）疊在上面
++	 */
++	void copyRectScaled(const Common::Rect &r);
++
++	/** [CHT] 中文文字層：640×400，存調色盤索引 */
++	Graphics::Surface _chtLayer;
++
++	/** [CHT] 文字層遮罩：非 0 代表該像素有字。
++	 *  不能拿「顏色 0」當透明——調色盤索引 0 是合法顏色，
++	 *  MADS 的文字色（_fontColors[1]）真的會是 0，那時字會整個消失。 */
++	Graphics::Surface _chtMask;
++
++	/** [CHT] 本幀被文字繪製觸及的區域（320 空間）。用來分辨
++	 *  「這塊 dirty 是文字自己重畫」還是「背景把文字蓋掉了」 */
++	Common::Array<Common::Rect> _chtTouched;
+ public:
+ 	int _shakeCountdown;
++
++	/** [CHT] 供 Font 直接把中文字模畫上去的文字層 */
++	Graphics::Surface *chtLayer() { return &_chtLayer; }
++
++	/** [CHT] 文字層遮罩，寫字時要一起標記 */
++	Graphics::Surface *chtMask() { return &_chtMask; }
++
++	/** [CHT] 標記某塊 320 空間區域「本幀有文字畫過」 */
++	void chtTouch(const Common::Rect &r320) { _chtTouched.push_back(r320); }
++
++	/** [CHT] 清掉文字層上某塊 320 空間區域對應的內容 */
++	void chtClear(const Common::Rect &r320);
++
++	/** [CHT] 清空整個文字層。用在「畫面整片換掉」的時機（場景轉場、
++	 *  片尾播完回主選單）——那些時候舊字不會有人來重畫，
++	 *  不主動清就會永遠留在畫面上。 */
++	void chtClearAll();
+ public:
+ 	/**
+ 	 * Constructor
+diff --git a/engines/mads/staticres.cpp b/engines/mads/staticres.cpp
+index 80accd4b..20b81fbb 100644
+--- a/engines/mads/staticres.cpp
++++ b/engines/mads/staticres.cpp
+@@ -41,6 +41,21 @@ const char *const kWalkToStr = "Walk to ";
+ const char *const kFenceStr = "fence";
+ const char *const kOverStr = "over";
+ 
++// [CHT] 指令列用的中文版。這些字串是引擎硬寫的，不在任何資源檔裡，
++// 漏掉就會變成「中文動詞＋英文介係詞」的中英夾雜。
++// 介係詞取最短的可讀形式：指令列本來就是關鍵字式的，
++// 「丟 船長日誌 向 艙壁」比硬湊完整語序更貼近原版的簡潔感。
++const char *const kArticleListCht[9] = {
++	nullptr, "\xA5\xCE", "\xB5\xB9", "\xA6\x56", "\xB1\xF1",
++	"\xA4\x57", "\xB6\x69", "\xA4\x55", "\xAB\xE1"
++};   // 用 給 向 從 上 進 下 後
++
++const char *const kLookAroundStrCht = "\xC0\xF4\xB5\xF8";        // 環視
++const char *const kToStrCht = "\xA8\xD3";                          // 來
++const char *const kUseStrCht = "\xA8\xCF\xA5\xCE ";              // 使用
++const char *const kWalkToStrCht = "\xA8\xAB\xA8\xEC ";           // 走到
++const char *const kOverStrCht = "\xB6\x56\xB9\x4C";              // 越過
++
+ const char *const kGameReleaseInfoStr = "ScummVM rev: 8.43 14-Sept-92";
+ const char *const kGameReleaseTitleStr = "GAME RELEASE VERSION INFO";
+ 
+diff --git a/engines/mads/staticres.h b/engines/mads/staticres.h
+index 97d360ad..359d337c 100644
+--- a/engines/mads/staticres.h
++++ b/engines/mads/staticres.h
+@@ -35,6 +35,14 @@ extern const char *const kWalkToStr;
+ extern const char *const kFenceStr;
+ extern const char *const kOverStr;
+ 
++// [CHT] 中文版指令列字串
++extern const char *const kArticleListCht[9];
++extern const char *const kLookAroundStrCht;
++extern const char *const kToStrCht;
++extern const char *const kUseStrCht;
++extern const char *const kWalkToStrCht;
++extern const char *const kOverStrCht;
++
+ extern const char *const kGameReleaseInfoStr;
+ extern const char *const kGameReleaseTitleStr;
+ 
+diff --git a/engines/mads/user_interface.cpp b/engines/mads/user_interface.cpp
+index e77c949d..525cb35e 100644
+--- a/engines/mads/user_interface.cpp
++++ b/engines/mads/user_interface.cpp
+@@ -27,6 +27,30 @@
+ 
+ namespace MADS {
+ 
++// [CHT] 介面區佈局常數。原版格高寫死 8px（英文字高約 7px），中文字模 16×15
++// 塞進去會壓到下一格。介面區總高只有 44px（200 − MADS_SCENE_HEIGHT），
++// 15px × 3 列 = 45px 只超出 1px —— 最後一列底部裁掉 1px，而指令與物品名
++// 都沒有下沉筆劃（逗號句號那類才會用到第 15 列），實際看不出來。
++// 列數 5→3 之後指令表變成「3 列 4 欄」。中文動詞用單字（看／拿／談，1990s
++// 中文遊戲的慣例），一格只要 20px，4 欄共 80px，仍在原本物品欄（x=90）左邊，
++// 所以物品欄、捲軸、物品旋轉圖全部維持原位、不必動美術。
++// 詳見 docs/30-engine-design.md §4。
++#define CHT_UI_ROW_H      15
++#define CHT_UI_ROWS        3
++#define CHT_UI_CMD_W    20   // 單字 verb：16px 字 + 4px 間距
++
++
++int UserInterface::chtRows() const {
++	// [CHT] 中文改走文字層（顯示層每格已是 16px），原版 5 列 8px 的佈局
++	// 重新變得剛好——不再需要動 UI 佈局。保留這兩支只為集中說明。
++	return 5;
++}
++
++int UserInterface::chtRowHeight() const {
++	return 8;
++}
++
++
+ UISlot::UISlot() {
+ 	_flags = IMG_STATIC;
+ 	_segmentId = 0;
+@@ -479,7 +503,7 @@ void UserInterface::drawActions() {
+ }
+ 
+ void UserInterface::drawInventoryList() {
+-	int endIndex = MIN((int)_vm->_game->_objects._inventoryList.size(), _inventoryTopIndex + 5);
++	int endIndex = MIN((int)_vm->_game->_objects._inventoryList.size(), _inventoryTopIndex + chtRows());
+ 	for (int idx = _inventoryTopIndex; idx < endIndex; ++idx) {
+ 		writeVocab(CAT_INV_LIST, idx);
+ 	}
+@@ -756,18 +780,21 @@ void UserInterface::loadElements() {
+ bool UserInterface::getBounds(ScrCategory category, int v, Common::Rect &bounds) {
+ 	int heightMultiplier, widthMultiplier;
+ 	int leftStart, yOffset, widthAmt;
++	const bool cht = _vm->_cht && _vm->_cht->enabled();
++	const int rows = chtRows();
++	const int rowH = chtRowHeight();
+ 
+ 	switch (category) {
+ 	case CAT_COMMAND:
+-		heightMultiplier = v % 5;
+-		widthMultiplier = v / 5;
++		heightMultiplier = v % rows;
++		widthMultiplier = v / rows;
+ 		leftStart = 2;
+ 		yOffset = 3;
+ 		widthAmt = 32;
+ 		break;
+ 
+ 	case CAT_INV_LIST:
+-		if (v < _inventoryTopIndex || v >= (_inventoryTopIndex + 5))
++		if (v < _inventoryTopIndex || v >= (_inventoryTopIndex + rows))
+ 			return false;
+ 
+ 		heightMultiplier = v - _inventoryTopIndex;
+@@ -804,8 +831,8 @@ bool UserInterface::getBounds(ScrCategory category, int v, Common::Rect &bounds)
+ 
+ 	bounds.left = (widthMultiplier > 0) ? widthMultiplier * widthAmt + leftStart : leftStart;
+ 	bounds.setWidth(widthAmt);
+-	bounds.top = heightMultiplier * 8 + yOffset;
+-	bounds.setHeight(8);
++	bounds.top = heightMultiplier * rowH + yOffset;
++	bounds.setHeight(rowH);
+ 
+ 	if (category == CAT_INV_SCROLLER) {
+ 		switch (v) {
+diff --git a/engines/mads/user_interface.h b/engines/mads/user_interface.h
+index df8418d9..71588fb6 100644
+--- a/engines/mads/user_interface.h
++++ b/engines/mads/user_interface.h
+@@ -148,6 +148,10 @@ private:
+ 	/**
+ 	 * Returns the area within the user interface a given element falls
+ 	 */
++	/** [CHT] 中文時介面改 3 列 15px（原版 5 列 8px），見 user_interface.cpp */
++	int chtRows() const;
++	int chtRowHeight() const;
++
+ 	bool getBounds(ScrCategory category, int invIndex, Common::Rect &bounds);
+ 
+ 	/**

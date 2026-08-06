@@ -1,0 +1,1197 @@
+0	game
+1	qsave
+2	look
+3	take
+4	push
+5	open
+6	put
+7	talk to
+8	give
+9	pull
+10	close
+11	throw
+12	walk to
+13	activate
+14	admire
+15	adsm
+16	air vent
+17	aloe plant
+18	anemone
+19	anomometer
+20	area around hut
+21	area to south
+22	area to west
+23	aromatic meat
+24	attach
+25	audio tape
+26	auxiliary power
+27	badmitton brat
+28	bag
+29	bamboo tree
+30	bats
+31	bawlemer oriole-hun
+32	bear rug
+33	beastly trophy
+34	big leaves
+35	big pipes
+36	big sky
+37	big stone
+38	binoculars
+39	birdies
+40	blowgun
+41	bomb
+42	bombs
+43	bone
+44	bones
+45	bottle
+46	boulder
+47	boulders
+48	bra
+49	break
+50	breathe air
+51	bulkhead
+52	burger
+53	burn
+54	burnt out warp coil
+55	bush-like formation
+56	bushes
+57	bushy fern
+58	cactus
+59	card
+60	cast
+61	cauldron
+62	cave
+63	cave ceiling
+64	cave entrance
+65	cave exit
+66	cave floor
+67	cave to east
+68	cave wall
+69	ceiling
+70	chair
+71	charge cases
+72	chicken
+73	chicken bomb
+74	clearing to east
+75	clearing to south
+76	cliff face
+77	climb down
+78	climb through
+79	climb up
+80	clock
+81	closet
+82	clothesline
+83	clump of trees
+84	coal
+85	cocoanut
+86	compact case
+87	computer game
+88	control panel
+89	coral
+90	crab
+91	credit chip
+92	cumulous cloud
+93	curious weed patch
+94	curtain
+95	curtains
+96	cut
+97	damage control
+98	damage control panel
+99	dampen
+100	dead fish
+101	dead purple monster
+102	declivitous chasm
+103	deep dark forest
+104	dense forest
+105	detonators
+106	dino mite
+107	disassemble
+108	dive into
+109	door
+110	door key
+111	doorway
+112	drawer
+113	drink
+114	durafail cells
+115	eastern cliff face
+116	eat
+117	eject
+118	empty
+119	engineering controls
+120	engineering section
+121	enter key
+122	escape hatch
+123	estrotoxin
+124	examine
+125	experiment cage
+126	extinguish
+127	face id
+128	fern
+129	field to north
+130	field to south
+131	field to west
+132	fill
+133	fire pit
+134	fishing line
+135	fishing rod
+136	floor
+137	floor of hut
+138	floor tile
+139	fondle
+140	forest to east
+141	front window
+142	fungoids
+143	furnace
+144	fuzzy dice
+145	gaze
+146	gaze at
+147	gaze in
+148	glance at
+149	glove
+150	gnarly shrub
+151	gnaw on
+152	gorge on
+153	grain alchohol
+154	grassland to east
+155	grassland to south
+156	grassy area
+157	grassy area to north
+158	grassy knoll
+159	grind
+160	groovilactic tree
+161	guards arm
+162	hatchway
+163	hook up
+164	horizon
+165	hose down
+166	hotpants
+167	hull
+168	hurl
+169	hut
+170	hut area
+171	hut to east
+172	hut to south
+173	hut to the south
+174	hut to west
+175	huts to north
+176	hydrospanner
+177	hyperdrive jump unit
+178	id card
+179	ignite
+180	inflate
+181	insert
+182	inspect
+183	jungle
+184	jungle to east
+185	jungle to west
+186	key 1
+187	key 2
+188	key 3
+189	key 4
+190	key 5
+191	key 6
+192	key 7
+193	key 8
+194	key 9
+195	keypad
+196	kneeling woman
+197	knife
+198	ladder
+199	large stalagmite
+200	leer at
+201	library computer
+202	lick
+203	life support section
+204	light
+205	load
+206	lock
+207	log
+208	look at
+209	look in
+210	look through
+211	lounge area
+212	love altar
+213	lowlands
+214	machine
+215	magnet
+216	main airlock
+217	manta ray
+218	marshy wetlands
+219	match
+220	medical waste
+221	medicine cabinet
+222	men who came before
+223	mine
+224	mirror
+225	monitor
+226	monkey
+227	monkey liver juice
+228	monster sludge
+229	mountain
+230	mountain range
+231	mountains
+232	mtam
+233	mushrooms
+234	navigation controls
+235	north path
+236	northern exposure
+237	northern sea cliff
+238	obstacle
+239	ocean floor
+240	odd rock formation
+241	oogly-boogly juice
+242	open area to east
+243	open area to north
+244	open area to south
+245	open area to west
+246	open field
+247	outer hull
+248	outside
+249	oven
+250	overhang to east
+251	overhang to west
+252	overhead lamp
+253	pad of paper
+254	padlock key
+255	palm tree
+256	passage way to south
+257	passion puss
+258	peer through
+259	pencil
+260	pendulous crag
+261	penlight
+262	phone cells
+263	phone handset
+264	pile of rocks
+265	pillow
+266	pilot's chair
+267	pipe
+268	piranha
+269	plant
+270	plant stalk
+271	plants
+272	plastic jesus
+273	play
+274	plunger
+275	poison darts
+276	polycement
+277	pool
+278	poster
+279	power status panel
+280	precipice
+281	press
+282	pressure gauge
+283	pry
+284	raging river
+285	ramolyan rugby rats
+286	read
+287	rearview mirror
+288	rebreather
+289	refrigerator
+290	remote
+291	repair list
+292	river
+293	river to west
+294	robo-kitchen
+295	rock
+296	rocks
+297	rocky area
+298	rolling hill
+299	scalpel
+300	scenic mountains
+301	sea cliff
+302	seaweed
+303	seaweed bank
+304	security card
+305	set
+306	shake hands
+307	sharpen
+308	shield access panel
+309	shield generator
+310	shield modulator
+311	shield status panel
+312	ship
+313	shoot
+314	shovel
+315	shred
+316	shrunken heads
+317	singed meat
+318	sit in
+319	skull
+320	skull and crossbones
+321	sky
+322	sleep on
+323	slithering snake
+324	slug secretion
+325	small hole
+326	smell
+327	snake
+328	sniff
+329	soak
+330	special key 1
+331	special key 2
+332	spider
+333	spilt milk
+334	spit fire
+335	spray
+336	stab
+337	stairs
+338	stalagmites
+339	stand inside
+340	stare at
+341	steps
+342	stuffed fish
+343	surface
+344	swim across
+345	swim into
+346	swim through
+347	swim to
+348	swim towards
+349	swim under
+350	swooping creature
+351	table
+352	take liver
+353	take off
+354	take page
+355	tall grass
+356	tape player
+357	target computer
+358	target module
+359	targetting computer
+360	tasmanian devil
+361	tasty turkey
+362	teleport device
+363	teleporter
+364	thatched roof
+365	thorns
+366	thorny bush
+367	tie
+368	timebomb
+369	timer
+370	timer module
+371	tree
+372	trees
+373	trodden path
+374	tube
+375	tunnel
+376	twinkie bush
+377	twinkifruit
+378	unlock
+379	uzi
+380	vase
+381	video game
+382	view
+383	view screen
+384	viewport
+385	village area
+386	village to west
+387	volcano
+388	vulture
+389	wad of cattle parts
+390	walk across
+391	walk inside
+392	walk on
+393	walk outside
+394	walk through
+395	walk towards
+396	wall
+397	watch tower
+398	water
+399	weapons display
+400	wear
+401	weather station
+402	weather vane
+403	weight machine
+404	western cliff face
+405	wheel
+406	window
+407	witchdoctor hut
+408	workbench
+409	write on
+410	yellow birdy
+411	grass
+412	bouncing reptile
+413	deep pit
+414	lowlands to north
+415	small bush
+416	small cactus
+417	rocky area to north
+418	bamboo-like plant
+419	mountainside
+420	field
+421	grassy field
+422	crag
+423	huge legs
+424	leaf-covered pit
+425	pile of leaves
+426	open field to east
+427	lawn
+428	walk down
+429	path to west
+430	hedge
+431	village path
+432	path to northeast
+433	jungle path
+434	thick undergrowth
+435	ocean
+436	ocean in distance
+437	strange device
+438	bush
+439	anemometer
+440	island in distance
+441	path
+442	trophy
+443	specimen jars
+444	bowl
+445	large bowl
+446	path to north
+447	hut to north
+448	path to east
+449	chicken on spit
+450	captive creature
+451	twinkifruit bush
+452	stream
+453	opposite shore
+454	path to south
+455	opposite bank
+456	broken ladder
+457	bag of twinkifruits
+458	bed
+459	display
+460	leave
+461	exit from
+462	device
+463	0 key
+464	1 key
+465	2 key
+466	3 key
+467	4 key
+468	5 key
+469	6 key
+470	7 key
+471	8 key
+472	9 key
+473	frown key
+474	smile key
+475	native woman
+476	yellow bird
+477	bleeper
+478	sizemometer
+479	panel
+480	printer
+481	hard drive
+482	bathroom
+483	desk
+484	passageway
+485	fire hydrant
+486	freezer
+487	equidigitizer
+488	vision-view
+489	teledetector
+490	pole
+491	transposition device
+492	statuesque
+493	temperature gauge
+494	check
+495	watch
+496	electro-scanner
+497	hall
+498	scanner
+499	place hand on
+500	security monitor
+501	digitorama
+502	rail beam
+503	vault
+504	hallway
+505	pipes
+506	air vent grate
+507	security office
+508	signal
+509	bleep
+510	blip
+511	loft
+512	electronic ant farm
+513	electric wiring
+514	security panel
+515	corridor
+516	circuit controls
+517	air duct
+518	cell wall
+519	lights
+520	stare into
+521	cell controls
+522	commode
+523	use
+524	basin
+525	jump inside
+526	previous cell
+527	next room
+528	zink
+529	gaze into
+530	throne
+531	sack
+532	limb
+533	sink
+534	johnny-on-the-spot
+535	debris
+536	bunk
+537	next cell
+538	toilet
+539	monitor area
+540	sidewall
+541	coffee mug
+542	sit at
+543	lighting fixture
+544	monitors
+545	gender controls
+546	neuro-analyzer
+547	molecular recorder
+548	maintenance panel
+549	ramp
+550	walk up
+551	subsonic atomizer
+552	eight ball
+553	dna inverter
+554	dna converter
+555	platform
+556	guinea pig test box
+557	gaseous probe warper
+558	tool cabinet
+559	surgical boxes
+560	fetal heart monitor
+561	xray cabinet
+562	sterilization sink
+563	dripolator
+564	shock machine
+565	interrogation table
+566	lie down on
+567	decipher
+568	guard
+569	rip in floor
+570	teleport area
+571	broken beam
+572	rock chunk
+573	bloody cell wall
+574	wall board
+575	gender scanner
+576	bar
+577	walk into
+578	hallway to south
+579	sign
+580	hallway to north
+581	bottles
+582	upper dance floor
+583	dance floor
+584	railing
+585	bar stool
+586	lady
+587	upper level
+588	alcove
+589	disco ball
+590	ladies
+591	coach lamp
+592	card slot
+593	hoop
+594	cannonballs
+595	water fountain
+596	hallway to east
+597	hallway to west
+598	support
+599	backboard
+600	wide door
+601	sign post
+602	fire extinguisher
+603	trash
+604	missiles
+605	tank
+606	two-ton-weight
+607	one-ton tomato
+608	anvil
+609	minuteman iv icbm
+610	chest
+611	armor
+612	carton
+613	powder
+614	raft
+615	whatzit
+616	catapult
+617	hand grenade
+618	barrels
+619	loading ramp
+620	blimp
+621	flour
+622	fly paper
+623	rug
+624	carpet
+625	can
+626	rubber duckie
+627	golf clubs
+628	rat
+629	barrel
+630	bucket of tar
+631	sacks
+632	storage
+633	120v, 3 phase, 400hz
+634	lab equipment
+635	air horn
+636	jar
+637	severed cable
+638	probe assembly
+639	knife switch
+640	work bench
+641	heater
+642	toxic waste
+643	experiment
+644	drawing board
+645	"mishap"
+646	air purifier
+647	dummy
+648	picture
+649	baggage check
+650	departure schedule
+651	shade of pale
+652	itinerary
+653	bargain vat
+654	pencils
+655	pad if paper
+656	deepest depths
+657	rolodex
+658	mona tisa
+659	abstract art
+660	space questing viii
+661	theatrical art
+662	metal pole
+663	exit
+664	swirling light
+665	register
+666	peachy buns
+667	our town
+668	embroidered art
+669	george bush-alike
+670	counter
+671	sensor
+672	software information
+673	walk behind
+674	bargains
+675	scan light
+676	old software stand
+677	software shelf
+678	hottest software
+679	great paintball art
+680	scenic vista
+681	laser
+682	laser jet
+683	lever
+684	bullseye
+685	stand
+686	control station
+687	strange monster
+688	ghastly beast
+689	gawk at
+690	corridor to south
+691	corridor to north
+692	walk onto
+693	rock wall
+694	woman
+695	women
+696	corridor to east
+697	corridor to west
+698	ammunition
+699	armored vehicle
+700	tomato
+701	missile
+702	suit of armor
+703	powder container
+704	inflatable raft
+705	grenade
+706	fence
+707	wooden statue
+708	conveyer belt
+709	controls
+710	equipment
+711	shelf
+712	cabinets
+713	control console
+714	faucet
+715	panel box
+716	statue
+717	gauge
+718	circuit panel
+719	catwalk
+720	circuits
+721	blood stain
+722	grate
+723	air shaft
+724	return to
+725	formaldehyde
+726	petrox
+727	sodium benzoate
+728	gurney
+729	ironing board
+730	left monitor
+731	right monitor
+732	red button
+733	green button
+734	right one key
+735	right 1 key
+736	right 2 key
+737	right 3 key
+738	right 4 key
+739	right 5 key
+740	right 6 key
+741	right 7 key
+742	right 8 key
+743	left 1 key
+744	left 2 key
+745	left 3 key
+746	left 4 key
+747	corridor wall
+748	mug
+749	doughnut
+750	security station
+751	newspaper
+752	magazine
+753	clipboard
+754	paper football
+755	your stuff
+756	other stuff
+757	lamp
+758	climb into
+759	light bulb
+760	step into
+761	room
+762	crawl to
+763	fourth cell
+764	third cell
+765	second cell
+766	first cell
+767	equipment room
+768	crawl down
+769	descending shaft
+770	sauropod
+771	monster
+772	fake id
+773	alien liquor
+774	intern
+775	instrument table
+776	woman on balcony
+777	woman in chair
+778	sit on
+779	woman in alcove
+780	kettle
+781	bartender
+782	whiskey
+783	alcohol
+784	rim
+785	walk along
+786	submerged city
+787	governor's house
+788	rim towards east
+789	cement pylon
+790	elevator
+791	elevator shaft
+792	conveyor belt
+793	cannon balls
+794	electrical overhang
+795	gutter pipe
+796	sidewalk
+797	street
+798	barricade
+799	door control slot
+800	street to east
+801	sidewalk to east
+802	building
+803	car
+804	get inside
+805	marquee
+806	building entrance
+807	guard station
+808	technical equipment
+809	guard turret
+810	pillar
+811	papers
+812	file cabinet
+813	windows
+814	walk
+815	storage box
+816	water cooler
+817	box
+818	rifles
+819	slingshot
+820	mausoleum
+821	software store
+822	concrete building
+823	humongous monitor
+824	space bike
+825	billboard
+826	lack of nookie motel
+827	bidet's xcreetza hut
+828	buildings
+829	skyscraper
+830	software logo
+831	giant telescope
+832	handle
+833	hole
+834	laser beam
+835	pedestal
+836	boat
+837	giant monument
+838	rope
+839	sand bar restaurant
+840	porthole
+841	ticket booth
+842	polly's entrance
+843	restaurant entrance
+844	the pleasure dome
+845	starfish
+846	flipper
+847	sand dollar
+848	shell
+849	guest list
+850	weird animal head
+851	ship's wheel
+852	handicap sign
+853	elevator controls
+854	brick wall
+855	bike rack
+856	o'donald's sign
+857	elevator entrance
+858	special sale sign
+859	attorneys at law
+860	sledge mall
+861	skeleton
+862	strange equipment
+863	street to west
+864	sidewalk to west
+865	teleporter entrance
+866	software door
+867	spinach patch doll
+868	reflect
+869	register drawer
+870	elevator door
+871	hydraulic support
+872	equipment overhead
+873	get into
+874	warning label
+875	nuclear slingshot
+876	display case
+877	photon rifles
+878	monitoring equipment
+879	telescope
+880	motel
+881	restaurant
+882	software store sign
+883	advertising poster
+884	advertisement
+885	old software
+886	cash register
+887	entrance
+888	laser cannon
+889	sand bags
+890	pleasure dome
+891	dome entrance
+892	laboratory
+893	street to south
+894	elevator access slot
+895	car controls
+896	scent packet
+897	kitty
+898	glove compartment
+899	moldy sock
+900	soda cans
+901	windshield
+902	dashboard
+903	interior of car
+904	view right button
+905	black button
+906	white button
+907	inside of car
+908	rim towards west
+909	cement block
+910	city
+911	speaker
+912	eye chart
+913	launch pad
+914	building to west
+915	pad to east
+916	pad to west
+917	tower
+918	look out
+919	service panel
+920	crack
+921	throttle
+922	grab
+923	instrumentation
+924	tp
+925	seat
+926	status panel
+927	ship's controls
+928	professor
+929	professor's gurney
+930	welcome mat
+931	melon mush
+932	badminton brat
+933	apply
+934	combination
+935	note
+936	lecithin
+937	repair woman
+938	explosives
+939	dollop
+940	drop
+941	dash
+942	splash
+943	dock to south
+944	steer towards
+945	building to north
+946	volcano rim
+947	open water to south
+948	projector
+949	guard's arm
+950	nibble on
+951	enter
+952	
+953	timer button 1
+954	remote button 1
+955	start button 2
+956	remote button 2
+957	timer button 2
+958	start button 1
+959	antigrav controls
+960	bruce's tree
+961	coliseum
+962	bruce's garden room
+963	fountain
+964	house of bruce
+965	city backdrop
+966	bruce's balcony
+967	bruce's entrance
+968	bruce's logo
+969	lounge chair
+970	living room floor
+971	livingroom floor
+972	perfume bottle
+973	cool neon light
+974	flower pot
+975	coffee table
+976	flowers
+977	art deco chair
+978	safe
+979	splashy decor
+980	theatrical faces
+981	art deco piece
+982	end of room
+983	fireplace
+984	artwork
+985	cool neon lights
+986	glass plated window
+987	bedroom floor
+988	bauble
+989	snapshot
+990	perfume
+991	clapboard
+992	beret
+993	horse whip
+994	corner table
+995	boa
+996	wig stand
+997	partition
+998	megaphone
+999	slip
+1000	sconce
+1001	vanity
+1002	bedboard
+1003	love seat
+1004	souvenir tickets
+1005	review
+1006	bruce at the gala
+1007	art deco rug
+1008	livingroom
+1009	sculpture
+1010	specimen epithet
+1011	vent
+1012	flower box
+1013	ledge
+1014	bolt
+1015	observation window
+1016	air hose
+1017	auto shop
+1018	manhole
+1019	auto shop entrance
+1020	broken window
+1021	womanhole
+1022	garage door
+1023	scratch pad
+1024	gas prices
+1025	up button
+1026	down button
+1027	spare parts list
+1028	skylight
+1029	tool box
+1030	car lift
+1031	car seat
+1032	garage floor
+1033	garage door controls
+1034	amish hat
+1035	jack
+1036	coils
+1037	oil can
+1038	fan belts
+1039	rear of garage
+1040	front of garage
+1041	muffler
+1042	spare part
+1043	hubcap
+1044	candle
+1045	rates
+1046	grease can
+1047	calendar
+1048	fork lift
+1049	trash can
+1050	shaker chair
+1051	quarter panel
+1052	area behind car
+1053	danger zone
+1054	newsstand
+1055	lady godiva monument
+1056	spot a pot
+1057	guard rail
+1058	alley
+1059	ditch
+1060	video store door
+1061	buckluster marquee
+1062	video store
+1063	hormone billboard
+1064	phone antenna
+1065	return slot
+1066	noose
+1067	comedy videos
+1068	smelly sneaker
+1069	pippy's stocking
+1070	phone cradle
+1071	drama videos
+1072	spotlight
+1073	storeroom floor
+1074	all sales final
+1075	machoprose tee shirt
+1076	unknown comic hands
+1077	wet cement
+1078	pippy's tiny imprint
+1079	obnoxious dog paws
+1080	leg and a leg jeans
+1081	video store exit
+1082	aisle
+1083	video monitor
+1084	polly pig's imprint
+1085	john wynn's imprint
+1086	mr ned's imprint
+1087	peg-leg pete imprint
+1088	marx bros poster
+1089	pippy billboard
+1090	videos noone wants
+1091	more classic videos
+1092	join our price club
+1093	educational videos
+1094	deep discount titles
+1095	world champs poster
+1096	workout videos
+1097	20 percent off sign
+1098	civilization ad
+1099	new release videos
+1100	porno videos
+1101	foreign videos
+1102	classic videos
+1103	adventure videos
+1104	buckluster logo
+1105	wine bottle
+1106	dirt pile
+1107	mammoth pencil head
+1108	wreaky pumpkin
+1109	milk carton
+1110	bucket
+1111	empty box
+1112	diaper box
+1113	hermit
+1114	metal pipe
+1115	concrete support
+1116	various trash
+1117	armature
+1118	control box
+1119	top of dome
+1120	expressway to east
+1121	go towards
+1122	expressway to west
+1123	dome
+1124	view of city
+1125	expressway
+1126	hook
+1127	sea monster
+1128	edge of volcano
+1129	jump through
+1130	old tea cup
+1131	name plate
+1132	old vase
+1133	portrait
+1134	put down
+1135	tall building
+1136	obnoxious dog
+1137	guts
+1138	big heads
+1139	install
+1140	life support module
+1141	remove
+1142	large blade
+1143	side entrance
+1144	indicator
+1145	signpost
+1146	pin
+1147	powder puff
+1148	shelves
+1149	electrodes
+1150	mishap
+1151	isl'd superstructure
+1152	file cabinets
+1153	cycle shop
+1154	air bike
+1155	emergency light
+1156	target area
+1157	ice chests
+1158	birds
+1159	doctor's office
+1160	deface
+1161	large heads
+1162	small table
+1163	collosseum
+1164	house
+1165	balcony
+1166	garden room
+1167	cove lights
+1168	masks
+1169	neon lights
+1170	glass block wall
+1171	screen
+1172	spare ribs
+1173	banner
+1174	instructional videos
+1175	cement
+1176	store
+1177	cardboard box
+1178	graffitti
+1179	graffiti
+1180	photograph
+1181	director's slate
+1182	crop
+1183	hat
+1184	logo
+1185	maintenance building
+1186	massage
+1187	mangle
+1188	rub
+1189	juggle
+1190	smash
+1191	guzzle
+1192	west end of platform
+1193	east end of platform
+1194	fold
+1195	spindle
+1196	mutilate

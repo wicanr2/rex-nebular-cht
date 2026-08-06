@@ -1,0 +1,130 @@
+1	DONE	完成
+2	CANCEL	取消
+3	SAVE	儲存
+4	RESTORE	載入
+5	CLEAR	洗掉
+6	YES	是
+7	NO	否
+8	OK	確定
+9	(Empty)	（空的）
+10	REX NEBULAR GAME MENU	錯體奇航 遊戲功能選單
+11	Save Game	儲存進度
+12	Restore Game	載入進度
+13	Game Play Options	其它功能
+14	Resume Current Game	回到目前的遊戲之中
+15	Exit From Game	回到遊戲主選單
+16	REX NEBULAR GAME OPTIONS MENU	錯體奇航 其它功能
+17	Music is @	音樂開關 @
+18	Sound is @	音效開關 @
+19	Interface is @	操作介面 @
+20	Inventory is @	物品顯示 @
+21	Text Window is @	指令與物品視窗 @
+22	Screen Fade is @	畫面切換 @
+23	Storyline is @	故事線 @
+24	ON	開
+25	OFF	關
+26	ON	開
+27	OFF	關
+28	STANDARD	標準型
+29	EASY	簡易型
+30	SPINNING	旋轉型
+31	STILL	靜止型
+32	ANIMATED	活動型
+33	STILL	靜止型
+34	SMOOTH	平滑型
+35	MEDIUM	中等型
+36	FAST	快速型
+37	NAUGHTY	限制級
+38	NICE	輔導級
+39	DESCRIBE GAME TO BE SAVED	為這個進度取個名字
+40	SELECT GAME TO BE RESTORED	選擇要載入的進度
+41	SELECT A DIFFICULTY LEVEL	選擇難度
+42	Novice - Easy	新手 — 簡單
+43	Advanced - Difficult	進階 — 困難
+44	Expert - Very Difficult	專家 — 非常困難
+45	Save Complete	儲存完成
+46	Restore Complete	載入完成
+47	Save Failed	儲存失敗
+48	Restore Failed	載入失敗
+49	"LOG ON.~	「船長日誌，啟動。~
+50	~LOG OFF."	~船長日誌，結束。」
+51	"Gads!"	「靠！」
+52	"Yikes!"	「唉唷！」
+53	"But that crazy woman is up there!"	「可是那個瘋女人還在上面啊！」
+54	~Geez. What an awful dream!	~唉，做的是什麼衰夢啊！
+55	~I dreamed I was shot down . . .	~夢到自己被人打下來……
+56	~. . . and crashed into the . . . Uh oh!	~……然後一頭撞進……糟了！
+57	"Dang!"	「該死！」
+58	"Ahhhhh . . ."	「啊啊啊……」
+59	"Urgh!	「嗚啊！
+60	"Yag!	「呀！
+61	"Gads!	「靠！
+62	"Uulge!	「嗚咕！
+63	"Gak!	「嘎！
+64	It's alive!"	活了！」
+65	"Hubba hubba!"	「唷呵，辣喔！」
+66	"Get a load of this babe!"	「你看這辣妹！」
+67	"Oh baby!"	「喔耶，正點！」
+68	"Look at those maracas!"	「你看那對沙鈴！」
+69	"Check THIS out!"	「你看看『這個』！」
+70	"Uh oh . . ."	「糟了……」
+71	"Hi, Binky."	「嗨，賓奇。」
+72	"Greetings, Commander Rex."	「你好，雷克斯指揮官。」
+73	"Manual labor!? Me!?"	「粗活？！我？！」
+74	"I already have a dead fish."	「我已經有一條死魚了。」
+75	"I don't want another one."	「不需要再一條了。」
+76	"No thanks."	「不用了，謝謝。」
+77	~Okay, that crazy woman is still up there.	~好吧，那個瘋女人還在上面。
+78	~I'd better keep away from the surface,	~我最好別浮上水面，
+79	~and find another way to dry land.	~另外想辦法上岸。
+80	~I hope I find it soon.  This stupid	~希望快點找到辦法。這個爛
+81	~rebreather is hurting my mouth.	~水中呼吸器咬得我嘴好痛。
+82	"Belch!"	「噯～」
+83	"Burp!"	「嗝～」
+84	"Hic!"	「打嗝！」
+85	"Interesting . . ."	「有意思……」
+86	"Intriguing . . ."	「耐人尋味……」
+87	"Fascinating . . ."	「太神奇了……」
+88	"Hmmmmm . . ."	「嗯……」
+89	"Crabs! Cool!"	「螃蟹！酷喔！」
+90	"Hi! I'm Rex!"	「嗨！我是雷克斯！」
+91	"Hi. I'm Zatox."	「嗨，我是薩托克斯。」
+92	"Peeeeyeew!"	「噁～好臭喔！」
+93	"Bogus odor!"	「這什麼鬼味道！」
+94	"Offensive to my olfactories!"	「有辱我的嗅覺器官！」
+95	"Barf City!"	「噁爆了！」
+96	"El Stinko!"	「臭斃啦！」
+97	"Great view!"	「這風景，讚！」
+98	"Whoops!"	「哎呀！」
+99	"This ladder's had it."	「這梯子已經不行了。」
+100	"All right!"	「讚啦！」
+101	"That's right, go inside . . ."	「對，就是這樣，進去吧……」
+102	"Whoa! Beam me up!"	「哇塞！傳送我離開這裡！」
+103	"I thought I heard something behind . . ."	「我剛剛好像聽到後面有聲音……」
+104	"Something's weird . . ."	「怪怪的……」
+105	"Something's wrong . . ."	「不太對勁……」
+106	"Could someone be following me?"	「該不會有人在跟蹤我吧？」
+107	"That sure looks tasty!"	「看起來真好吃！」
+108	"Bawk!"	「咯！」
+109	"Cluck."	「咕咕。」
+110	"Gluk."	「咕嚕。」
+111	"BWAAAAAAK!"	「咯咯咯咯咯！」
+112	"Hiie-ya!"	「嘿呀！」
+113	"Oof."	「唔。」
+114	"Your kind are not welcome in our village."	「你們這種人，在我們村子不受歡迎。」
+115	"Er, excuse me . . ."	「呃，不好意思……」
+116	"Seen a vase anywhere?"	「你有沒有看到一個花瓶？」
+117	"Wanna buy a used starship?"	「要不要買艘二手太空船？」
+118	"Mind if I borrow that roast chicken?"	「介意我借用一下那隻烤雞嗎？」
+119	"Gotta run. Bye."	「我先閃了，掰。」
+120	"What's a Keeper, anyway?"	「守護者到底是什麼東西啊？」
+121	"Good morning, Keeper."	「早安，守護者。」
+122	"Nice clothes, Keeper."	「衣服不錯喔，守護者。」
+123	"Don't you belong somewhere else?"	「你不是應該在別的地方嗎？」
+124	"No."	「不。」
+125	"Sure, Keeper, take what you want."	「好啊，守護者，你要什麼就拿去吧。」
+126	"You always do."	「反正你每次都這樣。」
+127	"So long, Keeper."	「再會了，守護者。」
+128	"Hey! That's my dinner, Keeper!"	「喂！那是我的晚餐耶，守護者！」
+129	"Now where did that monkey get to?"	「那隻猴子到底跑哪去了？」
+130	"Bawwwwwp!"	「巴嗚嗚嗚～」

@@ -1,0 +1,61 @@
+# 《錯體奇航》繁中化 — Windows x86_64 交叉編譯環境（mingw-w64）
+#
+# 與其他專案的差別：**SDL2 從原始碼交叉編譯**，不用官方預編譯的 SDL2-devel-mingw 包。
+# 理由跟 macOS 那邊不用 brew 是同一個：預編譯包的內容由上游決定，哪天換了東西
+# （macOS 的 sdl2 就被換成 sdl2-compat shim → runtime dlopen libSDL3 → 玩家端黑畫面），
+# 本機完全測不出來。自編是 pinned 的，版本與編譯選項都在自己手上。
+FROM debian:12-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential g++-mingw-w64-x86-64 gcc-mingw-w64-x86-64 \
+    binutils-mingw-w64-x86-64 mingw-w64-tools \
+    make cmake pkg-config git ca-certificates curl xz-utils file zip \
+ && rm -rf /var/lib/apt/lists/*
+
+# posix threading variant：ScummVM 用到 C++11 threading model，win32 variant 缺 std::thread
+RUN update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix \
+ && update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
+
+ARG SDL2_VER=2.30.9
+ARG ZLIB_VER=1.3.1
+ENV MINGW_PREFIX=/usr/x86_64-w64-mingw32
+
+# --- SDL2：從 release tarball 交叉編譯 ---
+# shared + static 都產：ScummVM 走 sdl2-config，動態連結時打包要帶 SDL2.dll。
+RUN curl -fsSL -o /tmp/SDL2.tar.gz \
+      "https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_VER}/SDL2-${SDL2_VER}.tar.gz" \
+ && mkdir -p /tmp/sdl2 && tar xf /tmp/SDL2.tar.gz -C /tmp/sdl2 --strip-components=1 \
+ && cd /tmp/sdl2 \
+ && ./configure --host=x86_64-w64-mingw32 --prefix="${MINGW_PREFIX}" \
+      --disable-video-opengles --disable-oss --disable-alsa --disable-pulseaudio \
+ && make -j"$(nproc)" \
+ && make install \
+ && cd / && rm -rf /tmp/sdl2 /tmp/SDL2.tar.gz
+
+# [HARD] 反查自編結果，別讓「編得過」冒充「編對了」。
+#  - 真 SDL2 的 libSDL2.dll.a 帶得動 SDL_CreateWindow 這類核心符號
+#  - 產物必須是 PE32+ x86-64，不是不小心編成 host 的 ELF
+RUN set -eu; \
+    test -f "${MINGW_PREFIX}/bin/SDL2.dll" || { echo "### SDL2.dll 沒產出 ###"; exit 1; }; \
+    file "${MINGW_PREFIX}/bin/SDL2.dll" | grep -q 'PE32+' \
+      || { echo "### SDL2.dll 不是 PE32+ ###"; file "${MINGW_PREFIX}/bin/SDL2.dll"; exit 1; }; \
+    x86_64-w64-mingw32-nm -g --defined-only "${MINGW_PREFIX}/lib/libSDL2.a" 2>/dev/null \
+      | grep -q 'SDL_CreateWindow' || { echo "### libSDL2.a 缺核心符號 ###"; exit 1; }; \
+    "${MINGW_PREFIX}/bin/sdl2-config" --version | grep -q "${SDL2_VER}" \
+      || { echo "### sdl2-config 版本對不上 ###"; exit 1; }; \
+    echo "SDL2 ${SDL2_VER} 自編驗證通過"
+
+# --- zlib（ScummVM 存檔壓縮用）---
+# zlib.net/fossils 對部分 runner 回 HTTP 415，先走 GitHub release
+RUN curl -fsSL -o /tmp/zlib.tar.gz "https://github.com/madler/zlib/releases/download/v${ZLIB_VER}/zlib-${ZLIB_VER}.tar.gz" \
+      || curl -fsSL -o /tmp/zlib.tar.gz "https://zlib.net/fossils/zlib-${ZLIB_VER}.tar.gz" \
+ && mkdir -p /tmp/zlib && tar xf /tmp/zlib.tar.gz -C /tmp/zlib --strip-components=1 \
+ && cd /tmp/zlib \
+ && CC=x86_64-w64-mingw32-gcc AR=x86_64-w64-mingw32-ar RANLIB=x86_64-w64-mingw32-ranlib \
+    ./configure --prefix="${MINGW_PREFIX}" --static \
+ && make -j"$(nproc)" libz.a \
+ && make install \
+ && cd / && rm -rf /tmp/zlib /tmp/zlib.tar.gz
+
+ENV PATH="${MINGW_PREFIX}/bin:${PATH}"
+WORKDIR /src
