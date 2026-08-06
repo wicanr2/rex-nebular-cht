@@ -37,19 +37,52 @@ ffmpeg -y -loglevel error -f x11grab -framerate 25 -video_size 1024x768 -i :99 \
     -t "$((SECS + 40))" -c:v libx264 -preset ultrafast -qp 0 "$OUT/raw.mkv" &
 FF_PID=$!
 
-sleep 8
-# 主選單 → 開始新遊戲 → 難度
-xdotool mousemove 350 375 2>/dev/null; sleep 1; xdotool click 1
-sleep 4
-xdotool mousemove 512 372 2>/dev/null; sleep 1; xdotool click 1
-sleep 28          # 開場過場（前 30 秒實測是靜音期，音樂在這之後進來）
+sleep 10
+
+# [雷] 只做 mousemove + click 不夠 —— 游標會動，但點擊送不到沒有焦點的視窗，
+# 於是流程整段停在主選單而畫面看起來一切正常（游標還在正確的選項上）。
+# 第一次錄就是這樣，錄了 115 秒全是主選單。先把 ScummVM 視窗啟用起來。
+activate() {
+    local wid
+    wid=$(xdotool search --name "ScummVM" 2>/dev/null | tail -1)
+    if [ -n "$wid" ]; then
+        xdotool windowactivate --sync "$wid" 2>/dev/null
+        xdotool windowfocus "$wid" 2>/dev/null
+    fi
+}
+click_at() {   # $1 x  $2 y
+    activate
+    xdotool mousemove "$1" "$2" 2>/dev/null
+    sleep 1
+    xdotool click --clearmodifiers 1 2>/dev/null
+}
+
+activate
+# [HARD] 驗證流程真的推進了，不要盲送。主選單與遊戲畫面的差異夠大，
+# 用畫面雜湊比對就能判斷 —— 沒變就是點擊沒生效，早點知道比錄完 115 秒才發現好。
+import -window root /tmp/before.png 2>/dev/null
+BEFORE=$(md5sum /tmp/before.png 2>/dev/null | cut -c1-8)
+
+click_at 350 375          # Start a new game
+sleep 5
+click_at 512 372          # 難度選擇
+sleep 6
+
+import -window root /tmp/after.png 2>/dev/null
+AFTER=$(md5sum /tmp/after.png 2>/dev/null | cut -c1-8)
+if [ "$BEFORE" = "$AFTER" ]; then
+    echo "### 點擊後畫面完全沒變（$BEFORE）—— 流程沒推進，還在主選單 ###"
+    kill "$GAME_PID" "$FF_PID" "$XVFB_PID" 2>/dev/null
+    exit 7
+fi
+echo "=== 畫面已從 $BEFORE 變成 $AFTER，流程有推進 ==="
+
+sleep 24          # 開場過場（前 30 秒實測是靜音期，音樂在這之後進來）
 
 # 進遊戲後操作：滑過場景讓狀態列出現中文、點物件觸發音效
 for i in 1 2 3 4 5 6 7 8; do
-    xdotool mousemove $((280 + i * 55)) $((300 + (i % 4) * 45)) 2>/dev/null
-    sleep 2
-    xdotool click 1 2>/dev/null
-    sleep 5
+    click_at $((280 + i * 55)) $((300 + (i % 4) * 45))
+    sleep 6
 done
 
 sleep "$SECS"

@@ -1,0 +1,14 @@
+# 錄影專用環境：在開發環境上加一個能按真實時間跑的音訊伺服器。
+#
+# 為什麼需要：SDL 的 disk audio driver 是「盡快把 mixer 輸出寫檔」，不受真實時間約束——
+# 實測 110 秒的遊玩錄出 397 秒的音訊。拿它跟 x11grab 的畫面合成，音畫差 3.6 倍，
+# 「音效落在該響的那一刻」完全不成立。
+#
+# PulseAudio 的 null sink 沒有實體硬體，但它按真實時間消耗取樣（模擬音效卡的時鐘），
+# 所以 ScummVM 會以正常速度產生音訊，ffmpeg 從 sink 的 monitor 錄，就跟畫面同步了。
+FROM rex-cht:dev
+
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pulseaudio pulseaudio-utils \
+ && rm -rf /var/lib/apt/lists/*
