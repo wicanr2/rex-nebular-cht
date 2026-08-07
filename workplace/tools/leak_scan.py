@@ -22,6 +22,7 @@ import io
 import os
 import re
 import sys
+import tarfile
 import zipfile
 
 CATEGORIES = (
@@ -61,7 +62,14 @@ def names_of(path):
     if zipfile.is_zipfile(path):
         with zipfile.ZipFile(path) as z:
             return z.namelist()
-    sys.exit(f"### 不認得的目標：{path}（要 zip 或目錄）###")
+    # macOS 交付是 .tar.gz 與 .dmg —— 原本只認 zip 與目錄，於是**三平台裡就
+    # macOS 那包從來沒被掃過**，而指令跑起來的樣子是「### 不認得的目標 ###」，
+    # 混在一堆 ✓ 中間很容易被當成用法寫錯而不是覆蓋缺口。
+    if tarfile.is_tarfile(path):
+        with tarfile.open(path) as t:
+            return [m.name for m in t.getmembers() if m.isfile()]
+    sys.exit(f"### 不認得的目標：{path}（要 zip / tar.gz / 目錄）###\n"
+             f"###   .dmg 請先掛載或解開再掃 ###")
 
 
 def report(path, hits):

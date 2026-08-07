@@ -260,3 +260,27 @@ bash tools/build_windows.sh
 > 順帶一個踩過的：把 `build_windows.sh` 整支包進 `docker run rex-mingw` 裡跑，
 > 會因為容器內沒有 docker 而靜靜停在第一個 `docker run` —— **退出碼是 0**，
 > 只是什麼都沒編出來。要驗的是產物存不存在，不是退出碼。
+
+## leak-scan 一直沒掃過 macOS 那包
+
+`leak_scan.py` 原本只認 zip 與目錄。macOS 交付是 `.tar.gz` 與 `.dmg`，
+餵進去會得到：
+
+```
+### 不認得的目標：dist-all/RexNebular-CHT-macos-universal.tar.gz（要 zip 或目錄）###
+```
+
+這行混在一堆 ✓ 中間，讀起來像「我指令打錯了」而不是「這一包沒被檢查」。
+於是三平台裡就 macOS 從來沒過過 leak-scan。
+
+已補上 tarfile 支援，`.dmg` 仍要先解開（訊息裡有寫）。三平台現在一次掃完：
+
+```bash
+python3 tools/leak_scan.py \
+    dist-all/rexnebular-cht-patch.zip \
+    dist-all/rexnebular-cht-win64.zip \
+    dist-all/RexNebular-CHT-macos-universal.tar.gz
+```
+
+通則跟 `apply_patches.sh` 那條同源：**「工具不支援這個輸入」跟「這個輸入沒問題」
+在輸出上要長得不一樣**，而且前者要能讓人一眼看出覆蓋範圍少了一塊。
