@@ -1228,7 +1228,7 @@ index f053855..6ea0626 100644
  
  	if (_loadGameSlot >= 0)
 diff --git a/engines/mads/nebular/menu_nebular.cpp b/engines/mads/nebular/menu_nebular.cpp
-index 4963234..ae31ff9 100644
+index 4963234..0224a0c 100644
 --- a/engines/mads/nebular/menu_nebular.cpp
 +++ b/engines/mads/nebular/menu_nebular.cpp
 @@ -27,6 +27,7 @@
@@ -1274,7 +1274,23 @@ index 4963234..ae31ff9 100644
  		if (_frameIndex == _menuItems[0]->getCount()) {
  			handleAction((MADSGameAction)_selectedIndex);
  		} else {
-@@ -138,6 +153,7 @@ void MainMenu::doFrame() {
+@@ -121,8 +136,14 @@ void MainMenu::doFrame() {
+ 	}
+ 
+ 	// If we've alerady reached the end of the menuitem animation, exit immediately
+-	if (_menuItemIndex == 6)
++	if (_menuItemIndex == 6) {
++		// [CHT] 動畫結束後這裡就不再重畫任何東西了，但中文標籤畫在文字層，
++		// 而文字層的 dirty 清除會在畫面有 dirty 時把它清掉（跟難度選單同一個機制）。
++		// 畫面全靜止時看起來沒事，一有 dirty 就整片消失 —— 同一顆 binary
++		// 在 Linux 下截到中文、在 wine 下截到英文，差別就在有沒有 dirty。
++		redrawChtLabels();
+ 		return;
++	}
+ 
+ 	// If the user has chosen to skip the animation, show the full menu immediately
+ 	if (_skipFlag && _menuItemIndex >= 0) {
+@@ -138,6 +159,7 @@ void MainMenu::doFrame() {
  
  		_vm->_events->showCursor();
  		showBonusItems();
@@ -1282,7 +1298,7 @@ index 4963234..ae31ff9 100644
  	} else {
  		if ((_menuItemIndex == -1) || (_frameIndex == 0)) {
  			if (++_menuItemIndex == 6) {
-@@ -145,6 +161,7 @@ void MainMenu::doFrame() {
+@@ -145,6 +167,7 @@ void MainMenu::doFrame() {
  				// Reached end of display animation
  				_vm->_events->showCursor();
  				showBonusItems();
@@ -1290,7 +1306,7 @@ index 4963234..ae31ff9 100644
  				return;
  			} else if (_menuItemIndex == 4 && !shouldShowQuotes()) {
  				++_menuItemIndex;
-@@ -193,6 +210,95 @@ void MainMenu::showBonusItems() {
+@@ -193,6 +216,101 @@ void MainMenu::showBonusItems() {
  		scene._kernelMessages.add(Common::Point(305, 143), 0x4140, 0, 0, 0, "E");
  }
  
@@ -1343,9 +1359,7 @@ index 4963234..ae31ff9 100644
 +	// `_scene._sprites.clear()` 一起做 —— 而那個 clear() 會 delete 掉
 +	// 陣列裡每一個 SpriteAsset，包含 _menuItems[]。收完再去 getFrame() 就是
 +	// use-after-free：讀回來的 w/h 是 2386x-8892 這種垃圾值，然後 segfault。
-+	struct Label { int x, y; byte color; const Common::String *text; };
-+	Label labels[6];
-+	int count = 0;
++	_chtLabels.clear();
 +
 +	for (int i = 0; i < 6; ++i) {
 +		if (i == 4 && !shouldShowQuotes())
@@ -1361,11 +1375,12 @@ index 4963234..ae31ff9 100644
 +		// 字模 15px 高（640 空間）＝ 320 空間的 7.5，跟選項高度置中對齊
 +		const int y = yTop + (frame0->h - cht->glyphHeight() / MADS_DISPLAY_SCALE) / 2;
 +
-+		labels[count].x = x;
-+		labels[count].y = y;
-+		labels[count].color = chtLabelColor(i);
-+		labels[count].text = tr;
-+		++count;
++		ChtLabel label;
++		label.x = x;
++		label.y = y;
++		label.color = chtLabelColor(i);
++		label.text = *tr;
++		_chtLabels.push_back(label);
 +	}
 +
 +	// 英文選項是 sprite，中文要蓋掉它就得先把它收走 —— 背景是星空，
@@ -1375,22 +1390,29 @@ index 4963234..ae31ff9 100644
 +	scene._spriteSlots.reset(false);
 +	scene._spriteSlots.fullRefresh();
 +
-+	for (int i = 0; i < count; ++i)
-+		cht->drawToLayer(_vm->_screen, labels[i].x, labels[i].y,
-+			*labels[i].text, labels[i].color);
-+
 +	_chtLabelsDrawn = true;
 +	_redrawFlag = true;
++	redrawChtLabels();
++}
++
++void MainMenu::redrawChtLabels() {
++	ChtSupport *cht = _vm->_cht;
++	if (!cht || !cht->enabled() || !_chtLabelsDrawn)
++		return;
++
++	for (uint i = 0; i < _chtLabels.size(); ++i)
++		cht->drawToLayer(_vm->_screen, _chtLabels[i].x, _chtLabels[i].y,
++			_chtLabels[i].text, _chtLabels[i].color);
 +}
 +
  bool MainMenu::onEvent(Common::Event &event) {
  	Scene &scene = _vm->_game->_scene;
  	if (_selectedIndex != -1)
 diff --git a/engines/mads/nebular/menu_nebular.h b/engines/mads/nebular/menu_nebular.h
-index 41c6068..6d43f02 100644
+index 41c6068..c090e13 100644
 --- a/engines/mads/nebular/menu_nebular.h
 +++ b/engines/mads/nebular/menu_nebular.h
-@@ -79,6 +79,24 @@ private:
+@@ -79,6 +79,42 @@ private:
  	 */
  	void handleAction(MADSGameAction action);
  
@@ -1409,8 +1431,26 @@ index 41c6068..6d43f02 100644
 +	 */
 +	byte chtLabelColor(int itemIndex) const;
 +
++	/**
++	 * [CHT] 每幀把中文標籤補畫回文字層。
++	 *
++	 * 為什麼要每幀：文字層的 dirty 清除機制會在畫面有 dirty 時清掉那塊
++	 * （它假設 scene 區的文字每幀重畫）。主選單跑完動畫就停在那裡不再重畫，
++	 * 於是中文被清掉之後沒人補。畫面全靜止時看起來正常，一有 dirty 就整片消失
++	 * —— 同一顆 binary 在 Linux 下截到中文、在 wine 下截到英文，就是這個。
++	 */
++	void redrawChtLabels();
++
 +	/** [CHT] 中文標籤畫過了沒（畫過就不再走 sprite 動畫那條路） */
 +	bool _chtLabelsDrawn;
++
++	/** [CHT] 每一項的座標、字色與譯文，算一次之後每幀重畫都用這份 */
++	struct ChtLabel {
++		int x, y;
++		byte color;
++		Common::String text;
++	};
++	Common::Array<ChtLabel> _chtLabels;
 +
  	/**
  	 * Add a sprite slot for the current menuitem frame

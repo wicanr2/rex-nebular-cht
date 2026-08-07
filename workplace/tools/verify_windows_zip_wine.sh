@@ -41,6 +41,17 @@ timeout 120 wine scummvm.exe --config=scummvm.ini --path=game --auto-detect \
 GAME_PID=$!
 sleep 25
 
+# [HARD] 截主選單之前先大量移動滑鼠製造 dirty。
+# 中文標籤畫在文字層，而文字層的 dirty 清除只在畫面有 dirty 時才會清 ——
+# 「啟動、等、截圖」的靜止流程下，中文被清掉這件事 100% 測不到。
+# 主選單的中文就是這樣在 Linux 靜止截圖下過關、在 wine 下露出英文的。
+for i in 1 2 3 4 5 6 7 8; do
+    xdotool mousemove $((250 + i * 40)) $((360 + (i % 3) * 30)) 2>/dev/null
+    sleep 0.4
+done
+xdotool mousemove 700 600 2>/dev/null
+sleep 2
+
 import -window root "$OUT/win-menu.png" 2>/dev/null || echo "主選單截圖失敗"
 
 # 進遊戲：主選單 → 開始新遊戲 → 難度

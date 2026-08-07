@@ -55,7 +55,7 @@ grep -q 'ChtSupport' engines/mads/font.cpp \
 
 # 但單一 grep 仍是抽查，會漏掉沒被 grep 到的那 21 個檔。
 # 指紋涵蓋 engines/mads/ 底下每一個 .cpp/.h，任何一處沒套到都會對不上。
-EXPECT="${EXPECT_FINGERPRINT:-e6df72ade4f7}"
+EXPECT="${EXPECT_FINGERPRINT:-6166f3f28ce4}"
 if command -v python3 >/dev/null; then
     python3 "$HERE/engine_fingerprint.py" "$DEST" --expect "$EXPECT" \
         || { echo "### 引擎指紋不符 —— patch 套得不完整或上游 drift ###"; exit 6; }
