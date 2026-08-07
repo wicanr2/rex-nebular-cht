@@ -53,6 +53,71 @@ uint16  entryCount
 > 掃描時先做正對照：拿 `QUOTES.DAT` / `VOCAB.DAT` 這種一定存在的資源確認掃描本身有效。
 > 第一次掃回 0 筆，就是靠正對照當場發現是掃描寫錯，不是檔案不存在。
 
+## 音效實際上何時會響：兩條路，別混為一談
+
+「遊戲有沒有音效」在這款要分兩層問，兩層的觸發時機與音量控制**完全不同**：
+
+| | FM 音效 | DSR 數位音效 |
+|---|---|---|
+| 資料 | `asound.001–009`（跟音樂同一份驅動） | `REX009.DSR` 22 筆 |
+| 路徑 | `sound.cpp:45` 的 OPL | `audio.cpp:92` `playSound()` |
+| mixer 類型 | **`kPlainSoundType`** | `kSFXSoundType` |
+| 受什麼控制 | **只受 `mute`**，`music_volume` / `sfx_volume` 都管不到 | `sfx_volume` |
+| 何時響 | 走路、開門、機械聲——一般遊玩隨時 | 只在三個呼叫點：`Scene::playSpeech`、`animation.cpp:578`（動畫的 soundId）、`conversations.cpp:460`（對話語音） |
+
+1992 年的 AdLib 卡**沒有 DAC**，音樂與音效都是 FM 合成——這就是為什麼一般音效跟音樂
+綁在同一條 OPL 路徑上。SB 多的那顆 DAC 專門播數位取樣。
+
+> **[雷] OPL 走 `kPlainSoundType`（`audio/fmopl.cpp:455`）。**
+> 意思是把 `music_volume` 調到 32 對 FM 音樂**完全沒有效果**——我在量測時就是這樣
+> 誤以為「音樂已經壓小了，剩下的響聲一定是音效」。實際上那些響聲就是 FM 本身。
+
+### 實測：三個場合都沒觸發 DSR
+
+用交叉相關（`tools/verify_sfx_match.py`）在錄音裡找 22 筆音效的波形：
+
+| 場合 | 最高相關 | 判定 |
+|---|---|---|
+| 一般遊玩（駕駛艙走動、點物件，100s） | 0.119 | 無 |
+| debugger 嘗試（Ctrl+D 沒開起來） | 0.115 | 無 |
+| 開場動畫 Watch Introduction（110s，全 20 筆樣板） | 0.109 | 無 |
+| **正對照**：把 `sfx-011` 明確混進音樂 | **0.982 @ 30.0s** | ✓ 抓得到 |
+
+正對照證明方法有效（抓得到、不誤報），所以「沒找到」是真的沒播，不是量不到。
+
+結論：**DSR 音效在這三個場合都不會響**，它要等到有語音／對話／帶 `soundId` 的動畫
+才會被觸發。玩家聽到的一般音效全部來自 FM 那條路。
+
+### [雷] 一個設計錯誤的 A/B 實驗
+
+我一開始用「`--sfx-volume=0` vs `255` 各跑一次，比音量差」來驗證音效，得到 **+34.9 dB**，
+看起來很有說服力。但這個實驗有兩個致命問題：
+
+1. **FM 不受 `sfx_volume` 影響**（見上），所以音量差不能歸因給音效。
+2. 兩次執行的流程推進程度**不保證一致**——對照組很可能根本沒進遊戲，
+   而那支腳本沒有畫面驗證。
+
+那個 +34.9 dB 的結論已撤回。交叉相關才是能把「音效的貢獻」與「流程推進程度不同」
+分開的方法。
+
+### 三平台的音效設定
+
+MADS 除了 ScummVM 的音量之外**還有自己的音效開關**（當年手冊裡的「無聲勝有聲」）：
+
+```cpp
+// engines/mads/mads.cpp:120-131 loadOptions()
+if (ConfMan.hasKey("mute") && ConfMan.getBool("mute")) { _soundFlag = false; _musicFlag = false; }
+else { _soundFlag = !ConfMan.hasKey("sfx_mute") || !ConfMan.getBool("sfx_mute"); ... }
+```
+
+而且玩家在遊戲內改設定會寫回 ini（`mads.cpp:163-165`），所以三個 mute 都顯式寫成 `false`：
+
+| 平台 | 做法 |
+|---|---|
+| Windows | 包內 `scummvm.ini` 寫死 |
+| Linux | `AppRun` 首次執行時鋪設定，**已存在就不覆蓋**（不動玩家調過的） |
+| macOS | 不強加。`.app` 雙擊帶不了參數，而動 `Info.plist` 或把 script 塞進 `Contents/MacOS/` 是在破壞平台自己的啟動機制。ScummVM 預設 `sfx_volume=192`（`base/commandLine.cpp:308`）且無 mute，本來就是開的 |
+
 ## [HARD] MT-32 做不到
 
 **別再試了**，三條路全堵，每條都有一手證據：

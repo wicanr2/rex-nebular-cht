@@ -127,6 +127,12 @@ detection table 裡全部登記為英文，設成別的語言反而會讓辨識�
 #         → engines/mads/audio.cpp:92 playSound() → FAB 解壓 → makeRawStream → mixer
 #           資料是 REX009.DSR（22 筆）與 ACT002.DSR（13 筆），封在 HAG 內
 # MADS 沒有 MIDI 路徑，所以 music_driver 除了 adlib 沒有別的有意義的選擇（見 docs/40-packaging.md）。
+# MADS 除了 ScummVM 的音量之外，還有自己的音效開關（當年手冊裡那個「無聲勝有聲」）：
+#   engines/mads/mads.cpp:120-131 loadOptions()
+#     mute=true                 → 音樂與音效全關
+#     否則 _soundFlag = !sfx_mute、_musicFlag = !music_mute
+#   engines/mads/mads.cpp:163-165 saveOptions() 會把玩家在遊戲內的選擇寫回 ini。
+# 三個 mute 顯式寫成 false，玩家在遊戲裡關過再開，也不會留下擋住音效的殘值。
 INI = """[scummvm]
 gui_language=en
 gfx_mode=surfacesdl
@@ -136,6 +142,9 @@ music_driver=adlib
 music_volume=192
 sfx_volume=255
 speech_volume=255
+mute=false
+sfx_mute=false
+music_mute=false
 """
 
 
