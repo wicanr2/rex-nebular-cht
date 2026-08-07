@@ -58,11 +58,19 @@ def parse_messages(data):
         return []
 
     chunk = items[1][2]
+
+    # [HARD] round-trip 式的格式證明：chunk 的長度必須剛好是 count × 96。
+    # 這比「抽出來的字看起來像話」強得多 —— record size 只要差一個 byte，
+    # 第一筆仍會完全正確（第一版寫 100 就是這樣騙過我的），但長度對不上。
+    # 對 50 個檔各驗一次，等於 50 個獨立樣本都同意 96 這個數字。
+    if len(chunk) != count * MSG_RECSIZE:
+        raise ValueError(
+            f"chunk 長度 {len(chunk)} != {count} × {MSG_RECSIZE}"
+            f"（差 {len(chunk) - count * MSG_RECSIZE}）—— record size 算錯了")
+
     out = []
     for i in range(count):
         off = i * MSG_RECSIZE
-        if off + MSG_RECSIZE > len(chunk):
-            break
         rec = chunk[off:off + MSG_RECSIZE]
         raw = rec[2:2 + 64]
         msg = raw.split(b"\x00")[0].decode("latin-1")

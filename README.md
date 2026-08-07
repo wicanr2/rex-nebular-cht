@@ -239,7 +239,7 @@ TTF 縮到這個尺寸筆劃比例會跑掉、複雜字糊成一團。
 
 **Linux**：`RexNebular-CHT-x86_64.AppImage`，`chmod +x` 後直接執行。
 
-**已經有自己編的 ScummVM**：套 `patches/rex-cht-engine.patch`（基準 ScummVM v2.8.0），
+**已經有自己編的 ScummVM**：套 `workplace/patches/rex-cht-engine.patch`（基準 ScummVM v2.8.0），
 再把 `cht-data/` 兩個檔放進遊戲目錄或用 `--extrapath` 指過去。
 
 **中文的開關就是那兩個檔在不在**——移走就變回英文原版，不需要任何設定，

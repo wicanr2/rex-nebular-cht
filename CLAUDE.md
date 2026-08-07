@@ -135,7 +135,7 @@ ProtectionResult GameNebular::checkCopyProtection() {
 
 代價要認：多一層查表、key 要穩定。取捨紀錄寫進 `docs/`，別讓後人以為只是隨手選的。
 
-**[HARD] 先做可逆性證明再動文字**：抽 ①②③④ → 原封不動寫回／重組 → **diff = 0**。這一步沒過，後面全部是沙上建塔。
+**[HARD] 先做可逆性證明再動文字**：抽 ①②③④⑥ → 原封不動寫回／重組 → **diff = 0**。這一步沒過，後面全部是沙上建塔。
 
 ---
 
@@ -409,7 +409,10 @@ README 本體：在地代理史（**這款當年只有中文手冊、沒有中�
 
 1. [ ] 解壓遊戲到 `game/`，`scummvm --list-games` 確認落在哪一筆 detection entry。
 2. [ ] 建 docker image；自編 ScummVM（pristine）跑起來、截一張英文原版圖當對照組。
-3. [ ] 寫抽字工具：`QUOTES.DAT` / `VOCAB.DAT` / `MESSAGES.DAT`（FAB 解壓）/ `CONV*.CNV` → **round-trip diff = 0**。
+3. [ ] 寫抽字工具：`QUOTES.DAT` / `VOCAB.DAT` / `MESSAGES.DAT`（FAB 解壓）/ `*.TXR` /
+   **`*.AA` 動畫內嵌訊息**（六個來源，見 §4.1）→ **round-trip diff = 0**。
+   抽完**不要**直接相信「跑完沒報錯」：拿畫面上看得到的字反過來問「它從哪個來源來」，
+   說不出來的就是還有第七個來源。（`.AA` 那一包就是這樣才被發現的，代價是九個角色名從沒進過翻譯流程。）
 4. [ ] 統計字數（各來源則數）→ 寫進 `docs/00-scope.md`，README 的「N 則對白」由此而來。
 5. [ ] 判讀完整本中文手冊 → `docs/20-glossary.md` 統一譯名表。
 6. [ ] 再跑一輪網路資料蒐集（§6），補 `docs/10-references.md`。
