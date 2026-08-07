@@ -90,7 +90,50 @@ def git_tracked(repo="."):
     return out.stdout.splitlines()
 
 
+def is_appimage(path):
+    """AppImage type 2：ELF 檔頭，第 8–10 個 byte 是 magic `AI\\x02`。"""
+    try:
+        with open(path, "rb") as f:
+            head = f.read(11)
+    except OSError:
+        return False
+    return head[:4] == b"\x7fELF" and head[8:11] == b"AI\x02"
+
+
+def appimage_names(path):
+    """解開 AppImage 列出內容。
+
+    [HARD] 為什麼非支援不可：`RexNebular-CHT-x86_64.AppImage` **內建 56 個遊戲資料檔**
+    （AppRun 直接指 usr/share/rexnebular-game），而同一個 dist-all 裡的其他包都是
+    patch-only。原本這支腳本認不得 AppImage，只回一句「不認得的目標」就 exit 1 ——
+    於是三平台裡唯一含遊戲的那顆，從來沒有被掃過一次，
+    「哪顆能公開、哪顆只能自己留」全靠人記得 package_linux.sh 第一行的註解。
+
+    `--appimage-extract` 只解壓、不執行裡面的程式。
+    """
+    import shutil
+    import subprocess
+    import tempfile
+    tmp = tempfile.mkdtemp(prefix="leakscan-appimg-")
+    try:
+        r = subprocess.run([os.path.abspath(path), "--appimage-extract"],
+                           cwd=tmp, capture_output=True)
+        root = os.path.join(tmp, "squashfs-root")
+        if r.returncode != 0 or not os.path.isdir(root):
+            sys.exit(f"### {path} 是 AppImage 但解不開（rc={r.returncode}）—— 這不是通過 ###")
+        out = []
+        for d, _dirs, fs in os.walk(root):
+            for fn in fs:
+                out.append(os.path.relpath(os.path.join(d, fn), root).replace(os.sep, "/"))
+        return out
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def names_of(path):
+    # AppImage 也是 ELF，所以要排在其他判斷之前 —— zipfile/tarfile 都不會認它。
+    if os.path.isfile(path) and is_appimage(path):
+        return appimage_names(path)
     if os.path.isdir(path):
         out = []
         for d, _dirs, fs in os.walk(path):
