@@ -21,6 +21,8 @@ CACHE="$HERE/pkg/cache"
 # 「每平台留最新一份」的前提是只有一個目錄。
 DIST="$W/dist-all"
 
+TMPD=$(mktemp -d); trap 'rm -rf "$TMPD"' EXIT
+
 BIN="$W/scummvm-src/scummvm"
 [ -x "$BIN" ] || { echo "### 找不到自編的 scummvm，先跑 tools/build.sh ###"; exit 2; }
 [ -d "$APPDIR" ] || { echo "### 找不到 AppDir staging：$APPDIR ###"; exit 2; }
@@ -53,11 +55,48 @@ echo "  ✓ binary ${a:0:12} / 資料 ${c:0:12} / 指紋 $FP 都已更新"
 
 # ---- 2. AppImage ----
 export ARCH=x86_64
+
+# [HARD] 中文資料要放進 usr/share/scummvm/ —— 那是 AppRun 唯一的 extrapath。
+# 公開版的 --path 指到包外面，中文資料就只剩這條路能找到。
+cp "$ROOT/cht-data/rex_cht.tsv" "$ROOT/cht-data/rex_big5.fnt" "$APPDIR/usr/share/scummvm/"
+
+# ---- 2a. 公開版 AppImage：不含遊戲本體 ----
+#
+# 這一顆是拿去發 Release 的。原本只產一顆含遊戲的（package_linux.sh 開頭寫的
+# 「本機測試用」），而它就放在 dist-all 裡跟 patch zip 並排、README 又直接指路它 ——
+# 傳錯一顆就是版權事故。現在兩顆分開產、名字分得開，公開那顆當場掃過。
+PUB="$TMPD/AppDir-public"
+rm -rf "$PUB"; cp -a "$APPDIR" "$PUB"
+find "$PUB/usr/share/rexnebular-game" -type f \
+     \( -iname '*.hag' -o -iname '*.res' -o -iname '?sound.[0-9][0-9][0-9]' \
+        -o -iname 'digital.aga' \) -delete
 "$CACHE/appimagetool-x86_64.AppImage" --appimage-extract-and-run \
     --runtime-file "$CACHE/runtime-x86_64" \
-    "$APPDIR" "$DIST/RexNebular-CHT-x86_64.AppImage" >/dev/null 2>&1
+    "$PUB" "$DIST/RexNebular-CHT-x86_64.AppImage" >/dev/null 2>&1
 chmod +x "$DIST/RexNebular-CHT-x86_64.AppImage"
-echo "  ✓ AppImage $(du -h "$DIST/RexNebular-CHT-x86_64.AppImage" | cut -f1)"
+# [HARD] 反查，而且是掃打包好的那顆，不是掃 staging —— 兩者中間隔著 appimagetool。
+python3 "$HERE/leak_scan.py" "$DIST/RexNebular-CHT-x86_64.AppImage" >/dev/null \
+    || { echo "### 公開版 AppImage 混進版權素材 ###"
+         python3 "$HERE/leak_scan.py" "$DIST/RexNebular-CHT-x86_64.AppImage"; exit 4; }
+echo "  ✓ AppImage（公開版，不含遊戲）$(du -h "$DIST/RexNebular-CHT-x86_64.AppImage" | cut -f1)"
+
+# ---- 2b. 完整版 AppImage：含遊戲，輸出到 repo 之外 ----
+# 同一份 AppDir，差別只在 usr/share/rexnebular-game/ 有沒有那 56 個檔。
+FULLOUT="/home/anr2/scummvm/rexnebular-full-local"
+if [ -f "$APPDIR/usr/share/rexnebular-game/global.hag" ]; then
+    mkdir -p "$FULLOUT"
+    "$CACHE/appimagetool-x86_64.AppImage" --appimage-extract-and-run \
+        --runtime-file "$CACHE/runtime-x86_64" \
+        "$APPDIR" "$FULLOUT/RexNebular-CHT-FULL-x86_64.AppImage" >/dev/null 2>&1
+    chmod +x "$FULLOUT/RexNebular-CHT-FULL-x86_64.AppImage"
+    # 這顆**應該**被 leak_scan 抓到 —— 抓不到才是出事（表示遊戲沒進去）。
+    if python3 "$HERE/leak_scan.py" "$FULLOUT/RexNebular-CHT-FULL-x86_64.AppImage" >/dev/null 2>&1; then
+        echo "### 完整版 AppImage 掃不到遊戲資料 —— 它根本沒含遊戲 ###"; exit 4
+    fi
+    echo "  ✓ AppImage（完整版，含遊戲）$(du -h "$FULLOUT/RexNebular-CHT-FULL-x86_64.AppImage" | cut -f1) → $FULLOUT"
+else
+    echo "  – 跳過完整版（AppDir 裡沒有遊戲資料）"
+fi
 
 # ---- 3. patch zip（公開散布：只有中文資料，不含遊戲本體）----
 rm -f "$DIST/rexnebular-cht-patch.zip"

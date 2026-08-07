@@ -347,7 +347,18 @@ AdLib 輸出，屬 MicroProse 的著作權，不隨這個 repo 散布。
 **macOS**：下載 `RexNebular-CHT-macos-universal.dmg`（arm64 + Intel 通用），
 第一次開啟前先解隔離：`xattr -dr com.apple.quarantine /Applications/ScummVM.app`。
 
-**Linux**：`RexNebular-CHT-x86_64.AppImage`，`chmod +x` 後直接執行。
+**Linux**：`RexNebular-CHT-x86_64.AppImage`，`chmod +x` 後直接執行。遊戲檔放在
+AppImage 旁邊的 `game/` 資料夾：
+
+```
+RexNebular-CHT-x86_64.AppImage
+game/global.hag
+game/section1.hag
+...
+```
+
+或用 `REX_GAME_DIR=/path/to/rexnebular ./RexNebular-CHT-x86_64.AppImage` 指過去。
+找不到遊戲時它會印出該放哪、要放什麼，不會只是靜靜地退出。
 
 **已經有自己編的 ScummVM**：套 `workplace/patches/rex-cht-engine.patch`（基準 ScummVM v2.8.0），
 再把 `cht-data/` 兩個檔放進遊戲目錄或用 `--extrapath` 指過去。
@@ -407,7 +418,7 @@ workplace/
 | `normalize_batch.py` | 半形標點轉全形（**跳過控制碼內部**）、譯名收斂 |
 | `apply_patches.sh` | 取得 pristine ScummVM 並套 patch，收尾比對引擎指紋 |
 | `sync_cht_data.sh` | 把 `cht-data/` 同步到遊戲目錄並反查引擎實際讀到的版本 |
-| `package_linux.sh` | AppImage ＋ patch zip，反查 binary 與資料都真的換過 |
+| `package_linux.sh` | AppImage（公開版／完整版兩顆）＋ patch zip，反查 binary、資料與有沒有混進遊戲 |
 | `verify_anim_cht.sh` | 驗動畫內嵌訊息的替換有沒有發生（讀引擎的 debug 輸出）|
 | `engine_fingerprint.py` | 算 `engines/mads/**` 的指紋，可 `--expect` 比對 |
 | `build_windows.sh` | mingw 交叉編，收尾用 `objdump` 問出該帶哪些 DLL |
