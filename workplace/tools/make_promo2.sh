@@ -104,7 +104,7 @@ fade=t=in:st=0:d=0.5,fade=t=out:st=$FO:d=0.5,format=yuv420p" \
 card       "$TMP/00.png" '錯體奇航' 'Rex Nebular and the Cosmic Gender Bender' 'MicroProse 1992 ・ 繁體中文化'
 dcard      "$TMP/02.png" '夢到自己被人打下來……然後一頭撞進……糟了！' 'I dreamed I was shot down . . . and crashed into the . . . Uh oh!'
 split_ba   "$TMP/04.png" "$SHOT/clean-en.png" "$SHOT/clean-cht.png" '指令表 ・ 物品欄 ・ 對白 全中文'
-statcard   "$TMP/06.png" '這一路上的每一句話' '4556' '則對白與詞條 ・ 2409 字自製點陣字型'
+statcard   "$TMP/06.png" '這一路上的每一句話' '4562' '則對白與詞條 ・ 2409 字自製點陣字型'
 card       "$TMP/99.png" '錯體奇航' 'Rex Nebular and the Cosmic Gender Bender' '繁體中文化 ・ 倚天點陣字 ・ 三平台'
 
 # 靜態卡片的音訊各取一段不重疊的區間，接起來不會聽到同一句重複
