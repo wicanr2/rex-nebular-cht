@@ -159,10 +159,10 @@ index c7cd523..e7741ca 100644
  
 diff --git a/engines/mads/cht.cpp b/engines/mads/cht.cpp
 new file mode 100644
-index 0000000..24e3164
+index 0000000..789674e
 --- /dev/null
 +++ b/engines/mads/cht.cpp
-@@ -0,0 +1,231 @@
+@@ -0,0 +1,295 @@
 +/* ScummVM - Graphic Adventure Engine
 + *
 + * ScummVM is the legal property of its developers, whose names
@@ -188,6 +188,7 @@ index 0000000..24e3164
 +#include "common/textconsole.h"
 +#include "common/debug.h"
 +#include "mads/cht.h"
++#include "mads/screen.h"
 +
 +namespace MADS {
 +
@@ -385,6 +386,69 @@ index 0000000..24e3164
 +	return chtOn && !s.empty() && (byte)s[0] >= 0xA1;
 +}
 +
++int ChtSupport::drawToLayer(Screen *screen, int x320, int y320,
++		const Common::String &text, byte color) const {
++	if (!_enabled || !screen)
++		return x320;
++
++	Graphics::Surface *layer = screen->chtLayer();
++	Graphics::Surface *mask = screen->chtMask();
++	// 文字層是在 Screen 建構之後才配置的。主選單比一般場景早很多，
++	// 沒有這道檢查就會在還沒配置時寫進 null pixels。
++	if (!layer || !mask || !layer->getPixels() || !mask->getPixels()) {
++		debug(2, "[CHT] drawToLayer：文字層尚未配置，略過");
++		return x320;
++	}
++	const int scale = MADS_DISPLAY_SCALE;
++	const int logicalW = _glyphW / scale;      // 一個字在 320 空間佔的寬度
++
++	const char *p = text.c_str();
++	int x = x320;
++	while (*p) {
++		if ((byte)p[0] >= 0xA1 && (byte)p[1] >= 0x40) {
++			const uint16 code = ((byte)p[0] << 8) | (byte)p[1];
++			const byte *g = glyph(code);
++			const int ax = x * scale, ay = y320 * scale;
++
++			if (ax + _glyphW > layer->w)
++				break;                          // 畫不下就停，不要畫出畫面外
++
++			if (g) {
++				// 先清這一格：主選單會重畫，同位置疊字會糊成一團
++				const Common::Rect cell(x, y320, x + logicalW,
++					y320 + (_glyphH + scale - 1) / scale);
++				screen->chtClear(cell);
++				screen->chtTouch(cell);
++
++				for (int row = 0; row < _glyphH; ++row) {
++					const int ly = ay + row;
++					if (ly < 0 || ly >= layer->h)
++						continue;
++					byte *dstP = (byte *)layer->getBasePtr(0, ly);
++					byte *maskP = (byte *)mask->getBasePtr(0, ly);
++					const byte *rowP = g + (size_t)row * _bytesPerRow;
++					for (int col = 0; col < _glyphW; ++col) {
++						const int lx = ax + col;
++						if (lx < 0 || lx >= layer->w)
++							continue;
++						if (rowP[col >> 3] & (0x80 >> (col & 7))) {
++							dstP[lx] = color;
++							maskP[lx] = 1;      // 顏色可能是 0，得靠遮罩才知道有字
++						}
++					}
++				}
++			}
++			x += logicalW;
++			p += 2;
++		} else {
++			// 主選單的譯名理論上全是中文，但 ASCII 混進來時不要當成半個中文字
++			// 而把後面整串吃掉 —— 直接跳過一個位元組。
++			++p;
++		}
++	}
++	return x;
++}
++
 +bool ChtSupport::hasWideChar(const Common::String &s) {
 +	for (uint i = 0; i < s.size(); ++i) {
 +		if ((byte)s[i] >= 0xA1)
@@ -396,10 +460,10 @@ index 0000000..24e3164
 +} // End of namespace MADS
 diff --git a/engines/mads/cht.h b/engines/mads/cht.h
 new file mode 100644
-index 0000000..860d981
+index 0000000..338ce86
 --- /dev/null
 +++ b/engines/mads/cht.h
-@@ -0,0 +1,129 @@
+@@ -0,0 +1,146 @@
 +/* ScummVM - Graphic Adventure Engine
 + *
 + * ScummVM is the legal property of its developers, whose names
@@ -524,6 +588,23 @@ index 0000000..860d981
 +
 +	/** 字串開頭是不是雙位元組字（用來判斷該不該套用英文文法規則） */
 +	static bool big5StartsWide(const Common::String &s, bool chtOn);
++
++	/**
++	 * 把一串 Big5 直接畫進中文文字層 —— 給 baked-art 疊繪用。
++	 *
++	 * 跟 Font::writeString() 的差別：那條路是「遊戲要顯示一段文字」，會走
++	 * 排版度量、行寬限制、字型顏色那一整套；這裡是「我要在畫面某個座標蓋一行中文」，
++	 * 沒有 Font context（主選單的選項是 sprite 美術，不是文字，見 font.h:36）。
++	 *
++	 * 座標用 320 空間（跟 sprite 的 _offset 同一個座標系），內部乘上
++	 * MADS_DISPLAY_SCALE 換算到 640 文字層。字模 1:1 畫，不放大 ——
++	 * 放大 2 倍雖然跟英文選項尺寸相當，但手冊譯名就塞不下了（實測：
++	 * 「由上次離開之處繼續遊戲」11 字，2 倍要 176 單位，那一項只有 136）。
++	 *
++	 * 回傳畫完之後的 x（320 空間），畫不下就在越界前停住。
++	 */
++	int drawToLayer(class Screen *screen, int x320, int y320,
++	                const Common::String &text, byte color) const;
 +};
 +
 +} // End of namespace MADS
@@ -581,7 +662,7 @@ index 1db3604..082019e 100644
  			_currentPos = event.mouse;
  			_mouseMoved = true;
 diff --git a/engines/mads/font.cpp b/engines/mads/font.cpp
-index d141483..5ef32c2 100644
+index d141483..1af6e21 100644
 --- a/engines/mads/font.cpp
 +++ b/engines/mads/font.cpp
 @@ -161,7 +161,7 @@ int Font::writeString(BaseSurface *surface, const Common::String &msg, const Com
@@ -593,7 +674,7 @@ index d141483..5ef32c2 100644
  	if (height == 0)
  		return x;
  
-@@ -175,8 +175,68 @@ int Font::writeString(BaseSurface *surface, const Common::String &msg, const Com
+@@ -175,8 +175,75 @@ int Font::writeString(BaseSurface *surface, const Common::String &msg, const Com
  
  	int xPos = x;
  
@@ -617,6 +698,13 @@ index d141483..5ef32c2 100644
 +				return xPos;
 +
 +			if (g) {
++				// [CHT] 英文是 2bpp 抗鋸齒，一個字用 _fontColors[1..3] 三個色階；
++				// 中文是 1bpp，只能挑一個。原本固定用 [1]，在大多數對話框剛好是
++				// 主體色所以看起來沒事 —— 直到難度選擇畫面：它 resetGamePalette(18,10)
++				// 換過調色盤，[1] 在那裡是暗色，於是**中文有畫、座標也對，就是看不見**
++				// （debug 印得出 21 個字，畫面上一個都沒有）。
++				// 改成挑三色裡最亮的那個，英文主體色是哪一格都跟得上。
++				const byte inkColor = pickInkColor();
 +				// [CHT] 中文不畫進 320 的 surface，而是畫進「放大後」的文字層。
 +				// 畫進 320 再被 Screen::update() 放大的話，16×15 的字會變成 32×30
 +				// 的巨無霸；畫在文字層則是 1:1，尺寸跟放大後的英文相當。
@@ -645,7 +733,7 @@ index d141483..5ef32c2 100644
 +						if (lx < 0 || lx >= layer->w)
 +							continue;
 +						if (rowP[col >> 3] & (0x80 >> (col & 7))) {
-+							dstP[lx] = _fontColors[1];
++							dstP[lx] = inkColor;
 +							maskP[lx] = 1;      // 顏色可能就是 0，得靠遮罩才知道這裡有字
 +						}
 +					}
@@ -662,7 +750,32 @@ index d141483..5ef32c2 100644
  		char theChar = (*text++) & 0x7F;
  		int charWidth = _charWidths[(byte)theChar];
  
-@@ -223,15 +283,33 @@ int Font::getWidth(const Common::String &msg, int spaceWidth) {
+@@ -219,19 +286,58 @@ int Font::writeString(BaseSurface *surface, const Common::String &msg, const Com
+ 	return xPos;
+ }
+ 
++// [CHT] 從目前的字型配色裡挑一個最適合單色中文的顏色。
++// 取亮度最高的非透明色：MADS 的對話框一律是深底亮字，最亮的那格就是主體色。
++byte Font::pickInkColor() const {
++	byte best = _fontColors[1];
++	int bestLum = -1;
++	for (int i = 1; i <= 3; ++i) {
++		const byte c = _fontColors[i];
++		if (c == 0xFF)
++			continue;                       // 0xFF 是透明，不是顏色
++		const byte *rgb = &_vm->_palette->_mainPalette[(int)c * 3];
++		// 亮度用 ITU-R BT.601 的權重，綠色權重最高 —— 這款的對話框字
++		// 常是綠或黃，用平均值會挑錯。
++		const int lum = rgb[0] * 30 + rgb[1] * 59 + rgb[2] * 11;
++		if (lum > bestLum) {
++			bestLum = lum;
++			best = c;
++		}
++	}
++	return best;
++}
++
+ int Font::getWidth(const Common::String &msg, int spaceWidth) {
  	int width = 0;
  	const char *text = msg.c_str();
  
@@ -699,14 +812,21 @@ index d141483..5ef32c2 100644
  	if (charWidth > 12)
  		return 4;
 diff --git a/engines/mads/font.h b/engines/mads/font.h
-index 4ef1c69..489ef78 100644
+index 4ef1c69..f4d3f45 100644
 --- a/engines/mads/font.h
 +++ b/engines/mads/font.h
-@@ -84,7 +84,7 @@ public:
+@@ -84,7 +84,14 @@ public:
  
  	int maxWidth() const { return _maxWidth; }
  	int getWidth(const Common::String &msg, int spaceWidth = -1);
 -	int getHeight() const { return _maxHeight; }
++
++	/**
++	 * [CHT] 單色中文該用哪個顏色。英文是 2bpp、一個字用 _fontColors[1..3]
++	 * 三個色階，中文只能挑一個 —— 取三色裡最亮的，跟著英文的主體色走。
++	 * 原本固定用 [1]，在難度選擇畫面（換過調色盤）那是暗色，中文就此隱形。
++	 */
++	byte pickInkColor() const;
 +	int getHeight() const;   // [CHT] 有中文時回中文字模高，見 font.cpp
  	int writeString(BaseSurface *surface, const Common::String &msg, const Common::Point &pt,
  		int spaceWidth = 0, int width = 0);
@@ -944,7 +1064,7 @@ index 9d80ac3..fd6fcd9 100644
  	conversations.o \
  	debugger.o \
 diff --git a/engines/mads/nebular/dialogs_nebular.cpp b/engines/mads/nebular/dialogs_nebular.cpp
-index 7f7ac80..5ac76a1 100644
+index 7f7ac80..5aa8f11 100644
 --- a/engines/mads/nebular/dialogs_nebular.cpp
 +++ b/engines/mads/nebular/dialogs_nebular.cpp
 @@ -30,6 +30,7 @@
@@ -1067,6 +1187,25 @@ index 7f7ac80..5ac76a1 100644
  		if (ch) {
  			xOffset = (MADS_SCREEN_WIDTH / 2) - font->getWidth(
  				Common::String(msgP, ch), line->_widthAdjust);
+@@ -869,6 +910,18 @@ void GameDialog::show() {
+ 
+ 		_vm->_events->waitForNextFrame();
+ 		_vm->_game->_fx = kTransitionNone;
++
++		// [CHT] 這個迴圈只在 _redrawFlag 時重畫文字（滑鼠移動、選擇時才設），
++		// 但中文是畫在文字層的，而文字層的 dirty 清除機制假設
++		// 「scene 區的文字每幀都會重畫，清了立刻補回來」（見 Screen::update）。
++		// 兩者湊在一起的結果：中文畫一次 → 下一幀背景 dirty 把它清掉 →
++		// 再也沒有人補回來。英文不受影響，因為它畫在 320 的 surface 上。
++		//
++		// 症狀是難度選擇畫面只剩兩個綠框、一個字都沒有，而 debug 印得出
++		// 「畫中文 21 個字、座標正確、字模都在」—— 畫了，然後被清了。
++		// 改成中文模式下每幀重畫。這是對話框，一秒幾十次重畫不構成負擔。
++		if (_vm->_cht && _vm->_cht->enabled())
++			_redrawFlag = true;
+ 	}
+ }
+ 
 diff --git a/engines/mads/nebular/game_nebular.cpp b/engines/mads/nebular/game_nebular.cpp
 index f053855..6ea0626 100644
 --- a/engines/mads/nebular/game_nebular.cpp
@@ -1088,6 +1227,194 @@ index f053855..6ea0626 100644
  	initializeGlobals();
  
  	if (_loadGameSlot >= 0)
+diff --git a/engines/mads/nebular/menu_nebular.cpp b/engines/mads/nebular/menu_nebular.cpp
+index 4963234..ae31ff9 100644
+--- a/engines/mads/nebular/menu_nebular.cpp
++++ b/engines/mads/nebular/menu_nebular.cpp
+@@ -27,6 +27,7 @@
+ #include "mads/resources.h"
+ #include "mads/scene.h"
+ #include "mads/screen.h"
++#include "mads/cht.h"
+ #include "mads/nebular/menu_nebular.h"
+ 
+ namespace MADS {
+@@ -48,6 +49,7 @@ MainMenu::MainMenu(MADSEngine *vm): MenuView(vm) {
+ 	_selectedIndex = -1;
+ 	_buttonDown = false;
+ 	_showEvolve = _showSets = false;
++	_chtLabelsDrawn = false;
+ 
+ 	for (int i = 0; i < 7; ++i)
+ 		_menuItems[i] = nullptr;
+@@ -87,6 +89,13 @@ void MainMenu::display() {
+ 		screenObjects.add(
+ 			Common::Rect(pt.x, pt.y + DIALOG_TOP, pt.x + frame0->w,
+ 			pt.y + frame0->h + DIALOG_TOP), SCREENMODE_VGA, CAT_COMMAND, i);
++
++		// [CHT] 疊中文標籤要知道每一項的真實矩形。不要從截圖目測 ——
++		// 主選單是 sprite 美術，位置由 frame 的 _offset 決定，而 _offset
++		// 是「底部中央」不是左上角（見上面那兩行的換算）。
++		debug(2, "[CHT] 選單項 %d：rect=(%d,%d)-(%d,%d) w=%d h=%d frames=%d",
++			i, pt.x, pt.y + DIALOG_TOP, pt.x + frame0->w, pt.y + frame0->h + DIALOG_TOP,
++			frame0->w, frame0->h, _menuItems[i]->getCount());
+ 	}
+ 
+ 	// Set the cursor for when it's shown
+@@ -102,6 +111,12 @@ void MainMenu::doFrame() {
+ 
+ 	// If an item has already been selected, handle rotating out the other menu items
+ 	if (_selectedIndex != -1) {
++		// [CHT] 中文模式下英文 sprite 在動畫結束時就收掉了，退場動畫沒有素材可以轉，
++		// 硬跑會是一片空白轉半秒。直接執行選到的動作。
++		if (_chtLabelsDrawn) {
++			handleAction((MADSGameAction)_selectedIndex);
++			return;
++		}
+ 		if (_frameIndex == _menuItems[0]->getCount()) {
+ 			handleAction((MADSGameAction)_selectedIndex);
+ 		} else {
+@@ -138,6 +153,7 @@ void MainMenu::doFrame() {
+ 
+ 		_vm->_events->showCursor();
+ 		showBonusItems();
++		drawChtLabels();
+ 	} else {
+ 		if ((_menuItemIndex == -1) || (_frameIndex == 0)) {
+ 			if (++_menuItemIndex == 6) {
+@@ -145,6 +161,7 @@ void MainMenu::doFrame() {
+ 				// Reached end of display animation
+ 				_vm->_events->showCursor();
+ 				showBonusItems();
++				drawChtLabels();
+ 				return;
+ 			} else if (_menuItemIndex == 4 && !shouldShowQuotes()) {
+ 				++_menuItemIndex;
+@@ -193,6 +210,95 @@ void MainMenu::showBonusItems() {
+ 		scene._kernelMessages.add(Common::Point(305, 143), 0x4140, 0, 0, 0, "E");
+ }
+ 
++byte MainMenu::chtLabelColor(int itemIndex) const {
++	MSprite *spr = _menuItems[itemIndex]->getFrame(0);
++	const byte trans = spr->getTransparencyIndex();
++
++	// 取原圖用得最多的非透明色。選項的字是實心色塊加一圈暗邊，
++	// 主體一定壓過描邊，所以「最常出現」就是字色。
++	int hist[256];
++	for (int i = 0; i < 256; ++i)
++		hist[i] = 0;
++
++	const byte *pix = (const byte *)spr->getPixels();
++	if (!pix || spr->w <= 0 || spr->h <= 0) {
++		debug(2, "[CHT] 選單項 %d 沒有像素可取色（pix=%p %dx%d）",
++			itemIndex, (const void *)pix, spr->w, spr->h);
++		return (byte)0xFF;
++	}
++	const int pitch = spr->pitch;
++	for (int y = 0; y < spr->h; ++y) {
++		const byte *p = pix + (size_t)y * pitch;
++		for (int x = 0; x < spr->w; ++x) {
++			if (p[x] != trans)
++				++hist[p[x]];
++		}
++	}
++
++	int best = -1, bestCount = 0;
++	for (int i = 0; i < 256; ++i) {
++		if (hist[i] > bestCount) {
++			bestCount = hist[i];
++			best = i;
++		}
++	}
++	debug(2, "[CHT] 選單項 %d 取色 index=%d（%d 個像素，透明色=%d）",
++		itemIndex, best, bestCount, trans);
++	return (best < 0) ? (byte)0xFF : (byte)best;
++}
++
++void MainMenu::drawChtLabels() {
++	ChtSupport *cht = _vm->_cht;
++	if (!cht || !cht->enabled() || _chtLabelsDrawn)
++		return;
++
++	Scene &scene = _vm->_game->_scene;
++
++	// [雷] 先把每一項要用的東西（座標、字色）算完，**再**收 sprite。
++	// SpriteSlots::reset() 的預設參數是 reset(true)，那會連
++	// `_scene._sprites.clear()` 一起做 —— 而那個 clear() 會 delete 掉
++	// 陣列裡每一個 SpriteAsset，包含 _menuItems[]。收完再去 getFrame() 就是
++	// use-after-free：讀回來的 w/h 是 2386x-8892 這種垃圾值，然後 segfault。
++	struct Label { int x, y; byte color; const Common::String *text; };
++	Label labels[6];
++	int count = 0;
++
++	for (int i = 0; i < 6; ++i) {
++		if (i == 4 && !shouldShowQuotes())
++			continue;
++
++		const Common::String *tr = cht->lookup(Common::String::format("menu:%d", i));
++		if (!tr)
++			continue;                       // 沒譯文就讓那一項留白，不要畫半套
++
++		MSprite *frame0 = _menuItems[i]->getFrame(0);
++		const int x = frame0->_offset.x - (frame0->w / 2);
++		const int yTop = frame0->_offset.y - frame0->h + DIALOG_TOP;
++		// 字模 15px 高（640 空間）＝ 320 空間的 7.5，跟選項高度置中對齊
++		const int y = yTop + (frame0->h - cht->glyphHeight() / MADS_DISPLAY_SCALE) / 2;
++
++		labels[count].x = x;
++		labels[count].y = y;
++		labels[count].color = chtLabelColor(i);
++		labels[count].text = tr;
++		++count;
++	}
++
++	// 英文選項是 sprite，中文要蓋掉它就得先把它收走 —— 背景是星空，
++	// 沒辦法拿一塊純色補上去。收 sprite 之後畫面自然回到背景圖，
++	// 中文再畫到文字層。原本的逐項淡入動畫在這之前已經跑完了。
++	// reset(false)：只清 slots，不要動 _scene._sprites 裡的 asset。
++	scene._spriteSlots.reset(false);
++	scene._spriteSlots.fullRefresh();
++
++	for (int i = 0; i < count; ++i)
++		cht->drawToLayer(_vm->_screen, labels[i].x, labels[i].y,
++			*labels[i].text, labels[i].color);
++
++	_chtLabelsDrawn = true;
++	_redrawFlag = true;
++}
++
+ bool MainMenu::onEvent(Common::Event &event) {
+ 	Scene &scene = _vm->_game->_scene;
+ 	if (_selectedIndex != -1)
+diff --git a/engines/mads/nebular/menu_nebular.h b/engines/mads/nebular/menu_nebular.h
+index 41c6068..6d43f02 100644
+--- a/engines/mads/nebular/menu_nebular.h
++++ b/engines/mads/nebular/menu_nebular.h
+@@ -79,6 +79,24 @@ private:
+ 	 */
+ 	void handleAction(MADSGameAction action);
+ 
++	/**
++	 * [CHT] 主選單的選項是 bitmap 美術不是文字（font.h:36 一手註解），
++	 * 換字型換不到它 —— 中文化等於改圖。這裡走的是「不改原美術」那條路：
++	 * 讓原本的逐項淡入動畫照跑，跑完之後把英文 sprite 收掉，
++	 * 在中文文字層的同一個座標畫上譯名。
++	 */
++	void drawChtLabels();
++
++	/**
++	 * [CHT] 從原 sprite 的像素統計出文字色，而不是自己挑一個索引。
++	 * 主選單的調色盤來自 RM990.ART，猜一個值等於賭它剛好是黃的；
++	 * 取原圖用得最多的非透明色，換調色盤也不會錯。
++	 */
++	byte chtLabelColor(int itemIndex) const;
++
++	/** [CHT] 中文標籤畫過了沒（畫過就不再走 sprite 動畫那條路） */
++	bool _chtLabelsDrawn;
++
+ 	/**
+ 	 * Add a sprite slot for the current menuitem frame
+ 	 */
 diff --git a/engines/mads/scene.cpp b/engines/mads/scene.cpp
 index 491a791..a91eeb4 100644
 --- a/engines/mads/scene.cpp

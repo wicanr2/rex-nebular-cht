@@ -4555,3 +4555,10 @@ anim:RM975A.AA.0	「什麼星球！？我聽不懂你在說什麼！」
 anim:RM975A.AA.1	「所以可以麻煩別再開火了嗎？我這就走！」
 anim:RM976A.AA.0	「武器鎖定完成，長官。」
 anim:RM976A.AA.1	「很好。結束吧。」
+# --- menu: 主選單選項（baked-art 疊繪，譯名見 docs/20-glossary.md §7）---
+menu:0	開始一個全新的遊戲
+menu:1	由上次離開之處繼續遊戲
+menu:2	觀賞動畫開幕篇
+menu:3	遊戲製作小組一覽
+menu:4	名句集錦
+menu:5	離開遊戲

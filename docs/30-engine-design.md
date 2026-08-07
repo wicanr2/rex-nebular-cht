@@ -380,3 +380,68 @@ v1 先照 `docs/20-glossary.md` 的介係詞對照直譯（用／到／向／從
 2. 只換字型、不換文字：畫面應該完全沒變（證明 `Font` 改動沒破壞英文路徑）
 3. 只翻 VOCAB：指令列變中文、對白仍英文（證明替換表接得上、排版寬度算得對）
 4. 全量翻譯 → 全場景截圖驗收（含限制級／輔導級兩套）
+
+---
+
+## 8. 主選單：baked-art 疊繪
+
+`font.h:36` 有一行原作者的註解：
+
+```cpp
+FONT_MENU "*FONTMENU.FF"  // Not in Rex (uses bitmap files for menu strings)
+```
+
+主選單的每個選項是一張 sprite（`RM990A1.SS`～`RM990A7.SS`，各 14 幀做淡入動畫），
+不是文字。換字型換不到它。
+
+### 做法：動畫照跑，結束後換中文
+
+`MainMenu::doFrame()` 的動畫結束點（`_menuItemIndex == 6`，`showBonusItems()` 之後）
+呼叫 `drawChtLabels()`：收掉英文 sprite，在文字層的同一組座標畫譯名。
+
+座標不能從截圖目測 —— sprite 的 `_offset` 是**底部中央**不是左上角：
+
+```cpp
+Common::Point pt(frame0->_offset.x - (frame0->w / 2), frame0->_offset.y - frame0->h);
+```
+
+實測六項的矩形（320 空間）：
+
+| # | 動作 | rect | w×h | 譯名 | 1倍寬 |
+|---|---|---|---|---|---|
+| 0 | START_GAME | (12,88) | 128×16 | 開始一個全新的遊戲 | 72 |
+| 1 | RESUME_GAME | (12,106) | 136×17 | 由上次離開之處繼續遊戲 | 88 |
+| 2 | SHOW_INTRO | (13,125) | 143×16 | 觀賞動畫開幕篇 | 56 |
+| 3 | CREDITS | (183,94) | 51×16 | 遊戲製作小組一覽 | 64 |
+| 4 | QUOTES | (245,95) | 50×18 | 名句集錦 | 32 |
+| 5 | EXIT | (184,117) | 29×15 | 離開遊戲 | 32 |
+
+1 倍字級（每字 8 單位）手冊譯名幾乎全放得下；3 和 5 略超出，往右都是背景，不撞東西。
+若改用 2 倍字級（跟英文選項等高，每字 16 單位）就全部塞不下 —— 這是「字級」與
+「能不能照手冊」的直接取捨。
+
+點擊範圍是 `display()` 註冊在 `screenObjects` 的，跟 sprite 在不在無關，收掉照樣點得動。
+
+### 字色從原圖統計，不要挑索引
+
+主選單會 `resetGamePalette()` 換調色盤，寫死一個索引等於賭它在那張盤裡剛好是黃的。
+`MainMenu::chtLabelColor()` 掃 frame 0 的像素，取出現最多的非透明色 ——
+五個選項一致回報 index 236。
+
+### [雷·必看] `SpriteSlots::reset()` 會 delete 掉 SpriteAsset
+
+```cpp
+void SpriteSlots::reset(bool flag) {      // ← 宣告是 reset(bool flag = true)
+	_vm->_game->_scene._textDisplay.reset();
+	if (flag)
+		_vm->_game->_scene._sprites.clear();   // ← 這個 clear() 會 delete 每一個 asset
+	...
+}
+```
+
+第一版寫 `scene._spriteSlots.reset()` 就收 sprite，然後才去 `getFrame(0)` 取座標和字色 ——
+那時 `_menuItems[]` 已經全是懸空指標。讀回來的尺寸是 `2386x-8892`、`-6176x8972`
+這種值，然後 segfault。
+
+兩件事都要做：**用 `reset(false)`**，而且**先把座標與字色算完再收**。
+垃圾 w/h 是很好的線索 —— 看到不可能的尺寸就該想到物件已經被釋放，不要去懷疑解碼邏輯。

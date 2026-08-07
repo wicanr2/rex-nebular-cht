@@ -90,6 +90,16 @@ FONT_MENU "*FONTMENU.FF"  // font.h:36 註解：Not in Rex (uses bitmap files fo
 
 - `.FF` 是 MadsPack 壓縮的 **2bpp 抗鋸齒比例字**（`_fontColors[4]`，每 2 bit 一個像素索引），比 SCUMM 的 1bpp 點陣講究。
 - **[HARD] 主選單文字是 bitmap 美術**（font.h 一手註解）→ 主選單中文化 = **改圖**，不是換字型。歸類到 baked-art，工作量與對白翻譯無關，排期要分開算。
+  - **[已完成 2026-08-07]** 走的是「不動原美術」：7 個 sprite（`RM990A1–A7.SS`，各 14 幀）
+    的淡入動畫照跑，跑完在 `MainMenu::doFrame()` 收掉 sprite，改在文字層畫譯名
+    （`ChtSupport::drawToLayer`，key `menu:0`–`menu:5`）。點擊範圍是 `display()`
+    註冊在 `screenObjects` 的，跟 sprite 在不在無關，收掉照樣點得動。
+  - **字色從原圖統計，不要自己挑索引**：主選單會 `resetGamePalette()` 換調色盤，
+    挑一個常數等於賭它在那張盤裡剛好是黃的。取原 sprite 用最多的非透明色（實測五項一致 index 236）。
+  - **[雷] `SpriteSlots::reset()` 預設是 `reset(true)`**，會連 `_scene._sprites.clear()`
+    一起做 —— 那會 `delete` 掉每個 `SpriteAsset`（含 `_menuItems[]`）。收完再 `getFrame()`
+    就是 use-after-free：w/h 讀回 `2386x-8892` 然後 segfault。要 `reset(false)`，
+    而且**先把座標與字色算完再收**。
 - 中文字**不要塞進 `.FF`**：`.FF` 結構被 128 格上限鎖死。正解是另開一份 Big5 點陣字庫（`rex_big5.fnt`），走獨立繪字路徑。
 
 ### 4.3 畫布 320×200 → [HARD] 拉畫布，不縮字
@@ -395,6 +405,19 @@ README 本體：在地代理史（**這款當年只有中文手冊、沒有中�
   結果整段防護拆光它照樣說沒問題，因為同函式裡 `const bool chtOn = ...` 還在。
   修法：`ChtSupport` 的 `big5Strchr`／`big5ToUppercase`／`big5ToLowercase`／
   `big5CapitalizeFirst`／`big5EndsWithChar`。詳見 `docs/30-engine-design.md`。
+- [HARD] **中文「沒顯示」要先分辨『沒畫』還是『畫了看不見』**，別急著查字型或譯文。
+  在繪字迴圈加一行 debug 印出「code / 座標 / 顏色 / 字模有沒有」，一跑就分岔：
+  - **沒畫** → 查譯文 key、字型缺字、繪字條件。
+  - **畫了看不見** → 兩個已知原因：
+    1. **顏色**：中文是 1bpp 只能挑一色，英文是 2bpp 用 `_fontColors[1..3]` 三色階。
+       原本固定用 `[1]`，在難度選擇畫面（`resetGamePalette(18,10)` 換過盤）那是暗色。
+       修法 `Font::pickInkColor()`：取三色裡亮度最高的（BT.601 權重，這款字常是綠或黃，
+       用平均值會挑錯）。
+    2. **被清掉**：文字層的 dirty 清除假設「scene 區的文字每幀重畫」。那對遊戲對白成立，
+       對 `GameDialog`（全螢幕對話框，只在 `_redrawFlag` 時重畫）不成立 ——
+       畫一次、下一幀被背景 dirty 清掉、再也沒人補回來。修法：中文啟用時該迴圈每幀重畫。
+  **診斷關鍵是數量**：難度畫面印出「21 個字」，剛好等於標題+三個選項的字數總和 ——
+  「剛好一輪」就說明它只畫了一次，問題在保存不在繪製。
 - [HARD] 引擎行為斷言以**原始碼／實機當 oracle**，不憑記憶（本檔每條技術事實都附了檔名行號，新增條目照辦）。
 - [HARD] 包驗收要**同時**比中文資料 md5 **與引擎指紋**。
 - [HARD] configure 偵測不到函式庫只會**安靜關掉選項**，收尾要反查 `config.mk`。
