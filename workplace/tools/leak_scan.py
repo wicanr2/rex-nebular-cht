@@ -43,8 +43,20 @@ CATEGORIES = (
         r"(^|/)(std|spc)font\.\d+$|(^|/)std\.\d+[a-z]$|\.(24[a-z]|1[56])$", re.I)),
 )
 
-# ScummVM 自己的 GPL 素材，長得像遊戲資料但不是
-ALLOW = re.compile(r"(^|/)themes/[^/]+\.(zip|dat)$|(^|/)(fonts|encoding)\.dat$", re.I)
+# ScummVM 自己的 GPL 素材，長得像遊戲資料但不是。
+#
+# [雷] `COPYING.MKV` 是 ScummVM 帶的授權書（Matroska 的 BSD 條款，純文字），
+# 加進 mkv 黑名單的當下它就變成誤報 —— 三個包裡只有 macOS 那包帶了完整的
+# COPYING 系列，所以分開掃時看不出來，一起掃才冒出來。
+# 誤報比漏報更容易讓人開始無視紅字，所以整個 COPYING* / COPYING-* 系列一併放行：
+# 那是一堆授權書，副檔名是授權種類（.LGPL/.OFL/.BSD/.MKV/.TINYGL…）不是格式。
+# [雷2] 放行段第一版寫成 `COPYING([.-][^/]*)?$`，`[^/]*` 貪婪吃到底 ——
+# `promo/COPYING-but-actually.mkv` 也被放行了。放行規則寫寬的代價跟黑名單漏一項一樣，
+# 只是方向相反，而且更難察覺（它讓紅字消失，看起來像修好了）。
+# 收成「COPYING + 單一段授權種類名」：後綴只能是一段英數，接不出第二個點。
+ALLOW = re.compile(
+    r"(^|/)themes/[^/]+\.(zip|dat)$|(^|/)(fonts|encoding)\.dat$"
+    r"|(^|/)COPYING([.-][A-Za-z0-9]+)?$", re.I)
 
 
 def scan(names):
@@ -124,6 +136,8 @@ def self_test():
         z.writestr("themes/scummmodern.zip", b"x")     # 放行項，不該被抓
         z.writestr("cht-data/rex_cht.tsv", b"x")       # 放行項
         z.writestr("cht-data/rex_big5.fnt", b"x")      # 放行項：只含用到的字，是衍生物
+        z.writestr("Resources/COPYING.MKV", b"x")      # 放行項：授權書，不是影片
+        z.writestr("Resources/COPYING-FREEFONT", b"x") # 放行項：同上，連字號那型
     buf.seek(0)
     with zipfile.ZipFile(buf) as z:
         hits = scan(z.namelist())
@@ -137,7 +151,8 @@ def self_test():
             ok = False
     # 反向：放行項不該被誤報
     flat = [n for v in hits.values() for n in v]
-    for good in ("themes/scummmodern.zip", "cht-data/rex_cht.tsv", "cht-data/rex_big5.fnt"):
+    for good in ("themes/scummmodern.zip", "cht-data/rex_cht.tsv", "cht-data/rex_big5.fnt",
+                 "Resources/COPYING.MKV", "Resources/COPYING-FREEFONT"):
         if good in flat:
             print(f"  ✗ 誤報放行項：{good}")
             ok = False
