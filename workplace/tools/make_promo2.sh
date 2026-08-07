@@ -26,7 +26,7 @@ FB=/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc
 FR=/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc
 W=1280; H=720; FPS=25
 SHOT=/w/out; OUT=/w/out/promo; TMP=/tmp/promo2
-GP="${GP:-/w/out/gp-final}"
+GP="${GP:-/w/out/gp-v3}"
 mkdir -p "$OUT" "$TMP"
 
 [ -s "$GP/raw.mkv" ] || { echo "### 沒有遊玩錄影，先跑 tools/record_gameplay_sync.sh ###"; exit 2; }
@@ -100,6 +100,26 @@ fade=t=in:st=0:d=0.5,fade=t=out:st=$FO:d=0.5,format=yuv420p" \
     -c:a aac -b:a 192k -ar 44100 -ac 2 "$3"
 }
 
+# 無聲畫面：畫面取錄影的某一段，音訊取另一段。
+#
+# [HARD] 只用在「原本就沒有音效事件」的畫面。這款的主選單整段是靜音的
+# （實測逐 2 秒掃描：24 秒以前一律 -91 dB，音樂要進遊戲才進來），
+# 拿 gameplay() 裁出來就是 6 秒無聲。而主選單沒有任何音效要對齊，
+# 借一段音樂不會讓「音效落在該響的那一刻」這件事失效。
+# 有音效的片段一律走 gameplay()，不要為了省事改用這支。
+silent_scene() { # $1 畫面起點  $2 長度  $3 out  $4 字幕  $5 音訊起點
+  local FO; FO=$(awk "BEGIN{print $2-0.5}")
+  ffmpeg -y -loglevel error -ss "$1" -t "$2" -i "$GP/raw.mkv" -ss "$5" -i "$GP/raw.mkv" \
+    -vf "crop=640:400:192:180,scale=1152:720:flags=neighbor,pad=${W}:${H}:64:0:black,\
+drawbox=y=ih-92:w=iw:h=92:color=black@0.72:t=fill,\
+drawtext=fontfile=$FR:text='$4':fontcolor=#d1dae3:fontsize=32:x=(w-text_w)/2:y=h-62,\
+fade=t=in:st=0:d=0.5,fade=t=out:st=$FO:d=0.5,format=yuv420p" \
+    -af "aformat=sample_rates=44100:channel_layouts=stereo,volume=0.85" \
+    -map 0:v -map 1:a -t "$2" \
+    -r $FPS -threads 2 -c:v libx264 -preset veryfast -pix_fmt yuv420p \
+    -c:a aac -b:a 192k -ar 44100 -ac 2 "$3"
+}
+
 # ===== 分鏡 =====
 card       "$TMP/00.png" '錯體奇航' 'Rex Nebular and the Cosmic Gender Bender' 'MicroProse 1992 ・ 繁體中文化'
 dcard      "$TMP/02.png" '夢到自己被人打下來……然後一頭撞進……糟了！' 'I dreamed I was shot down . . . and crashed into the . . . Uh oh!'
@@ -107,18 +127,20 @@ split_ba   "$TMP/04.png" "$SHOT/clean-en.png" "$SHOT/clean-cht.png" '指令表 �
 statcard   "$TMP/06.png" '這一路上的每一句話' '4562' '則對白與詞條 ・ 2409 字自製點陣字型'
 card       "$TMP/99.png" '錯體奇航' 'Rex Nebular and the Cosmic Gender Bender' '繁體中文化 ・ 倚天點陣字 ・ 三平台'
 
-# 靜態卡片的音訊各取一段不重疊的區間，接起來不會聽到同一句重複
-clip     "$TMP/00.png" "$TMP/c00.mp4" 6 40
-gameplay 58  8 "$TMP/c01.mp4" '太空打撈員雷克斯・尼布勒，船沉在一顆只剩女人的星球上'
-clip     "$TMP/02.png" "$TMP/c02.mp4" 5 66
-gameplay 72  7 "$TMP/c03.mp4" '指令表、物品欄、旁白，全部翻成繁體中文'
-clip     "$TMP/04.png" "$TMP/c04.mp4" 5 79
-gameplay 88  6 "$TMP/c05.mp4" '聲音是原版 Sound Blaster：FM 音樂配上數位音效'
-clip     "$TMP/06.png" "$TMP/c06.mp4" 5 94
-clip     "$TMP/99.png" "$TMP/c99.mp4" 6 99
+# 靜態卡片的音訊各取一段不重疊的區間，接起來不會聽到同一句重複。
+# 遊玩片段的畫面與音訊同源，區間也跟靜態卡片的取音區間錯開。
+clip          "$TMP/00.png" "$TMP/c00.mp4" 6 40
+silent_scene  11.5 6 "$TMP/c01.mp4" '主選單也是中文——這幾個選項原本是圖，不是字' 46
+clip          "$TMP/02.png" "$TMP/c02.mp4" 5 52
+gameplay      30  8 "$TMP/c03.mp4" '太空打撈員雷克斯・尼布勒，船沉在一顆只剩女人的星球上'
+clip          "$TMP/04.png" "$TMP/c04.mp4" 5 60
+gameplay      65  7 "$TMP/c05.mp4" '指令表、物品欄、旁白，全部翻成繁體中文'
+clip          "$TMP/06.png" "$TMP/c06.mp4" 5 80
+gameplay      102 6 "$TMP/c07.mp4" '聲音是原版 Sound Blaster：FM 音樂配上數位音效'
+clip          "$TMP/99.png" "$TMP/c99.mp4" 6 112
 
 LIST="$TMP/list.txt"; : > "$LIST"
-for f in c00 c01 c02 c03 c04 c05 c06 c99; do echo "file '$TMP/$f.mp4'" >> "$LIST"; done
+for f in c00 c01 c02 c03 c04 c05 c06 c07 c99; do echo "file '$TMP/$f.mp4'" >> "$LIST"; done
 
 # 每個片段都自帶音訊（遊玩片段是它自己那一刻的聲音），concat 直接接起來。
 # 不再事後蓋一層背景音樂 —— 那會把好不容易對齊的音效壓掉。

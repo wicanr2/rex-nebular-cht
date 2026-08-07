@@ -75,7 +75,20 @@ activate
 import -window root /tmp/before.png 2>/dev/null
 BEFORE=$(md5sum /tmp/before.png 2>/dev/null | cut -c1-8)
 
-click_at 350 375          # Start a new game
+# --- 主選單停留：掃過各選項，順便製造 dirty ---
+# 主選單的中文是 baked-art 疊繪（英文選項是 sprite 美術，收掉之後在文字層畫譯名），
+# 而文字層由 dirty 清除機制管理。**「啟動、等、截圖」的靜止流程 100% 測不到它會不會被清掉**
+# —— 沒有 dirty 就不會清。所以這段一定要動滑鼠，它同時是錄影素材與 baked-art 的實測。
+# 座標：遊戲畫面 640x400 位在 1024x768 的 +192+180，左欄 x≈100、右欄 x≈440（遊戲座標）。
+echo "=== 主選單停留：掃過各選項（製造 dirty）==="
+activate
+for pt in "292 370" "292 408" "292 445" "632 383" "632 423" "292 408" "292 370"; do
+    xdotool mousemove $pt 2>/dev/null; sleep 1.2
+done
+import -window root "$OUT/menu.png" 2>/dev/null
+echo "  主選單截圖：$OUT/menu.png（要自己看過，確認是中文不是英文）"
+
+click_at 350 375          # 開始一個全新的遊戲
 sleep 5
 click_at 512 372          # 難度
 sleep 6
