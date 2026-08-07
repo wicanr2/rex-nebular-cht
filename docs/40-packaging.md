@@ -226,6 +226,36 @@ ld: unknown options: -force_cpusubtype_ALL
 `attract/`、`anim/`、`animverify/` 八個目錄，**全部漏掉**。
 真的要讓某個檔進版控，用 `!` 開明確例外，讓它在 diff 裡顯眼。
 
+## 四個含原版配樂的遊玩錄影曾在公開 repo（已移除）
+
+上面那個「維持現狀」的決定範圍是英文原文與截圖。**影片是另一回事** ——
+`gameplay/raw.mkv`、`gameplay2/raw.mkv`、`gp-sync/raw.mkv`、`gp-sync/fixed.mkv`
+四個檔（約 96 MB，含原版 AdLib 配樂）從 `b23c3a4` 起就在公開 repo 裡，
+那直接違反 CLAUDE.md §16。2026-08-07 用 `git filter-repo --invert-paths` 從全部 25 個
+commit 抹掉，force push 覆蓋 `origin/main`。改寫前的完整歷史留了一份 bundle 在
+`~/scummvm/rexnebular-history-backup-2da7697.bundle`（repo 之外）。
+
+**兩個檢查同時失效才會漏成這樣**，兩個都值得記：
+
+1. `leak_scan.py` 的影片副檔名黑名單是 `wav|raw|mp4|ogg|mp3|flac`，**沒有 `mkv`** ——
+   而 x11grab + PulseAudio 錄出來的容器正是 mkv。副檔名黑名單的通病是漏一個就是一個洞，
+   而洞的形狀跟「通過」長得一模一樣。現在補上 `mkv|mov|avi|webm|ogv|m4a|aac`，
+   `--self-test` 也加了一筆 `.mkv` 樣本。
+2. **`.gitignore` 對已追蹤的檔案完全無效。** 上一節那次改成整個目錄 ignore 之後，
+   我用 `git check-ignore` 做了正對照、通過了 —— 但 `check-ignore` 回答的是
+   「**新**檔會不會被忽略」，不是「**現在**追蹤了什麼」。先 commit 再補 ignore 的檔案
+   會安安靜靜留在版控裡，而正對照照樣是綠的。
+
+所以新增了 `leak_scan.py --git [repo]`：掃 `git ls-files` 的輸出。這是唯一能回答
+「公開 repo 裡現在有什麼」的檢查，收工前跑它，不要只跑掃包的那個模式。
+
+> **已知殘留（使用者 2026-08-07 決定接受）**：force push 只是讓舊物件失去 ref，
+> GitHub 要等內部 GC 才真正清掉，沒有保證時間。實測 `gh api` 打舊 commit `e0ebf6d`
+> 與那個 29 MB blob（`49de86c`）**都還回得出來**。要立即生效只有兩條路：刪 repo 重建，
+> 或開票請 GitHub Support 清 unreachable objects。這個 repo 0 fork、0 star、
+> 建立才一天，且網頁上翻不到那些物件，使用者評估後決定不做進一步處理。
+> 寫下來同樣是為了讓它有結論，不要下一輪盤點又被當成待修問題提一遍。
+
 ## 「檢查工具不在」跟「檢查通過」長得幾乎一樣
 
 `apply_patches.sh` 收尾會比對引擎指紋，但原本寫的是：
