@@ -51,6 +51,24 @@ class Utf8ZipInfo(zipfile.ZipInfo):
 
 **這個問題是防呆腳本抓到的**，不是我事先想到的——寫完檢查、跑一次，它就叫了。
 
+### 旗標有兩處，要各驗一次
+
+zip 的每個檔案有**兩份** general purpose flag：central directory 一份、
+local file header 一份。`zipfile` 的 `flag_bits` 讀的是 central directory，
+有些打包工具只設其中一處，而各家解壓工具讀哪一處並不一致。
+
+實測本包 14 個 entry，兩處都是 `0x0800`（bit 11 ON），檔名全 ASCII。
+
+> **[雷] 定位 local header 要用 central directory 記錄的 `header_offset`，
+> 不要暴力搜尋 `PK\x03\x04`。** `themes/*.zip` 與 `fonts.dat` 本身就是 zip，
+> 存進外層後內部仍保留那個特徵——暴力搜尋會掃到巢狀內容，誤報 37 筆
+> 「`Geneva.bin` / `icons/*.png` / `FreeMono.ttf` 沒開旗標」，
+> 而那些檔案根本不在我們的包裡。第一次驗證就是這樣誤判的。
+
+`check_windows_zip.py --self-test` 因此有兩輪正對照：一輪餵六條全違反的包，
+一輪餵「central directory 有旗標、local file header 沒有」的包（後者要手工改 bytes，
+`zipfile` 造不出來）。只驗 `flag_bits` 的檢查會完全放行第二種。
+
 ## Windows：mingw runtime 不是系統 DLL
 
 mingw 編出來的 exe 預設動態連結 `libwinpthread-1.dll` / `libgcc_s_seh-1.dll` /

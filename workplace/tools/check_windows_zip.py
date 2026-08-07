@@ -12,7 +12,10 @@
     check_windows_zip.py --self-test  驗這支檢查本身
 """
 import io
+import os
+import struct
 import sys
+import tempfile
 import zipfile
 
 RULES = (
@@ -35,11 +38,34 @@ def check(zf):
     names = zf.namelist()
 
     # 規則 1
+    # [雷] zipfile 回報的 flag_bits 來自 central directory。zip 的每個檔案還有一份
+    # local file header，那裡也有 flag —— 有些工具只設其中一處，而解壓工具讀哪一處
+    # 各家不同。兩處都要驗。
+    #
+    # [雷] 定位 local header 要用 central directory 記錄的 header_offset，
+    # 不要暴力搜尋 PK\x03\x04：themes/*.zip 與 fonts.dat 本身就是 zip，
+    # 存進外層後內部仍保留那個特徵，暴力搜尋會掃到巢狀內容並誤報一堆 OFF。
+    zip_raw = None          # 整個 zip 的 bytes；下面規則 2/5 的 raw 是「單一檔案內容」，別混用
+    if getattr(zf, "filename", None):
+        try:
+            with open(zf.filename, "rb") as f:
+                zip_raw = f.read()
+        except OSError:
+            zip_raw = None
+
     for i in zf.infolist():
         if any(ord(c) > 127 for c in i.filename):
             fail(1, f"檔名含非 ASCII：{i.filename!r}")
         if not (i.flag_bits & 0x800):
-            fail(1, f"沒有 UTF-8 旗標：{i.filename}")
+            fail(1, f"central directory 沒有 UTF-8 旗標：{i.filename}")
+        if zip_raw is not None:
+            lo = i.header_offset
+            if zip_raw[lo:lo + 4] != b"PK\x03\x04":
+                fail(1, f"local header 位置不對：{i.filename}")
+            else:
+                lfh_flag = struct.unpack_from("<H", zip_raw, lo + 6)[0]
+                if not (lfh_flag & 0x800):
+                    fail(1, f"local file header 沒有 UTF-8 旗標：{i.filename}")
 
     # 規則 2/3/4
     bats = [n for n in names if n.lower().endswith(".bat")]
@@ -112,6 +138,30 @@ def build_broken_zip():
     return buf
 
 
+def build_lfh_only_broken():
+    """造一個 central directory 有 UTF-8 旗標、local file header 卻沒有的 zip。
+
+    真實世界會出現這種檔（某些打包工具只設一處），而只驗 zipfile.flag_bits
+    的檢查會完全放行 —— 因為那個值讀的是 central directory。
+    """
+    fd, path = tempfile.mkstemp(suffix=".zip")
+    os.close(fd)
+    with zipfile.ZipFile(path, "w") as z:
+        zi = zipfile.ZipInfo("PLAY-X.bat", date_time=(2026, 8, 7, 0, 0, 0))
+        zi.flag_bits |= 0x800
+        z.writestr(zi, b"@echo off\r\nerrorlevel\r\npause\r\n")
+        z.writestr("README-CHT.txt", b"\xef\xbb\xbfx\r\n")
+        z.writestr("scummvm.ini", b"[scummvm]\r\ngui_language=en\r\n")
+    raw = bytearray(open(path, "rb").read())
+    with zipfile.ZipFile(path) as z:
+        for i in z.infolist():                      # 只把 local header 的旗標清掉
+            lo = i.header_offset
+            flag = struct.unpack_from("<H", raw, lo + 6)[0]
+            struct.pack_into("<H", raw, lo + 6, flag & ~0x800)
+    open(path, "wb").write(bytes(raw))
+    return path
+
+
 def self_test():
     with zipfile.ZipFile(build_broken_zip()) as z:
         bad = check(z)
@@ -125,7 +175,25 @@ def self_test():
     if missed:
         print(f"\n### 檢查本身有洞：規則 {missed} 放行了必定違規的輸入 ###")
         return False
-    print("\n六條都會叫 —— 這套檢查本身是有效的。")
+    print("\n六條都會叫。")
+
+    # 額外一輪：central directory 有旗標、local file header 沒有。
+    # 只讀 zipfile.flag_bits 的檢查會放行這種檔。
+    print("\n=== 正對照 2：只有 central directory 開旗標的包 ===")
+    path = build_lfh_only_broken()
+    try:
+        with zipfile.ZipFile(path) as z:
+            bad2 = check(z)
+        hit = [m for m in bad2.get(1, []) if "local file header" in m]
+        if hit:
+            print(f"  ✓ 抓到：{hit[0]}")
+        else:
+            print("  ✗ 沒抓到 —— 只驗 central directory 會放行這種檔")
+            return False
+    finally:
+        os.unlink(path)
+
+    print("\n兩輪正對照都通過 —— 這套檢查本身是有效的。")
     return True
 
 
