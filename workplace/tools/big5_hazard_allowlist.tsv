@@ -1,0 +1,21 @@
+# 許功蓋風險掃描的豁免清單。
+#
+# 掃描器只知道「引擎拿某個字元跟某個 byte 比對」，不知道那個字串是不是譯文。
+# 資源檔名、腳本指令行、debug console 輸入都是純 ASCII，永遠不會有 Big5 lead byte，
+# 那些位置逐 byte 掃是安全的。
+#
+# [HARD] 每一列都要寫理由，而且理由要說得出「這個字串為什麼不可能是譯文」。
+# 寫不出來就是還沒查清楚 —— 不要為了讓掃描器不叫而加進來。
+# 行號會漂移，所以用「程式碼特徵字串」定位，不用行號。
+#
+# 檔案	字元	程式碼特徵	理由
+
+menu_views.cpp	e	_currentLine.hasPrefix("e")	AnimationView 腳本指令行（-h:ex 的參數），純 ASCII 指令，不是譯文
+menu_views.cpp	x	_currentLine.hasPrefix("e")	同上，同一行的另一個字元
+menu_views.cpp	N	if (v == 'N')	-r: 參數（NEVER/ALWAYS/BEGINNING），v 取自腳本指令不是譯文
+menu_views.cpp	A	else if (v == 'A')	同上
+menu_views.cpp	B	else if (v == 'B')	同上
+menu_views.cpp	\	strchr(resourceName.c_str(), '\\')	scanResourceIndex 解析資源檔名路徑，HAG 內檔名一律 ASCII
+resources.cpp	I	resourceName.hasPrefix("I")	資源檔名前綴判斷（I0.AA 這類），檔名一律 ASCII
+debugger.cpp	@	resName.hasPrefix("@")	debug console 指令參數，玩家玩不到；輸入是 ASCII 資源名
+debugger.cpp	H	toupper(s[strlen(s) - 1]) != 'H'	debug console 的十六進位數字尾碼判斷，輸入是 ASCII

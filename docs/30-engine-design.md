@@ -194,22 +194,89 @@ case kLowercase:  vocab.toLowercase();
 （`[title26]` → `[TITLE26]` 這種佔位符功能沒壞）；同一批資料餵給原本的逐 byte 版，
 **6154 次會改壞**。
 
-### 盤點方式（三型都要查）
+### [雷·必看] 第四型：`[` / `]` 控制碼括號解析——`]` 那型會讓字「消失」而不是「變樣」
+
+`MESSAGES.DAT` 的譯文帶控制碼（`[title32][sentence]`、`[noun1]`、`[center]`），
+`DialogsNebular::show()`（`nebular/dialogs_nebular.cpp:42`）逐 byte 走一遍去找括號：
+
+```cpp
+while (srcP < srcLine.c_str() + srcLine.size()) {
+    if (*srcP == '[')       { commandText = ""; commandFlag = true; }
+    else if (*srcP == ']')  { /* 執行指令 */ commandFlag = false; }
+    else if (commandFlag)   { commandText += *srcP; }
+    else                    { dialogText += *srcP; }
+    ++srcP;
+}
+```
+
+撞上的字：
+
+| 字 | Big5 | trail byte | 後果 |
+|---|---|---|---|
+| 久 | A4 **5B** | `[` | lead byte 落單，之後整行被吞進 commandText |
+| 也 | A4 **5D** | `]` | lead byte 落單，trail byte **直接消失** |
+| （ | A1 **5D** | `]` | 同上，而且這是全形標點、到處都是 |
+| 包 | A5 **5D** | `]` | 同上 |
+
+`]` 比 `[` 難查：它落在 `else if (*srcP == ']')` 分支，`commandFlag` 是 false 時
+**什麼事都不做** —— 沒有例外、沒有警告，那個 byte 就是沒被加進 `dialogText`。
+畫面上看到的是一個孤兒 lead byte 被當成半形字畫出來的怪符號。
+
+實測影響 **460 / 4357 行（10.6%）**，共 537 個字。實際被抓到的那一幕：
+
+```
+譯文  這台機器擺在這裡這麼久了，\n你到現在還是搞不懂「投入硬幣」是什麼意思。
+畫面  這台機器擺在這裡這麼⁋　你到現在還是搞不懂「投入硬幣」是什麼意思。
+                          ↑ 「久了，」三個字沒了，只剩一個怪符號
+```
+
+下一行為什麼正常？因為迴圈每處理完一行就重置 `commandFlag`。
+**症狀只影響「含受害字的那一行」，同一個對話框的其他行完全正常** —— 這讓它看起來
+更像「翻譯打錯字」而不是引擎問題。
+
+### 盤點方式：不要一型一型撞
+
+前三型都是**看到畫面壞掉才回頭找**，第四型是靠一張截圖上一個怪符號才發現的。
+手寫 grep 的問題是：要先想到該 grep 什麼字元，而「`]` 也是 trail byte」這件事
+不會自己浮現。改用交叉比對：
 
 ```bash
-# 第一、二型：逐 byte 掃描
+python3 tools/big5_hazard_scan.py engines/mads cht-data/rex_cht.tsv
+```
+
+它做三件事：
+
+1. 掃引擎原始碼，抓出所有「拿單一字元跟某個 byte 比對」的位置
+   （`== 'x'`、`strchr`、`hasSuffix`、`hasPrefix`、`findFirstOf`…）。
+2. **只留下字元值落在 Big5 trail byte 範圍（0x40–0x7E）的** ——
+   `' '`(0x20)、`'\n'`(0x0A)、`'\0'` 自動排除，不用人腦判斷哪個安全。
+3. 掃譯文算出每個危險字元**實際**會撞到哪些字、幾行。
+   有譯文佐證的才是真風險；沒有的列為潛在風險（換一批譯文就可能中）。
+
+未防護 × 譯文實際會撞 → exit 1。確定那個字串不可能是譯文（資源檔名、腳本指令行、
+debug console 輸入都是純 ASCII），寫進 `tools/big5_hazard_allowlist.tsv` **並附理由**。
+
+> **[HARD] 掃描器自己也要做正對照。** 第一版的 `GUARD_HINTS` 收了 `cht` 這個字樣，
+> 我把 `dialogs_nebular.cpp` 的 Big5 防護整段拆掉去測，它照樣回報「✓ 沒問題」——
+> 因為同一個函式裡 `const bool chtOn = _vm->_cht && ...` 這行還在偵測窗內。
+> 「附近提到中文化」不等於「這個迴圈有跳過雙位元組字」。收緊成只認 `0xA1` 比較
+> 或 `ChtSupport::big5*` 呼叫之後，正對照才過（exit 1 並精確指出 `[` 和 `]` 兩處）。
+
+補充：`GUARD_WINDOW` 一開始設 12 行，結果同一個迴圈裡 `'['` 判成已防護、四行之後的
+`']'` 判成未防護 —— 防護寫在迴圈開頭，離 `']'` 有 13 行。一個迴圈罩得住的範圍比
+12 行大，改成 30。
+
+手動盤點仍可當補充（要掃全樹，本專案最嚴重那處在 `nebular/` 子目錄）：
+
+```bash
 grep -rn 'strchr\|strrchr\|strstr\|strtok\|strpbrk' --include=*.cpp --include=*.h engines/mads/
-# 第三型：大小寫轉換 ← 最容易漏，影響也最大
 grep -rn 'toupper\|tolower\|toUppercase\|toLowercase' --include=*.cpp --include=*.h engines/mads/
-# 順帶：字串搜尋類 API
 grep -rn 'findFirstOf\|hasSuffix\|hasPrefix\|\.contains(' --include=*.cpp engines/mads/
 ```
 
-**要掃全樹，不能只掃 `engines/mads/*.cpp`** —— 本專案最嚴重的那處在 `nebular/` 子目錄下。
-逐一確認掃描對象會不會是譯文：資源檔名、腳本指令行是 ASCII，安全；
 凡是經過 `getVocab()` / `getQuote()` / `getMessage()` 的都要處理。
-**這類 bug 不會崩潰、不會報錯，只會讓某幾個字悄悄變成別的字**——而且只在特定文字上出現，
-所以很容易被當成「字型缺字」或「翻譯打錯」而查錯方向。
+**這類 bug 不會崩潰、不會報錯，只會讓某幾個字悄悄變成別的字或整段消失**——而且只在
+特定文字上出現，所以很容易被當成「字型缺字」或「翻譯打錯」而查錯方向。
 
 **診斷方式值得記**：推論了三輪都沒中（缺字？截斷？dirty 範圍？），
 最後是在 `writeString` 加一行 `debug(1, ...)` 印出 `pt / ofs / width / xEnd / surface 尺寸`，

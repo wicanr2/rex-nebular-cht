@@ -29,17 +29,18 @@ DIGITAL.AGA
 workplace/tools/pkg/build/
 workplace/tools/pkg/cache/
 
-# --- 中間產物：中文資料以 cht-data/ 為單一真相，out/ 的副本不入庫 ---
-workplace/out/rex_big5.fnt
-workplace/out/rex_cht.tsv
-workplace/out/win-verify/
-workplace/out/appimage-verify/
+# --- workplace/out/ 一律不入庫 ---
+#
+# [HARD] 這裡整個目錄 ignore，不要改回逐項列舉。
+# 原本是一行一個子目錄（out/audio/、out/promo/、out/win-verify/…），
+# 每新增一種產物就要記得補一行 —— 2026-08-07 一口氣多了 gp-sync2/ gp-sync3/
+# intro/ intro2/ attract/ anim/ animverify/ 七個目錄，**七個全部漏掉**，
+# 而它們裝的是遊戲截圖與錄影（MicroProse 的美術與配樂）。
+# 「忘記加一行」的代價是版權素材進公開 repo，這個預設值不能是「收錄」。
+#
+# 真的要讓某個檔進版控，用 ! 明確開例外，讓它顯眼。
+workplace/out/
 
-# --- 錄音與影片（配樂是 MicroProse 著作權）---
-workplace/out/audio/
-workplace/out/audio-mt32/
-workplace/out/audio-verify/
-workplace/out/promo/
 *.mp4
 *.wav
 *.raw
@@ -55,9 +56,7 @@ dist-all/
 *.dwo
 .deps/
 
-# --- 截圖：只有 docs/img/ 底下的進版控 ---
-workplace/out/*.png
-workplace/out/scenes/
+# --- 截圖：只有 docs/img/ 底下的進版控（workplace/out/ 已整個 ignore）---
 
 # --- 雜項 ---
 __pycache__/

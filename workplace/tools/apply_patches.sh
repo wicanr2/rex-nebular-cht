@@ -55,12 +55,21 @@ grep -q 'ChtSupport' engines/mads/font.cpp \
 
 # 但單一 grep 仍是抽查，會漏掉沒被 grep 到的那 21 個檔。
 # 指紋涵蓋 engines/mads/ 底下每一個 .cpp/.h，任何一處沒套到都會對不上。
-EXPECT="${EXPECT_FINGERPRINT:-08c09b8d23e8}"
+EXPECT="${EXPECT_FINGERPRINT:-c016035f2dc4}"
 if command -v python3 >/dev/null; then
     python3 "$HERE/engine_fingerprint.py" "$DEST" --expect "$EXPECT" \
         || { echo "### 引擎指紋不符 —— patch 套得不完整或上游 drift ###"; exit 6; }
 else
-    echo "（無 python3，略過指紋比對）"
+    # [雷] 這裡原本只印「（無 python3，略過指紋比對）」一行就過去了。
+    # rex-mingw image 正好沒裝 python3 —— 於是 **Windows 包的引擎指紋從頭到尾
+    # 沒有被驗過一次**，而輸出看起來一切正常。「檢查工具不在」跟「檢查通過」
+    # 在輸出上長得幾乎一樣，這是最容易矇混過去的一種。
+    # 訊息改成 ### 開頭（跟真正的錯誤同格式），並且明講後果與正確做法。
+    echo "### 這個環境沒有 python3，指紋沒有被比對 —— 這不是通過 ###"
+    echo "###   後果：patch 套得不完整也看不出來（只 grep 一個字串是抽查）"
+    echo "###   做法：先用 rex-cht:dev 套 patch（有 python3），再拿這棵樹去交叉編"
+    echo "###          docker run ... rex-cht:dev bash tools/apply_patches.sh <目標>"
+    exit 7
 fi
 
 echo "=== patch 套用完成：$DEST ==="

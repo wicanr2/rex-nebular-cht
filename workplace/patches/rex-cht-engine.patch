@@ -1,5 +1,5 @@
 diff --git a/engines/mads/action.cpp b/engines/mads/action.cpp
-index abe3b8ab..650561a7 100644
+index abe3b8a..650561a 100644
 --- a/engines/mads/action.cpp
 +++ b/engines/mads/action.cpp
 @@ -19,6 +19,7 @@
@@ -107,9 +107,59 @@ index abe3b8ab..650561a7 100644
  			}
  
  			_statusText += " ";
+diff --git a/engines/mads/animation.cpp b/engines/mads/animation.cpp
+index c7cd523..e7741ca 100644
+--- a/engines/mads/animation.cpp
++++ b/engines/mads/animation.cpp
+@@ -21,6 +21,7 @@
+ 
+ #include "mads/animation.h"
+ #include "mads/compression.h"
++#include "mads/cht.h"
+ 
+ #define FILENAME_SIZE 13
+ 
+@@ -231,9 +232,37 @@ void Animation::load(MSurface &backSurface, DepthSurface &depthSurface,
+ 		// Chunk 2: Following is a list of any messages for the animation
+ 		Common::SeekableReadStream *msgStream = madsPack.getItemStream(streamIndex++);
+ 
++		// [CHT] 動畫內嵌訊息是文字的第六個來源，跟 QUOTES / VOCAB / MESSAGES /
++		// TXR / 引擎硬寫字串並列。原本的抽字工具只認前五個，漏掉這裡 ——
++		// 開場動畫的「Modern Day Rex / Cro-Magnon Rex / Rexanderthal」那串字卡、
++		// 場景裡的「<-- Woman hiding in tree」箭頭標示都出自這裡，玩家一開遊戲
++		// 就看得到。50 個 .AA 檔共 199 則。
++		//
++		// 在載入時替換而不是在繪製時（update() 的 kernelMessages.add），因為載入
++		// 只跑一次，繪製每幀都跑。
++		Common::String chtKey = resourceName;
++		if (chtKey.hasPrefix("*"))
++			chtKey.deleteChar(0);
++		chtKey.toUppercase();
++
+ 		for (int i = 0; i < _header._messagesCount; ++i) {
+ 			AnimMessage rec;
+ 			rec.load(msgStream);
++
++			if (_vm->_cht && _vm->_cht->enabled()) {
++				const Common::String key = Common::String::format("anim:%s.%d", chtKey.c_str(), i);
++				const Common::String *tr = _vm->_cht->lookup(key);
++				if (tr) {
++					rec._msg = *tr;
++					debug(2, "[CHT] %s 已替換", key.c_str());
++				} else {
++					// 沒命中就維持英文。會走到這裡通常代表 key 組錯了
++					// （resName 的大小寫、有沒有帶副檔名），不是真的漏翻 ——
++					// 抽字工具是拿 HAG 裡的檔名當 key，兩邊要對得起來。
++					debug(2, "[CHT] %s 查無譯文，維持英文：\"%s\"", key.c_str(), rec._msg.c_str());
++				}
++			}
++
+ 			_messages.push_back(rec);
+ 		}
+ 
 diff --git a/engines/mads/cht.cpp b/engines/mads/cht.cpp
 new file mode 100644
-index 00000000..24e31648
+index 0000000..24e3164
 --- /dev/null
 +++ b/engines/mads/cht.cpp
 @@ -0,0 +1,231 @@
@@ -346,7 +396,7 @@ index 00000000..24e31648
 +} // End of namespace MADS
 diff --git a/engines/mads/cht.h b/engines/mads/cht.h
 new file mode 100644
-index 00000000..860d9812
+index 0000000..860d981
 --- /dev/null
 +++ b/engines/mads/cht.h
 @@ -0,0 +1,129 @@
@@ -480,7 +530,7 @@ index 00000000..860d9812
 +
 +#endif /* MADS_CHT_H */
 diff --git a/engines/mads/events.cpp b/engines/mads/events.cpp
-index 1db36042..082019ec 100644
+index 1db3604..082019e 100644
 --- a/engines/mads/events.cpp
 +++ b/engines/mads/events.cpp
 @@ -118,10 +118,21 @@ void EventsManager::changeCursor() {
@@ -531,7 +581,7 @@ index 1db36042..082019ec 100644
  			_currentPos = event.mouse;
  			_mouseMoved = true;
 diff --git a/engines/mads/font.cpp b/engines/mads/font.cpp
-index d1414838..5ef32c26 100644
+index d141483..5ef32c2 100644
 --- a/engines/mads/font.cpp
 +++ b/engines/mads/font.cpp
 @@ -161,7 +161,7 @@ int Font::writeString(BaseSurface *surface, const Common::String &msg, const Com
@@ -649,7 +699,7 @@ index d1414838..5ef32c26 100644
  	if (charWidth > 12)
  		return 4;
 diff --git a/engines/mads/font.h b/engines/mads/font.h
-index 4ef1c69b..489ef782 100644
+index 4ef1c69..489ef78 100644
 --- a/engines/mads/font.h
 +++ b/engines/mads/font.h
 @@ -84,7 +84,7 @@ public:
@@ -662,7 +712,7 @@ index 4ef1c69b..489ef782 100644
  		int spaceWidth = 0, int width = 0);
  };
 diff --git a/engines/mads/game.cpp b/engines/mads/game.cpp
-index 54755722..af9799c3 100644
+index 5475572..ba2b091 100644
 --- a/engines/mads/game.cpp
 +++ b/engines/mads/game.cpp
 @@ -363,6 +363,16 @@ void Game::loadQuotes() {
@@ -682,7 +732,7 @@ index 54755722..af9799c3 100644
  }
  
  Common::StringArray Game::getMessage(uint32 id) {
-@@ -405,6 +415,28 @@ Common::StringArray Game::getMessage(uint32 id) {
+@@ -405,6 +415,38 @@ Common::StringArray Game::getMessage(uint32 id) {
  
  			delete[] bufferIn;
  			delete[] bufferOut;
@@ -695,6 +745,16 @@ index 54755722..af9799c3 100644
 +					Common::StringArray zh;
 +					Common::String cur;
 +					for (uint ci = 0; ci < tr->size(); ++ci) {
++						// [HARD] Big5 雙位元組字整個搬走，別拿它的第二個位元組
++						// 去比對反斜線。「功」= A5 5C —— 許功蓋本尊就卡在這個
++						// 位元組上。這裡若逐 byte 掃，「功」後面剛好接一個
++						// ASCII 'n' 就會被誤判成換行標記，把字吃掉半個。
++						if ((byte)(*tr)[ci] >= 0xA1 && (ci + 1) < tr->size()) {
++							cur += (*tr)[ci];
++							cur += (*tr)[ci + 1];
++							++ci;
++							continue;
++						}
 +						if ((*tr)[ci] == '\\' && (ci + 1) < tr->size() && (*tr)[ci + 1] == 'n') {
 +							zh.push_back(cur);
 +							cur.clear();
@@ -712,7 +772,7 @@ index 54755722..af9799c3 100644
  		}
  	}
 diff --git a/engines/mads/mads.cpp b/engines/mads/mads.cpp
-index be5ece8e..6378dc07 100644
+index be5ece8..6378dc0 100644
 --- a/engines/mads/mads.cpp
 +++ b/engines/mads/mads.cpp
 @@ -49,6 +49,7 @@ MADSEngine::MADSEngine(OSystem *syst, const MADSGameDescription *gameDesc) :
@@ -756,7 +816,7 @@ index be5ece8e..6378dc07 100644
  
  	// Run the game
 diff --git a/engines/mads/mads.h b/engines/mads/mads.h
-index 1971f212..2a74a120 100644
+index 1971f21..2a74a12 100644
 --- a/engines/mads/mads.h
 +++ b/engines/mads/mads.h
 @@ -29,6 +29,7 @@
@@ -776,7 +836,7 @@ index 1971f212..2a74a120 100644
  	Dialogs *_dialogs;
  	EventsManager *_events;
 diff --git a/engines/mads/menu_views.cpp b/engines/mads/menu_views.cpp
-index d2d0034b..08d6dd77 100644
+index d2d0034..08d6dd7 100644
 --- a/engines/mads/menu_views.cpp
 +++ b/engines/mads/menu_views.cpp
 @@ -29,6 +29,7 @@
@@ -857,7 +917,7 @@ index d2d0034b..08d6dd77 100644
  		*centerP = '\0';
  		xStart = (MADS_SCREEN_WIDTH / 2) - _font->getWidth(_currentLine);
 diff --git a/engines/mads/menu_views.h b/engines/mads/menu_views.h
-index 471232eb..7557c8c3 100644
+index 471232e..7557c8c 100644
 --- a/engines/mads/menu_views.h
 +++ b/engines/mads/menu_views.h
 @@ -80,6 +80,10 @@ private:
@@ -872,7 +932,7 @@ index 471232eb..7557c8c3 100644
  	Font *_font;
  private:
 diff --git a/engines/mads/module.mk b/engines/mads/module.mk
-index 9d80ac35..fd6fcd99 100644
+index 9d80ac3..fd6fcd9 100644
 --- a/engines/mads/module.mk
 +++ b/engines/mads/module.mk
 @@ -32,6 +32,7 @@ MODULE_OBJS := \
@@ -884,7 +944,7 @@ index 9d80ac35..fd6fcd99 100644
  	conversations.o \
  	debugger.o \
 diff --git a/engines/mads/nebular/dialogs_nebular.cpp b/engines/mads/nebular/dialogs_nebular.cpp
-index 7f7ac80a..9e32b534 100644
+index 7f7ac80..5ac76a1 100644
 --- a/engines/mads/nebular/dialogs_nebular.cpp
 +++ b/engines/mads/nebular/dialogs_nebular.cpp
 @@ -30,6 +30,7 @@
@@ -895,7 +955,47 @@ index 7f7ac80a..9e32b534 100644
  #include "mads/nebular/dialogs_nebular.h"
  #include "mads/nebular/game_nebular.h"
  #include "mads/nebular/menu_nebular.h"
-@@ -112,7 +113,9 @@ bool DialogsNebular::show(int messageId, int objectId) {
+@@ -53,14 +54,38 @@ bool DialogsNebular::show(int messageId, int objectId) {
+ 	TextDialog *dialog = nullptr;
+ 	_dialogWidth = 17;
+ 	_capitalizationMode = kUppercase;
++	const bool chtOn = _vm->_cht && _vm->_cht->enabled();
+ 
+ 	// Loop through the lines of the returned text
+ 	for (uint idx = 0; idx < msg.size(); ++idx) {
+ 		Common::String srcLine = msg[idx];
+ 		const char *srcP = srcLine.c_str();
++		const char *endP = srcLine.c_str() + srcLine.size();
+ 
+ 		// Loop through the text of the line
+-		while (srcP < srcLine.c_str() + srcLine.size()) {
++		while (srcP < endP) {
++			// [HARD] Big5 雙位元組字要整個搬走，不能拿它的第二個位元組去比對
++			// '[' / ']'。「也」= A4 5D、「（」= A1 5D、「包」= A5 5D、
++			// 「久」= A4 5B —— trail byte 剛好就是這兩個指令括號。
++			//
++			// 逐 byte 走的下場：lead byte 單獨進 dialogText（畫面上是一個半形
++			// 怪符號），trail byte 被當成括號處理。']' 那型更難查 —— 它落在
++			// `else if (*srcP == ']')` 分支，commandFlag 是 false 時什麼事都
++			// 不做，那個 byte 就這樣消失，字只剩一半，不崩潰也不報錯。
++			//
++			// 實測 460/4357 行譯文踩中（537 個字），而且「也」和「（」是高頻字。
++			if (chtOn && (byte)*srcP >= 0xA1 && srcP + 1 < endP) {
++				if (commandFlag) {
++					commandText += *srcP;
++					commandText += *(srcP + 1);
++				} else {
++					dialogText += *srcP;
++					dialogText += *(srcP + 1);
++				}
++				srcP += 2;
++				continue;
++			}
++
+ 			if (*srcP == '[') {
+ 				// Starting a command
+ 				commandText = "";
+@@ -112,7 +137,9 @@ bool DialogsNebular::show(int messageId, int objectId) {
  						if (!textNoun(dialogText, 2, valStr))
  							dialogText += getVocab(action._activeAction._indirectObjectId);
  					} else if (commandCheck("PREP", valStr, commandText)) {
@@ -906,12 +1006,12 @@ index 7f7ac80a..9e32b534 100644
  					} else if (commandCheck("SENTENCE", valStr, commandText)) {
  						dialogText += action._sentence;
  					} else if (commandCheck("WIDTH", valStr, commandText)) {
-@@ -196,16 +199,21 @@ Common::String DialogsNebular::getVocab(int vocabId) {
+@@ -196,16 +223,21 @@ Common::String DialogsNebular::getVocab(int vocabId) {
  
  	Common::String vocab = _vm->_game->_scene.getVocab(vocabId);
  
 +	// [CHT] 不能用 Common::String 的 toUppercase()/toLowercase()：它們逐 byte 跑
-+	// toupper/tolower，而 Big5 的 trail byte 大量落在 A-Z / a-z，會被加減 0x20 —— 
++	// toupper/tolower，而 Big5 的 trail byte 大量落在 A-Z / a-z，會被加減 0x20 ——
 +	// 字直接變成另一個字（「遊戲」→「鉍戲」、「關上」→「關已」），不崩潰也不報錯。
 +	// 實測本專案 4357 筆譯文有 3619 筆（83%）中招。中文沒有大小寫，整個跳過。
 +	const bool chtOn = _vm->_cht && _vm->_cht->enabled();
@@ -932,7 +1032,7 @@ index 7f7ac80a..9e32b534 100644
  	default:
  		break;
  	}
-@@ -234,13 +242,19 @@ bool DialogsNebular::textNoun(Common::String &dest, int nounId, const Common::St
+@@ -234,13 +266,19 @@ bool DialogsNebular::textNoun(Common::String &dest, int nounId, const Common::St
  	Common::String vocab = _vm->_dialogs->getVocab(action._activeAction._verbId);
  	Common::String *str;
  
@@ -955,7 +1055,7 @@ index 7f7ac80a..9e32b534 100644
  			case 'A':
  			case 'E':
  			case 'I':
-@@ -780,7 +794,10 @@ void GameDialog::addLine(const Common::String &msg, DialogTextAlign align,
+@@ -780,7 +818,10 @@ void GameDialog::addLine(const Common::String &msg, DialogTextAlign align,
  
  	case ALIGN_AT_CENTER: {
  		const char *msgP = msg.c_str();
@@ -968,7 +1068,7 @@ index 7f7ac80a..9e32b534 100644
  			xOffset = (MADS_SCREEN_WIDTH / 2) - font->getWidth(
  				Common::String(msgP, ch), line->_widthAdjust);
 diff --git a/engines/mads/nebular/game_nebular.cpp b/engines/mads/nebular/game_nebular.cpp
-index f0538556..6ea0626f 100644
+index f053855..6ea0626 100644
 --- a/engines/mads/nebular/game_nebular.cpp
 +++ b/engines/mads/nebular/game_nebular.cpp
 @@ -118,6 +118,16 @@ void GameNebular::startGame() {
@@ -989,7 +1089,7 @@ index f0538556..6ea0626f 100644
  
  	if (_loadGameSlot >= 0)
 diff --git a/engines/mads/scene.cpp b/engines/mads/scene.cpp
-index 491a7916..a91eeb45 100644
+index 491a791..a91eeb4 100644
 --- a/engines/mads/scene.cpp
 +++ b/engines/mads/scene.cpp
 @@ -270,6 +270,19 @@ void Scene::loadVocabStrings() {
@@ -1013,7 +1113,7 @@ index 491a7916..a91eeb45 100644
  
  uint32 Scene::getVocabStringsCount() const {
 diff --git a/engines/mads/scene.h b/engines/mads/scene.h
-index 18ab1073..5091a02f 100644
+index 18ab107..5091a02 100644
 --- a/engines/mads/scene.h
 +++ b/engines/mads/scene.h
 @@ -109,6 +109,7 @@ public:
@@ -1042,7 +1142,7 @@ index 18ab1073..5091a02f 100644
  	 * Clear the data for the currently loaded scene
  	 */
 diff --git a/engines/mads/screen.cpp b/engines/mads/screen.cpp
-index 309eca48..e24ce183 100644
+index 309eca4..e24ce18 100644
 --- a/engines/mads/screen.cpp
 +++ b/engines/mads/screen.cpp
 @@ -558,12 +558,79 @@ Screen::Screen(): BaseSurface() {
@@ -1204,7 +1304,7 @@ index 309eca48..e24ce183 100644
  	Scene &scene = _vm->_game->_scene;
  	byte palData[PALETTE_SIZE];
 diff --git a/engines/mads/screen.h b/engines/mads/screen.h
-index 3a1e4e44..0a01d497 100644
+index 3a1e4e4..0a01d49 100644
 --- a/engines/mads/screen.h
 +++ b/engines/mads/screen.h
 @@ -32,6 +32,12 @@ namespace MADS {
@@ -1265,7 +1365,7 @@ index 3a1e4e44..0a01d497 100644
  	/**
  	 * Constructor
 diff --git a/engines/mads/staticres.cpp b/engines/mads/staticres.cpp
-index 80accd4b..20b81fbb 100644
+index 80accd4..20b81fb 100644
 --- a/engines/mads/staticres.cpp
 +++ b/engines/mads/staticres.cpp
 @@ -41,6 +41,21 @@ const char *const kWalkToStr = "Walk to ";
@@ -1291,7 +1391,7 @@ index 80accd4b..20b81fbb 100644
  const char *const kGameReleaseTitleStr = "GAME RELEASE VERSION INFO";
  
 diff --git a/engines/mads/staticres.h b/engines/mads/staticres.h
-index 97d360ad..359d337c 100644
+index 97d360a..359d337 100644
 --- a/engines/mads/staticres.h
 +++ b/engines/mads/staticres.h
 @@ -35,6 +35,14 @@ extern const char *const kWalkToStr;
@@ -1310,7 +1410,7 @@ index 97d360ad..359d337c 100644
  extern const char *const kGameReleaseTitleStr;
  
 diff --git a/engines/mads/user_interface.cpp b/engines/mads/user_interface.cpp
-index e77c949d..75cbc58b 100644
+index e77c949..75cbc58 100644
 --- a/engines/mads/user_interface.cpp
 +++ b/engines/mads/user_interface.cpp
 @@ -20,6 +20,7 @@
@@ -1424,7 +1524,7 @@ index e77c949d..75cbc58b 100644
  	if (category == CAT_INV_SCROLLER) {
  		switch (v) {
 diff --git a/engines/mads/user_interface.h b/engines/mads/user_interface.h
-index df8418d9..71588fb6 100644
+index df8418d..71588fb 100644
 --- a/engines/mads/user_interface.h
 +++ b/engines/mads/user_interface.h
 @@ -148,6 +148,10 @@ private:

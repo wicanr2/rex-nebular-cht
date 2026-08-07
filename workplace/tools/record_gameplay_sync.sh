@@ -51,10 +51,23 @@ FF_PID=$!
 
 sleep 10
 
+# [雷] 視窗標題不是 "ScummVM" —— 遊戲一跑起來 ScummVM 就把標題換成
+# 「Rex Nebular and the Cosmic Gender Bender」。原本寫死搜 "ScummVM" 一直回空，
+# windowactivate 從來沒真的執行過。這支腳本仍然錄成功，是因為 Xvfb 上只有一個
+# 視窗、焦點本來就在它身上 —— 換句話說是**運氣**，不是這行程式碼在起作用。
+# 同樣的寫法搬到 shot_intro.sh 就當場踩雷（點擊全部落空、畫面完全正常）。
 activate() {
-    local wid
-    wid=$(xdotool search --name "ScummVM" 2>/dev/null | tail -1)
-    [ -n "$wid" ] && { xdotool windowactivate --sync "$wid" 2>/dev/null; xdotool windowfocus "$wid" 2>/dev/null; }
+    local wid=""
+    for pat in "Rex Nebular" "ScummVM"; do
+        wid=$(xdotool search --name "$pat" 2>/dev/null | tail -1 || true)
+        [ -n "$wid" ] && break
+    done
+    [ -z "$wid" ] && wid=$(xdotool search --name "." 2>/dev/null | tail -1 || true)
+    if [ -n "$wid" ]; then
+        xdotool windowactivate --sync "$wid" 2>/dev/null || true
+        xdotool windowfocus "$wid" 2>/dev/null || true
+    fi
+    return 0
 }
 click_at() { activate; xdotool mousemove "$1" "$2" 2>/dev/null; sleep 1; xdotool click --clearmodifiers 1 2>/dev/null; }
 

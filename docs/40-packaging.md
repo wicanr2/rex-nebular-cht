@@ -161,7 +161,7 @@ ld: unknown options: -force_cpusubtype_ALL
 
 - AppImage staging 裡的 `rexopen.res` / `rexend1-3.res`。`.gitignore` 當時只寫了大寫 `*.RES`，
   而 **git 的 ignore 比對區分大小寫**，小寫那組整批躲過。
-- `workplace/font-src/` 的倚天原始字庫。烘出來只含 2,394 字的 `rex_big5.fnt` 是衍生物，
+- `workplace/font-src/` 的倚天原始字庫。烘出來只含 2,409 字的 `rex_big5.fnt` 是衍生物，
   跟散布整份商業字庫是兩回事。
 
 ## 所有檢查工具都自帶正對照
@@ -171,3 +171,92 @@ ld: unknown options: -force_cpusubtype_ALL
 
 做成子指令而不是一次性的手工驗證，是為了讓它不會被忘記。**沒有紅字有兩種可能——
 包是好的，或檢查自己壞了**，而這兩件事看起來一模一樣。
+
+## 中文資料有兩份，同步失敗是靜默的
+
+| 路徑 | 角色 |
+|---|---|
+| `cht-data/` | 版控裡的來源。重烘字型、合併譯文、改譯名都改這裡 |
+| `workplace/game/` | 引擎執行時實際讀的（跟遊戲資料放在一起，gitignore） |
+
+打包腳本從 `cht-data/` 取，但**實機驗證跑的是 `workplace/game/`**。兩者沒有自動同步。
+
+2026-08-07 白跑一輪：補了 199 則動畫內嵌訊息、字型重烘成 2,409 字，然後直接跑實機
+驗證。截圖「看起來都正常」——因為那些畫面本來就不含新增的內容。真正的徵兆藏在
+`-d 1` 的 log 裡：
+
+```
+[CHT] 中文化啟用：字型 2394 字 (16x15)，替換表 4357 筆
+```
+
+**是舊的數字，而沒有任何東西會因此報錯。**
+
+修法是 `tools/sync_cht_data.sh`：複製 + 比 md5 + 印出「替換表 N 筆、字型 M 字」，
+讓它跟引擎啟動時那行直接對照。驗證腳本（`verify_anim_cht.sh`）也加了反查——
+引擎讀到的筆數跟 `game/` 對不上就 exit 5，不讓它安靜地驗一份舊表。
+
+通則：**同一份資料存在兩個地方，就要有人負責證明它們一致**，而且那個證明要出現在
+每次驗證的輸出裡，不能只寫在文件上。
+
+## 已決定：`workplace/out/` 底下已入庫的產物維持現狀
+
+公開 repo 上有 99 個 `workplace/out/` 檔案是初版 commit 帶上去的：
+
+| 內容 | 數量 |
+|---|---|
+| `batches-orig/` 遊戲英文原文全量 | 30 檔、4,360 行 |
+| `batches/` 原文＋譯文對照 | 30 檔 |
+| `text/` 抽字產物 | 5 檔 |
+| 驗證截圖（`big5-verify`／`dsr-*`／`gameplay*`／`gp-sync`） | 30 餘張 |
+
+嚴格對照 §5 的「公開 repo 天然 patch-only」，英文原文與遊戲截圖不在那個清單裡。
+**使用者 2026-08-07 決定：維持現狀，不移除、不改寫歷史。**
+
+寫下來是為了讓這件事有結論。它已經被翻出來檢討過一次，沒有紀錄的話下一輪盤點
+還會再被當成待修問題提一遍 —— 而每提一次都要重新查一次遠端、重新問一次。
+
+不過**新增的產物預設不入庫**：`.gitignore` 已從逐項列舉改成整個 `workplace/out/` ignore。
+原本一行一個子目錄的寫法，每新增一種產物就要記得補一行 ——
+2026-08-07 一口氣多了 `gp-sync2/`、`gp-sync3/`、`gp-final/`、`intro/`、`intro2/`、
+`attract/`、`anim/`、`animverify/` 八個目錄，**全部漏掉**。
+真的要讓某個檔進版控，用 `!` 開明確例外，讓它在 diff 裡顯眼。
+
+## 「檢查工具不在」跟「檢查通過」長得幾乎一樣
+
+`apply_patches.sh` 收尾會比對引擎指紋，但原本寫的是：
+
+```bash
+if command -v python3 >/dev/null; then
+    python3 engine_fingerprint.py "$DEST" --expect "$EXPECT" || exit 6
+else
+    echo "（無 python3，略過指紋比對）"      # ← 然後就過去了
+fi
+```
+
+`rex-mingw` image 沒裝 python3。於是 **Windows 包的引擎指紋從頭到尾沒有被比對過一次**，
+而輸出長這樣：
+
+```
+=== 套用繁中化 patch ===
+（無 python3，略過指紋比對）
+=== patch 套用完成：/w/build/mingw-tree ===
+```
+
+看起來完全正常。剩下的只有一個 `grep -q 'ChtSupport' font.cpp` 的抽查 —— 那只證明
+22 個檔裡有 1 個套上了。
+
+現在改成 `###` 開頭（跟真正的錯誤同格式）並 `exit 7`，訊息裡直接寫正確做法。
+正對照跑過：在 `rex-mingw` 裡執行確實 exit 7。
+
+**Windows 的正確流程**（順序不能顛倒）：
+
+```bash
+# 1. 用 rex-cht:dev 套 patch —— 它有 python3，指紋才驗得到
+docker run --rm -v "$PWD:/w" -w /w rex-cht:dev bash tools/apply_patches.sh /w/build/mingw-tree
+# 2. 在**宿主機**跑建置（這支腳本自己會開 rex-mingw 容器，不要再包一層 docker run）
+bash tools/build_windows.sh
+```
+
+> 順帶一個踩過的：把 `build_windows.sh` 整支包進 `docker run rex-mingw` 裡跑，
+> 會因為容器內沒有 docker 而靜靜停在第一個 `docker run` —— **退出碼是 0**，
+> 只是什麼都沒編出來。要驗的是產物存不存在，不是退出碼。

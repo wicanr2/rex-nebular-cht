@@ -1,7 +1,7 @@
 《錯體奇航》繁體中文化 — 引擎指紋
 
 演算法: sha256(engines/mads/**/*.cpp 與 *.h 依路徑排序後內容串接) 取前 12 碼
-指紋: 08c09b8d23e8
+指紋: c016035f2dc4
 檔案數: 124
 基準: ScummVM v2.8.0 + patches/rex-cht-engine.patch
 

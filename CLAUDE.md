@@ -55,7 +55,7 @@ int charWidth = _charWidths[(byte)theChar];
 
 ## 4. MADS 引擎領域事實（動手前的地基，全部有一手出處）
 
-### 4.1 文字有五個來源，少抽一個就露英文
+### 4.1 文字有**六**個來源，少抽一個就露英文
 
 | # | 來源 | 格式 | 出處 | 難度 |
 |---|---|---|---|---|
@@ -64,8 +64,17 @@ int charWidth = _charWidths[(byte)theChar];
 | ③ | `*MESSAGES.DAT` | **FAB 壓縮 ＋ 索引表**（id/offset/size），`Game::getMessage(id)` 解壓後切成字串陣列 | `game.cpp:368` | **回填難**（要重壓或改讀未壓縮） |
 | ④ | `*.TXR` | TextView 文字（片尾／製作名單），含腳本指令行 `[background=962]` `[pan=1,1,6]` | `menu_views.cpp` TextView | 低 |
 | ⑤ | 引擎硬寫字串 | `staticres.cpp`（`"Walk to "`、`"Look around"`、介係詞 `with`/`to`/`at`/`from`/`on`/`in`/`under`/`behind`）、`nebular/dialogs_nebular.cpp`（防拷提示等） | 原始碼 | 低但**最容易漏** |
+| ⑥ | `*.AA` **動畫內嵌訊息** | MadsPack chunk 1，每筆固定 **96 bytes**（`int16 soundId` + `char msg[64]` + 位置 + 兩組 RGB + 起訖幀）。203 檔中 50 檔有訊息，共 **199 則** | `animation.cpp:74 AnimMessage::load()`、載入 L234、繪製 L569 | 低但**最容易漏掉整包** |
 
-- ①②③④ 都封在 `GLOBAL.HAG` / `SECTION%d.HAG`（`resources.cpp:183`），`*` 前綴代表走 HAG 查找。
+- ①②③④⑥ 都封在 `GLOBAL.HAG` / `SECTION%d.HAG`（`resources.cpp:183`），`*` 前綴代表走 HAG 查找。
+- **[實測修正 2026-08-07] ⑥ 是後來才發現的，本檔原本寫「五個來源」。**
+  漏掉的代價：過場對白（逮捕／搜身／手術檯／片頭太空戰）全露英文，而且 **Rox、Karg、
+  Xina、Gyrain、Twinkles、Rhotunda、Olga、Boog、Og 九個角色的名字只存在於這裡** ——
+  其他五個來源逐一 grep 全部零命中。
+  **發現方式是看截圖，不是任何自動檢查**：太空船場景中央浮著一個看不懂的白色英文字，
+  追下去才挖出整個來源（那個字最後查明是原作 sprite 美術，跟它無關 —— 但沒去追就不會發現）。
+  **教訓**：「抽字工具跑完沒報錯」證明不了完整性。要證明完整，得反過來問
+  「畫面上每一個看得到的字，我能不能說出它從哪個來源來」。
 - **[實測修正 2026-08-06]** 本作**沒有任何 `CONV*.CNV` 對話樹檔**（那是 Dragonsphere／Phantom 用的），
   對話走 MESSAGES + QUOTES；`OBJECTS.DAT` 存的是 **vocab 索引**不是字串，物品名全在 `VOCAB.DAT`，
   不必另抽；`HOGANUS.DAT`（防拷題庫）是二進位不是明文。實測數據見 `docs/00-scope.md`。
@@ -362,19 +371,28 @@ README 本體：在地代理史（**這款當年只有中文手冊、沒有中�
 - [HARD] **限制級／輔導級兩套文字都要處理**，別只翻一套就宣稱完成。
 - [HARD] 字形預設**倚天點陣字**，`SPCFONT` 必帶。
 - [HARD] 公開 repo **patch-only**；`*.ROM`、遊戲資料、手冊掃描一律 gitignore。
-- [HARD] **「許功蓋問題」有三型，任何碰譯文的逐 byte 操作都要 Big5-aware**。
-  Big5 trail byte 落在 ASCII 可見範圍是家常便飯（「作」=A740、「一」=A440、「快存」尾位元組=0x73），
-  **症狀一律是某幾個字悄悄變成別的字，不崩潰也不報錯**，極易誤判成「字型缺字」查錯方向。
+- [HARD] **「許功蓋問題」有四型，任何碰譯文的逐 byte 操作都要 Big5-aware**。
+  Big5 trail byte 落在 ASCII 可見範圍是家常便飯（「作」=A740、「一」=A440、「功」=A55C），
+  **症狀一律是某幾個字悄悄變成別的字或整段消失，不崩潰也不報錯**，極易誤判成「字型缺字」查錯方向。
   1. **逐 byte 掃描**：`strchr`／`strstr`／`strtok`／手寫 `while (*p)` 在 trail byte 上誤中，
      把字從中間切開（`@`=0x40、`[`=0x5B、`\`=0x5C）。
   2. **結尾／前綴判斷**：`hasSuffix("s")` 這種判英文文法的，會被中文的 trail byte 誤中。
-  3. **[影響最大] 大小寫轉換**：`toUppercase()`／`toLowercase()`／`toupper()` 逐 byte 加減 0x20，
+  3. **大小寫轉換**：`toUppercase()`／`toLowercase()`／`toupper()` 逐 byte 加減 0x20，
      trail byte 落在 `A-Z`(0x41–0x5A) 或 `a-z`(0x61–0x7A) 就變成另一個字。
-     **實測本專案 4357 筆譯文有 3619 筆（83%）中招**（「遊戲」→「鉍戲」、「關上」→「關已」）。
+     **實測 4357 筆譯文有 3619 筆（83%）中招**（「遊戲」→「鉍戲」、「關上」→「關已」）。
      順帶：`char` 是 signed，把 ≥0x80 的 lead byte 傳給 `toupper()` 本身就是 UB。
-  盤點要**掃全樹不能只掃頂層**（本專案最嚴重那處在 `nebular/` 子目錄）：
-  `grep -rn 'strchr\|strstr\|strtok\|toupper\|tolower\|toUppercase\|toLowercase\|hasSuffix' --include=*.cpp --include=*.h engines/mads/`
-  逐一確認掃描對象會不會是譯文（資源檔名、腳本指令行是 ASCII，安全）。
+  4. **控制碼括號解析**：`DialogsNebular::show()` 逐 byte 找 `[` / `]` 判斷 `[title32]`
+     這類指令。「也」=A4**5D**、「（」=A1**5D**、「久」=A4**5B** —— trail byte 剛好就是括號。
+     `]` 那型最陰險：它落在 `else if (*srcP == ']')`，`commandFlag` 為 false 時什麼都不做，
+     **那個 byte 就這樣消失**，畫面只剩一個孤兒 lead byte 畫成的半形怪符號。
+     **實測 460/4357 行（10.6%）踩中**，而「也」「（」都是高頻字。
+  **[HARD] 不要靠 grep 一型一型撞** —— 前三型都是看到畫面壞掉才回頭找，第四型是靠一張
+  截圖上「這麼」後面一個怪符號才發現的。改用 `tools/big5_hazard_scan.py`：它把
+  「引擎會拿哪些字元比對」跟「譯文裡有哪些字的 trail byte 撞上它」交叉起來，
+  未防護且譯文實際會撞的組合會讓它 exit 1。確定不是譯文路徑（資源檔名、腳本指令行）
+  就寫進 `tools/big5_hazard_allowlist.tsv` **並附理由**，不要調參數讓它閉嘴。
+  掃描器本身也要做正對照（拆掉一處防護確認它會叫）—— 第一版 GUARD_HINTS 收了 `cht`，
+  結果整段防護拆光它照樣說沒問題，因為同函式裡 `const bool chtOn = ...` 還在。
   修法：`ChtSupport` 的 `big5Strchr`／`big5ToUppercase`／`big5ToLowercase`／
   `big5CapitalizeFirst`／`big5EndsWithChar`。詳見 `docs/30-engine-design.md`。
 - [HARD] 引擎行為斷言以**原始碼／實機當 oracle**，不憑記憶（本檔每條技術事實都附了檔名行號，新增條目照辦）。

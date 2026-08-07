@@ -22,17 +22,34 @@ MAGIC = b"RXCF"
 
 
 def collect_chars(paths):
-    """從 TSV 的第三欄（譯文）收集所有非 ASCII 字元。"""
+    """收集譯文用到的所有非 ASCII 字元。
+
+    吃兩種檔：
+      - 翻譯批次檔：UTF-8，三欄（key / 英文 / 中文），取第三欄
+      - 最終替換表 rex_cht.tsv：Big5，兩欄（key / 中文），取第二欄
+
+    後者是比較可靠的來源 —— 它就是引擎實際會讀的那份，從它取字集，字型必然
+    涵蓋每一個真的會畫到畫面上的字。從批次檔取則要靠「批次都合併進去了」這個
+    假設，多一個會漏的環節（動畫內嵌訊息那 199 則就沒有對應的批次檔）。
+    """
     chars = set()
     for p in paths:
-        with open(p, encoding="utf-8") as f:
-            for line in f:
-                parts = line.rstrip("\n").split("\t")
-                if len(parts) < 3:
-                    continue
-                for ch in parts[2]:
-                    if ord(ch) > 0x7F:
-                        chars.add(ch)
+        raw = open(p, "rb").read()
+        try:
+            text = raw.decode("utf-8")
+            col = 2                       # 批次檔：第三欄是譯文
+        except UnicodeDecodeError:
+            text = raw.decode("big5", "replace")
+            col = 1                       # 最終表：第二欄是譯文
+        for line in text.split("\n"):
+            if not line or line.startswith("#"):
+                continue
+            parts = line.rstrip("\r").split("\t")
+            if len(parts) <= col:
+                continue
+            for ch in parts[col]:
+                if ord(ch) > 0x7F:
+                    chars.add(ch)
     return chars
 
 

@@ -4355,3 +4355,203 @@ vocab:1193	月台東端
 vocab:1194	摺疊
 vocab:1195	刺穿
 vocab:1196	損毀
+# --- anim: 動畫內嵌訊息（*.AA chunk 1），文字的第六個來源 ---
+anim:RM001A1.AA.0	別忘了水中呼吸器！
+anim:RM001A10.AA.0	可惡。
+anim:RM001A10.AA.1	← 花瓶！
+anim:RM001A2.AA.0	欸！小心那個……
+anim:RM001A2.AA.1	欸！小心那個……水雷。
+anim:RM001A2.AA.2	欸！小心那個……水雷。
+anim:RM001A3.AA.0	「好吃！」
+anim:RM001A4.AA.0	← 躲在樹上的女人
+anim:RM001A4.AA.1	← 躲在樹上的女人
+anim:RM001A4.AA.2	← 大失誤
+anim:RM001A4.AA.3	← 好吃！
+anim:RM001A5.AA.0	「嗨！我是雷克斯！」
+anim:RM001A5.AA.1	「嗨。你死了。」
+anim:RM001A6.AA.0	「砰！你死了！」
+anim:RM001A9.AA.0	← 脆脆的！
+anim:RM001B0.AA.0	現代雷克斯
+anim:RM001B0.AA.1	克羅馬儂雷克斯
+anim:RM001B0.AA.2	舊石器雷克斯
+anim:RM001B0.AA.3	尼安德雷克斯
+anim:RM001B0.AA.4	南方古雷克斯
+anim:RM001B0.AA.5	暴龍雷克斯
+anim:RM001C0.AA.0	帶您快速參觀
+anim:RM001C0.AA.1	錯體奇航
+anim:RM001C0.AA.2	拍攝場景
+anim:RM001C0.AA.3	← 這 3D 算圖不錯吧？
+anim:RM001C1.AA.0	新巴爾的摩小行星
+anim:RM001C1.AA.1	（只是模型啦。）
+anim:RM001C1.AA.2	← 陽台上的人
+anim:RM001C1.AA.3	← 陽台上的人
+anim:RM001C1.AA.4	流星 →
+anim:RM001C2.AA.0	史東上校的辦公室
+anim:RM001C2.AA.1	← 真皮的喔！
+anim:RM001C3.AA.0	卡格少校無畏艦的艦橋
+anim:RM001C3.AA.1	← 很潮的座椅面板
+anim:RM001C3.AA.2	（其實是塑膠做的）
+anim:RM001C3.AA.3	← 輪盤
+anim:RM001C3.AA.4	← 潛望鏡
+anim:RM001C3.AA.5	← 水族箱
+anim:RM001C3.AA.6	← 點心區
+anim:RM001C3.AA.7	← 話說這些人是誰啊？
+anim:RM001C4.AA.0	地下城的酷炫
+anim:RM001C4.AA.1	剖面透視圖
+anim:RM001C5.AA.0	猛男城
+anim:RM001C5.AA.1	（男人的城市）
+anim:RM001C5.AA.2	← 布魯斯的
+anim:RM001C5.AA.3	店
+anim:RM001C5.AA.4	← 威廉斯外環道
+anim:RM001C5.AA.5	← 百視搭
+anim:RM001C5.AA.6	錄影帶
+anim:RM001C5.AA.7	← 阿布杜車行
+anim:RM001C5.AA.8	← 總督頂樓豪宅
+anim:RM001C6.AA.0	廢棄太空港
+anim:RM001C6.AA.1	發射器 →
+anim:RM001C6.AA.2	← 糟糕
+anim:RM001C7.AA.0	雷克斯與洛克絲在錯體機
+anim:RM001C7.AA.1	發射器 →
+anim:RM001C7.AA.2	← 糟糕
+anim:RM001C8.AA.0	小星星
+anim:RM001C8.AA.1	洛克絲
+anim:RM001C8.AA.2	蘿彤妲
+anim:RM001C8.AA.3	奧爾嘉
+anim:RM001C8.AA.4	雷克斯
+anim:RM001C8.AA.5	薩托克斯
+anim:RM001C8.AA.6	布格
+anim:RM001C9.AA.0	雷克斯
+anim:RM001C9.AA.1	派羅
+anim:RM001C9.AA.2	實習生
+anim:RM001C9.AA.3	史萊奇
+anim:RM001C9.AA.4	巴德
+anim:RM001C9.AA.5	守衛
+anim:RM001C9.AA.6	席娜中尉
+anim:RM001C9.AA.7	歐格
+anim:RM216A.AA.0	「真不敢相信卡格漏掉了這個。」
+anim:RM216A.AA.1	「你覺得他派得上用場嗎？」
+anim:RM216A.AA.2	「也許吧。看起來不太聰明。」
+anim:RM216A.AA.3	「潔倫明天就要進錯體機了……」
+anim:RM216A.AA.4	「說不定她可以不用受那個罪了。」
+anim:RM216A.AA.5	「好。他既然聰明到能摸進這裡，」
+anim:RM216A.AA.6	「……就讓史萊奇醫師看看他。」
+anim:RM216A.AA.7	「通知 ME-1 的守衛，可能有客人。」
+anim:RM216A.AA.8	「是，長官。」
+anim:RM301A.AA.0	「不准動，人渣！」
+anim:RM301A.AA.1	「糟了……」
+anim:RM301A.AA.2	「我是席娜中尉。我們等你很久了。」
+anim:RM301A.AA.3	「你現在是我們的俘虜。」
+anim:RM301A.AA.4	「慢慢轉身跟我走；敢反抗的話……」
+anim:RM301A.AA.5	「……就地格殺。」
+anim:RM301A.AA.6	「快點，人渣！」
+anim:RM301A.AA.7	「好啦好啦！」
+anim:RM302A.AA.0	「擺好姿勢。」
+anim:RM302A.AA.1	「躺著那種嗎？」
+anim:RM302A.AA.2	「閉嘴，人渣！」
+anim:RM302A.AA.3	「跟上她，人渣！」
+anim:RM302A.AA.4	「好啦好啦好啦。」
+anim:RM302B.AA.0	「擺好姿勢。」
+anim:RM302B.AA.1	「躺著那種嗎？」
+anim:RM302B.AA.2	「閉嘴，人渣！」
+anim:RM302B.AA.3	「跟上她，人渣！」
+anim:RM302B.AA.4	「好啦好啦好啦。」
+anim:RM307A.AA.0	「站住，人渣！」
+anim:RM307A.AA.1	「這就是你的牢房。進去。」
+anim:RM307A.AA.2	「我們等一下回來。」
+anim:RM307B.AA.0	「你得跟我們走。」
+anim:RM307B.AA.1	「史萊奇醫師想『看看』你……」
+anim:RM307B.AA.2	「嘿嘿。」
+anim:RM307B.AA.3	「別耍花樣，人渣。」
+anim:RM318A.AA.0	「躺上推床。」
+anim:RM318A.AA.1	「那玩意兒？免談！」
+anim:RM318A.AA.2	「喝啊！」
+anim:RM318A.AA.3	「唔。」
+anim:RM318C.AA.0	「那麼。」
+anim:RM318D.AA.0	「這位是針筒先生！」
+anim:RM318D.AA.1	「晚安囉！」
+anim:RM318D.AA.2	「呼——呼——……」
+anim:RM318D.AA.3	「等等！別叫針筒先生來！」
+anim:RM318D.AA.4	「又在做炸彈啦？」
+anim:RM318E.AA.0	「這位是針筒先生！」
+anim:RM318E.AA.1	「晚安囉！」
+anim:RM318E.AA.2	「呼——呼——……」
+anim:RM318E.AA.3	「等等！別叫針筒先生來！」
+anim:RM319B3.AA.0	「這位是短棍先生！」
+anim:RM319B4.AA.0	「跟棍棒先生打個招呼！」
+anim:RM319B5.AA.0	「那就見見電鋸先生！」
+anim:RM320A.AA.0	「不准動，人渣！你死定了！」
+anim:RM320A.AA.1	「我只是在吃甜甜圈而已……」
+anim:RM320A.AA.2	「閉嘴，人渣！」
+anim:RM320A.AA.3	「史萊奇醫師見到你會樂壞的！」
+anim:RM320A.AA.4	「欸，你看！你鞋帶鬆了！」
+anim:RM320A.AA.5	「蛤？鞋帶？」
+anim:RM320A.AA.6	「蛤？鞋帶？」
+anim:RM320A.AA.7	「唔！」
+anim:RM320A.AA.8	「欸，謝啦老兄……呃，蜥腳龍先生！」
+anim:RM320A.AA.9	「小事一樁，朋友。」
+anim:RM320A.AA.10	「我得閃了。」
+anim:RM320A.AA.11	「還有幾個屁股等著我踹。」
+anim:RM320A.AA.12	「後會……有期……寶貝！嘿嘿。」
+anim:RM321G0.AA.0	「糟了……」
+anim:RM321G0.AA.1	「這下慘了……」
+anim:RM321G0.AA.2	「這下真的慘了。」
+anim:RM321G0.AA.3	「搞什麼……」
+anim:RM321G0.AA.4	「我的錯體機啊！不見了！！！」
+anim:RM321G0.AA.5	「史東死定了！」
+anim:RM321G1.AA.0	「最好有用！」
+anim:RM321G1.AA.1	「呼——」
+anim:RM321G1.AA.2	「還好真的有用！」
+anim:RM321G1.AA.3	「沒有小雷克斯我該怎麼辦？」
+anim:RM321G2.AA.0	「好吧。」
+anim:RM321G2.AA.1	「快點解決吧。」
+anim:RM321G2.AA.2	「最討厭這種事了！」
+anim:RM938A.AA.0	「所以你看，這七萬五千銀河幣
+anim:RM938A.AA.1	是我賺來的！」
+anim:RM951A.AA.0	「東西在這，史東。
+anim:RM951A.AA.1	我的錢呢？」
+anim:RM951A.AA.2	「這不是雷克斯‧尼布勒嗎。
+anim:RM951A.AA.3	真是稀客。」
+anim:RM951A.AA.4	「我的線人真不可靠，
+anim:RM951A.AA.5	雷克斯。他們跟我說你……
+anim:RM951A.AA.6	……怎麼講……死了。」
+anim:RM951B.AA.0	「你說話從來不留情面，
+anim:RM951B.AA.1	雷克斯。這點我還挺欣賞的。」
+anim:RM951B.AA.2	「收支票你應該
+anim:RM951B.AA.3	不介意吧？」
+anim:RM951B.AA.4	「不介意。只要開票的銀行
+anim:RM951B.AA.5	是你的，我就收。」
+anim:RM951B.AA.6	「這確實是件精品。
+anim:RM951B.AA.7	勾起不少回憶啊。」
+anim:RM951B.AA.8	「跟我說說，雷克斯。找它
+anim:RM951B.AA.9	有遇到什麼麻煩嗎？」
+anim:RM952A.AA.0	「省省吧史東！這趟一點都不好玩。
+anim:RM952A.AA.1	錢給我，我馬上走人。
+anim:RM952A.AA.2	我現在跟一張床有約，
+anim:RM952A.AA.3	已經遲到了。」
+anim:RM952A.AA.4	「要喝一杯嗎？
+anim:RM952A.AA.5	雖然我早就知道
+anim:RM952A.AA.6	你的答案。」
+anim:RM952A.AA.7	「好啊，來杯七萬五千銀河幣加冰塊。
+anim:RM952A.AA.8	純的，要現金。」
+anim:RM952B.AA.0	「有沒有麻煩？你坐好，
+anim:RM952B.AA.1	我來跟你講講你口中那個
+anim:RM952B.AA.2	『輕鬆到不行』的差事。」
+anim:RM952B.AA.3	「找那顆星球很簡單。
+anim:RM952B.AA.4	簡單得有點過頭……」
+anim:RM963A.AA.0	「就是它。好，探測器，上工吧。」
+anim:RM965A.AA.0	「再靠近一點……」
+anim:RM967A.AA.0	「那到底是什麼鬼東西！？」
+anim:RM969A.AA.0	「那艘船也太大了吧！」
+anim:RM971A.AA.0	「目標受損，長官。她跑不掉了。」
+anim:RM971A.AA.1	「很好。上前解決掉。」
+anim:RM973A.AA.0	「比這更糟的我都唬過去了……」
+anim:RM973A.AA.1	「油豬號呼叫那艘討人厭的大船……」
+anim:RM974A.AA.0	「長官，那名駕駛想跟我們通話。」
+anim:RM974A.AA.1	「接到你的螢幕。」
+anim:RM974A.AA.2	「是，長官！」
+anim:RM974A.AA.3	「欸，有話好說嘛？我只是路過的觀光客！」
+anim:RM974A.AA.4	「你發現了我們的星球，你非死不可！」
+anim:RM975A.AA.0	「什麼星球！？我聽不懂你在說什麼！」
+anim:RM975A.AA.1	「所以可以麻煩別再開火了嗎？我這就走！」
+anim:RM976A.AA.0	「武器鎖定完成，長官。」
+anim:RM976A.AA.1	「很好。結束吧。」
