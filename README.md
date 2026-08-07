@@ -60,7 +60,7 @@ char theChar = (*text++) & 0x7F;      // ← 每個位元組被強制遮成 7-bi
 `_charWidths` 只開 128 格。任何 ≥ 0x80 的位元組——Big5 的 lead byte 必然是——都會被折成一個
 ASCII 字元。這一行決定了整個專案的形狀：**非改引擎不可**，剩下的問題只是「怎麼改得夠小」。
 
-改動集中在六個地方，每個都說得出為什麼非改不可：
+改動集中在七個地方，每個都說得出為什麼非改不可：
 
 | 檔案 | 改什麼 | 為什麼 |
 |---|---|---|
@@ -70,6 +70,7 @@ ASCII 字元。這一行決定了整個專案的形狀：**非改引擎不可**�
 | `game.cpp` / `scene.cpp` / `menu_views.cpp` / `staticres.cpp` | 前五個文字來源的查表 hook | 少接一個就露英文 |
 | `animation.cpp` | 第六個文字來源（`*.AA` 動畫內嵌訊息）的查表 hook | 見下面「第六個來源」 |
 | `dialogs_nebular.cpp` / `action.cpp` / `user_interface.cpp` | Big5 安全的大小寫、結尾判斷與控制碼括號解析 | 見下面「許功蓋問題」 |
+| `nebular/menu_nebular.cpp/.h` | 主選單的中文標籤疊繪 | 選項是 bitmap 美術不是文字，見下面「主選單是圖不是字」 |
 
 ### 中文為什麼要另開一層畫
 
