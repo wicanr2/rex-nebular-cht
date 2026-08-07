@@ -362,11 +362,21 @@ README 本體：在地代理史（**這款當年只有中文手冊、沒有中�
 - [HARD] **限制級／輔導級兩套文字都要處理**，別只翻一套就宣稱完成。
 - [HARD] 字形預設**倚天點陣字**，`SPCFONT` 必帶。
 - [HARD] 公開 repo **patch-only**；`*.ROM`、遊戲資料、手冊掃描一律 gitignore。
-- [HARD] **任何對譯文做逐 byte 掃描的地方都要 Big5-aware**（`strchr`／`strstr`／手寫 `while (*p)`）。
-  Big5 trail byte 落在 `@`(0x40)、`[`(0x5B)、`\`(0x5C) 這些 ASCII 值上是家常便飯
-  （「作」=A740、「一」=A440），逐 byte 掃描會在中文字第二個位元組上誤中、把字從中間切開。
-  **症狀是某幾個字悄悄變成別的字，不崩潰也不報錯**，極易誤判成「字型缺字」查錯方向。
-  盤點：`grep -n 'strchr\|strstr\|strtok' engines/mads/*.cpp`。詳見 `docs/30-engine-design.md`。
+- [HARD] **「許功蓋問題」有三型，任何碰譯文的逐 byte 操作都要 Big5-aware**。
+  Big5 trail byte 落在 ASCII 可見範圍是家常便飯（「作」=A740、「一」=A440、「快存」尾位元組=0x73），
+  **症狀一律是某幾個字悄悄變成別的字，不崩潰也不報錯**，極易誤判成「字型缺字」查錯方向。
+  1. **逐 byte 掃描**：`strchr`／`strstr`／`strtok`／手寫 `while (*p)` 在 trail byte 上誤中，
+     把字從中間切開（`@`=0x40、`[`=0x5B、`\`=0x5C）。
+  2. **結尾／前綴判斷**：`hasSuffix("s")` 這種判英文文法的，會被中文的 trail byte 誤中。
+  3. **[影響最大] 大小寫轉換**：`toUppercase()`／`toLowercase()`／`toupper()` 逐 byte 加減 0x20，
+     trail byte 落在 `A-Z`(0x41–0x5A) 或 `a-z`(0x61–0x7A) 就變成另一個字。
+     **實測本專案 4357 筆譯文有 3619 筆（83%）中招**（「遊戲」→「鉍戲」、「關上」→「關已」）。
+     順帶：`char` 是 signed，把 ≥0x80 的 lead byte 傳給 `toupper()` 本身就是 UB。
+  盤點要**掃全樹不能只掃頂層**（本專案最嚴重那處在 `nebular/` 子目錄）：
+  `grep -rn 'strchr\|strstr\|strtok\|toupper\|tolower\|toUppercase\|toLowercase\|hasSuffix' --include=*.cpp --include=*.h engines/mads/`
+  逐一確認掃描對象會不會是譯文（資源檔名、腳本指令行是 ASCII，安全）。
+  修法：`ChtSupport` 的 `big5Strchr`／`big5ToUppercase`／`big5ToLowercase`／
+  `big5CapitalizeFirst`／`big5EndsWithChar`。詳見 `docs/30-engine-design.md`。
 - [HARD] 引擎行為斷言以**原始碼／實機當 oracle**，不憑記憶（本檔每條技術事實都附了檔名行號，新增條目照辦）。
 - [HARD] 包驗收要**同時**比中文資料 md5 **與引擎指紋**。
 - [HARD] configure 偵測不到函式庫只會**安靜關掉選項**，收尾要反查 `config.mk`。

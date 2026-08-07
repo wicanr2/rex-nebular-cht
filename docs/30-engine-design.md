@@ -148,7 +148,66 @@ char *cStart  = strchr(_currentLine, '[');   // '[' = 0x5B，指令開始
 
 **[HARD] 通則**：**任何對譯文做逐 byte 掃描的地方都要 Big5-aware**。
 不只 `strchr`，`strstr`、`strtok`、手寫的 `while (*p)` 迴圈都算。
-盤點方式：`grep -n 'strchr\|strstr\|strtok' engines/mads/*.cpp`，逐一確認掃描對象會不會是譯文。
+
+### [雷·必看] 第三型：大小寫轉換——影響面比 `strchr` 大得多
+
+**這是後來才補查到的，而且是三型裡影響最廣的一型。**
+
+`Common::String::toUppercase()` / `toLowercase()` 是逐 byte 跑 `toupper`/`tolower`。
+Big5 的 trail byte 大量落在 `A-Z`(0x41–0x5A) 與 `a-z`(0x61–0x7A)——
+被加減 0x20 之後，**字直接變成另一個字**：
+
+```
+「遊戲」  a9 43 c0 b8 → toLowercase → 「鉍戲」
+「關上」  c3 f6 a4 57 → toLowercase → 「關已」
+「通風口」b3 71 ad b7 a4 66 → toUppercase → 「被風了」
+```
+
+實測本專案：**4357 筆譯文有 3619 筆（83%）含會被改掉的 trail byte**；
+單看 vocab 是 845 / 1193（71%）。
+
+真正會踩到的路徑是 `DialogsNebular::getVocab()`（`nebular/dialogs_nebular.cpp:195`）：
+
+```cpp
+Common::String vocab = _vm->_game->_scene.getVocab(vocabId);   // ← 譯文
+switch (_capitalizationMode) {
+case kUppercase:  vocab.toUppercase();   // ← 整串逐 byte
+case kLowercase:  vocab.toLowercase();
+```
+
+而 `_capitalizationMode` **預設就是 `kUppercase`**（`dialogs_nebular.h:41`，`.cpp:56` 每次重設），
+由對話文字裡 `[VERB]` / `[Verb]` / `[verb]` 佔位符的大小寫決定。
+換句話說：**任何含 vocab 佔位符的對話框，中文詞彙都會被改掉。**
+
+同一型的還有兩個變種：
+
+- **`hasSuffix("s")` 判英文複數**（`dialogs_nebular.cpp:236`）。中文譯文的最後一個位元組是
+  trail byte，可能剛好是 `'s'`(0x73)——「快存」= `A7 D6 A6 73`——於是被判成複數，挑錯句型。
+- **`toupper(vocab[0])` 判母音決定 a/an**（`:245`）。中文不需要冠詞，而且 `char` 是 **signed**，
+  把 ≥0x80 的 lead byte 傳給 `toupper()` 本身就是未定義行為。
+
+修法在 `ChtSupport`（`cht.h`/`cht.cpp`）：`big5ToUppercase` / `big5ToLowercase` /
+`big5CapitalizeFirst` / `big5EndsWithChar` / `big5StartsWide`。核心是逐**字元**走而不是逐 byte，
+雙位元組字整個跳過（中文沒有大小寫），ASCII 照常轉換。
+
+驗證用全量譯文對照：修正後 8714 次轉換中，中文 byte 全部不變、ASCII 仍正確轉換
+（`[title26]` → `[TITLE26]` 這種佔位符功能沒壞）；同一批資料餵給原本的逐 byte 版，
+**6154 次會改壞**。
+
+### 盤點方式（三型都要查）
+
+```bash
+# 第一、二型：逐 byte 掃描
+grep -rn 'strchr\|strrchr\|strstr\|strtok\|strpbrk' --include=*.cpp --include=*.h engines/mads/
+# 第三型：大小寫轉換 ← 最容易漏，影響也最大
+grep -rn 'toupper\|tolower\|toUppercase\|toLowercase' --include=*.cpp --include=*.h engines/mads/
+# 順帶：字串搜尋類 API
+grep -rn 'findFirstOf\|hasSuffix\|hasPrefix\|\.contains(' --include=*.cpp engines/mads/
+```
+
+**要掃全樹，不能只掃 `engines/mads/*.cpp`** —— 本專案最嚴重的那處在 `nebular/` 子目錄下。
+逐一確認掃描對象會不會是譯文：資源檔名、腳本指令行是 ASCII，安全；
+凡是經過 `getVocab()` / `getQuote()` / `getMessage()` 的都要處理。
 **這類 bug 不會崩潰、不會報錯，只會讓某幾個字悄悄變成別的字**——而且只在特定文字上出現，
 所以很容易被當成「字型缺字」或「翻譯打錯」而查錯方向。
 

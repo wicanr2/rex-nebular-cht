@@ -1,8 +1,16 @@
 diff --git a/engines/mads/action.cpp b/engines/mads/action.cpp
-index abe3b8ab..18b37262 100644
+index abe3b8ab..650561a7 100644
 --- a/engines/mads/action.cpp
 +++ b/engines/mads/action.cpp
-@@ -28,6 +28,16 @@
+@@ -19,6 +19,7 @@
+  *
+  */
+ 
++#include "mads/cht.h"
+ #include "mads/mads.h"
+ #include "mads/action.h"
+ #include "mads/inventory.h"
+@@ -28,6 +29,16 @@
  
  namespace MADS {
  
@@ -19,7 +27,19 @@ index abe3b8ab..18b37262 100644
  void ActionDetails::synchronize(Common::Serializer &s) {
  	s.syncAsUint16LE(_verbId);
  	s.syncAsUint16LE(_objectNameId);
-@@ -130,7 +140,7 @@ void MADSAction::set() {
+@@ -94,8 +105,10 @@ void MADSAction::clear() {
+ 
+ void MADSAction::appendVocab(int vocabId, bool capitalize) {
+ 	Common::String vocabStr = _vm->_game->_scene.getVocab(vocabId);
++	// [CHT] 首字是 Big5 lead byte 時不能碰：中文沒有大小寫，而且 char 是 signed，
++	// 把 ≥0x80 的值傳給 toupper() 是未定義行為。
+ 	if (capitalize)
+-		vocabStr.setChar(toupper(vocabStr[0]), 0);
++		ChtSupport::big5CapitalizeFirst(vocabStr, CHT_ON);
+ 
+ 	_statusText += vocabStr;
+ 	_statusText += " ";
+@@ -130,7 +143,7 @@ void MADSAction::set() {
  		}
  	} else if (_lookFlag && (_selectedRow == 0)) {
  		// Two 'look' actions in succession, so the action becomes 'Look around'
@@ -28,7 +48,7 @@ index abe3b8ab..18b37262 100644
  	} else {
  		bool flag = false;
  		if ((_commandSource == CAT_INV_VOCAB) && (_selectedRow >= 0)
-@@ -143,9 +153,9 @@ void MADSAction::set() {
+@@ -143,9 +156,9 @@ void MADSAction::set() {
  			_action._verbId = objEntry._vocabList[_selectedRow]._vocabId;
  
  			// Set up the status text string
@@ -40,7 +60,7 @@ index abe3b8ab..18b37262 100644
  			appendVocab(_action._verbId);
  		} else {
  			// Handling for if an action has been selected
-@@ -165,7 +175,7 @@ void MADSAction::set() {
+@@ -165,7 +178,7 @@ void MADSAction::set() {
  
  				if (_action._verbId == VERB_LOOK) {
  					// Add in the word 'add'
@@ -49,7 +69,7 @@ index abe3b8ab..18b37262 100644
  					_statusText += " ";
  				}
  			}
-@@ -174,7 +184,7 @@ void MADSAction::set() {
+@@ -174,7 +187,7 @@ void MADSAction::set() {
  			if ((_hotspotId >= 0) && (_selectedRow >= 0) && (_articleNumber > 0) && (_verbType == VERB_THAT)) {
  				flag = true;
  
@@ -58,7 +78,7 @@ index abe3b8ab..18b37262 100644
  				_statusText += " ";
  			}
  
-@@ -198,7 +208,7 @@ void MADSAction::set() {
+@@ -198,7 +211,7 @@ void MADSAction::set() {
  					} else {
  						// Default to a standard 'walk to'
  						_action._verbId = VERB_WALKTO;
@@ -67,7 +87,7 @@ index abe3b8ab..18b37262 100644
  					}
  				}
  
-@@ -242,15 +252,15 @@ void MADSAction::set() {
+@@ -242,15 +255,15 @@ void MADSAction::set() {
  						articleNum = scene._dynamicHotspots.get(_secondObject - scene._hotspots.size())._articleNumber;
  					}
  
@@ -89,10 +109,10 @@ index abe3b8ab..18b37262 100644
  			_statusText += " ";
 diff --git a/engines/mads/cht.cpp b/engines/mads/cht.cpp
 new file mode 100644
-index 00000000..92d5ab74
+index 00000000..24e31648
 --- /dev/null
 +++ b/engines/mads/cht.cpp
-@@ -0,0 +1,165 @@
+@@ -0,0 +1,231 @@
 +/* ScummVM - Graphic Adventure Engine
 + *
 + * ScummVM is the legal property of its developers, whose names
@@ -249,6 +269,72 @@ index 00000000..92d5ab74
 +	return nullptr;
 +}
 +
++// 逐字元走過字串，對 ASCII 位元組套用 fn，雙位元組字整個跳過。
++// 這是「許功蓋問題」在大小寫轉換上的修法：中文沒有大小寫，
++// 而 Big5 的 trail byte 大量落在 A-Z / a-z，逐 byte 轉換會把字改掉。
++static void big5MapAscii(Common::String &s, int (*fn)(int), bool chtOn) {
++	if (!chtOn) {
++		for (uint i = 0; i < s.size(); ++i)
++			s.setChar((char)fn((byte)s[i]), i);
++		return;
++	}
++
++	for (uint i = 0; i < s.size(); ) {
++		if ((byte)s[i] >= 0xA1 && i + 1 < s.size()) {
++			i += 2;            // 雙位元組字：原樣保留
++			continue;
++		}
++		s.setChar((char)fn((byte)s[i]), i);
++		++i;
++	}
++}
++
++void ChtSupport::big5ToUppercase(Common::String &s, bool chtOn) {
++	big5MapAscii(s, toupper, chtOn);
++}
++
++void ChtSupport::big5ToLowercase(Common::String &s, bool chtOn) {
++	big5MapAscii(s, tolower, chtOn);
++}
++
++void ChtSupport::big5CapitalizeFirst(Common::String &s, bool chtOn) {
++	if (s.empty())
++		return;
++	// Big5 lead byte 開頭就不動：中文沒有大小寫，而且 char 是 signed，
++	// 把 ≥0x80 的值傳給 toupper() 是未定義行為。
++	if (chtOn && (byte)s[0] >= 0xA1)
++		return;
++	s.setChar((char)toupper((byte)s[0]), 0);
++}
++
++bool ChtSupport::big5EndsWithChar(const Common::String &s, char c, bool chtOn) {
++	if (s.empty())
++		return false;
++	if (!chtOn)
++		return s[s.size() - 1] == c;
++
++	// 從頭走一次才知道最後一個位元組是獨立的 ASCII 字元，還是某個雙位元組字的
++	// trail byte。只看最後一格是分不出來的 —— 「快存」= A7 D6 A6 73 的結尾
++	// 剛好是 's'。
++	uint last = 0;
++	bool lastIsWide = false;
++	for (uint i = 0; i < s.size(); ) {
++		last = i;
++		if ((byte)s[i] >= 0xA1 && i + 1 < s.size()) {
++			lastIsWide = true;
++			i += 2;
++		} else {
++			lastIsWide = false;
++			++i;
++		}
++	}
++	return !lastIsWide && s[last] == c;
++}
++
++bool ChtSupport::big5StartsWide(const Common::String &s, bool chtOn) {
++	return chtOn && !s.empty() && (byte)s[0] >= 0xA1;
++}
++
 +bool ChtSupport::hasWideChar(const Common::String &s) {
 +	for (uint i = 0; i < s.size(); ++i) {
 +		if ((byte)s[i] >= 0xA1)
@@ -260,10 +346,10 @@ index 00000000..92d5ab74
 +} // End of namespace MADS
 diff --git a/engines/mads/cht.h b/engines/mads/cht.h
 new file mode 100644
-index 00000000..3c06b016
+index 00000000..860d9812
 --- /dev/null
 +++ b/engines/mads/cht.h
-@@ -0,0 +1,92 @@
+@@ -0,0 +1,129 @@
 +/* ScummVM - Graphic Adventure Engine
 + *
 + * ScummVM is the legal property of its developers, whose names
@@ -351,6 +437,43 @@ index 00000000..3c06b016
 +	 * chtOn 為 false 時行為與 strchr() 完全相同。
 +	 */
 +	static const char *big5Strchr(const char *s, char c, bool chtOn);
++
++	// --- 以下這組處理「許功蓋問題」的另一面：大小寫轉換 ---
++	//
++	// Big5 的 trail byte 大量落在 'A'-'Z'(0x41-0x5A) 與 'a'-'z'(0x61-0x7A)。
++	// Common::String::toUppercase() / toLowercase() 是逐 byte 跑 toupper/tolower，
++	// 會把 trail byte 加減 0x20 —— 字直接變成另一個字，不崩潰也不報錯。
++	//
++	// 實測本專案譯文：4357 筆裡有 3619 筆（83%）含會被改掉的 trail byte。
++	//   「遊戲」  → toLowercase → 「鉍戲」
++	//   「關上」  → toLowercase → 「關已」
++	//   「通風口」→ toUppercase → 「被風了」
++	//
++	// 中文沒有大小寫，所以正解是「雙位元組字整個跳過，只轉 ASCII」。
++
++	/** Big5 安全的整串轉大寫：雙位元組字原樣保留 */
++	static void big5ToUppercase(Common::String &s, bool chtOn);
++
++	/** Big5 安全的整串轉小寫：雙位元組字原樣保留 */
++	static void big5ToLowercase(Common::String &s, bool chtOn);
++
++	/**
++	 * 首字大寫。首字是 Big5 lead byte 時原樣不動 ——
++	 * 中文沒有大小寫，而且 char 是 signed，把 ≥0x80 的值傳給 toupper() 本身就是 UB。
++	 */
++	static void big5CapitalizeFirst(Common::String &s, bool chtOn);
++
++	/**
++	 * Big5 安全的「結尾是不是某個 ASCII 字元」。
++	 *
++	 * 原版用 hasSuffix("s") 判英文複數。中文譯文的最後一個位元組是 trail byte，
++	 * 可能剛好是 's'(0x73) —— 例如「快存」= A7 D6 A6 73 —— 於是被判成複數，
++	 * 挑到錯誤的句型。這個版本會先確認該位元組不是 trail byte。
++	 */
++	static bool big5EndsWithChar(const Common::String &s, char c, bool chtOn);
++
++	/** 字串開頭是不是雙位元組字（用來判斷該不該套用英文文法規則） */
++	static bool big5StartsWide(const Common::String &s, bool chtOn);
 +};
 +
 +} // End of namespace MADS
@@ -761,10 +884,18 @@ index 9d80ac35..fd6fcd99 100644
  	conversations.o \
  	debugger.o \
 diff --git a/engines/mads/nebular/dialogs_nebular.cpp b/engines/mads/nebular/dialogs_nebular.cpp
-index 7f7ac80a..fd3588ba 100644
+index 7f7ac80a..9e32b534 100644
 --- a/engines/mads/nebular/dialogs_nebular.cpp
 +++ b/engines/mads/nebular/dialogs_nebular.cpp
-@@ -112,7 +112,9 @@ bool DialogsNebular::show(int messageId, int objectId) {
+@@ -30,6 +30,7 @@
+ #include "mads/screen.h"
+ #include "mads/msurface.h"
+ #include "mads/staticres.h"
++#include "mads/cht.h"
+ #include "mads/nebular/dialogs_nebular.h"
+ #include "mads/nebular/game_nebular.h"
+ #include "mads/nebular/menu_nebular.h"
+@@ -112,7 +113,9 @@ bool DialogsNebular::show(int messageId, int objectId) {
  						if (!textNoun(dialogText, 2, valStr))
  							dialogText += getVocab(action._activeAction._indirectObjectId);
  					} else if (commandCheck("PREP", valStr, commandText)) {
@@ -775,7 +906,56 @@ index 7f7ac80a..fd3588ba 100644
  					} else if (commandCheck("SENTENCE", valStr, commandText)) {
  						dialogText += action._sentence;
  					} else if (commandCheck("WIDTH", valStr, commandText)) {
-@@ -780,7 +782,10 @@ void GameDialog::addLine(const Common::String &msg, DialogTextAlign align,
+@@ -196,16 +199,21 @@ Common::String DialogsNebular::getVocab(int vocabId) {
+ 
+ 	Common::String vocab = _vm->_game->_scene.getVocab(vocabId);
+ 
++	// [CHT] 不能用 Common::String 的 toUppercase()/toLowercase()：它們逐 byte 跑
++	// toupper/tolower，而 Big5 的 trail byte 大量落在 A-Z / a-z，會被加減 0x20 —— 
++	// 字直接變成另一個字（「遊戲」→「鉍戲」、「關上」→「關已」），不崩潰也不報錯。
++	// 實測本專案 4357 筆譯文有 3619 筆（83%）中招。中文沒有大小寫，整個跳過。
++	const bool chtOn = _vm->_cht && _vm->_cht->enabled();
+ 	switch (_capitalizationMode) {
+ 	case kUppercase:
+-		vocab.toUppercase();
++		ChtSupport::big5ToUppercase(vocab, chtOn);
+ 		break;
+ 	case kLowercase:
+-		vocab.toLowercase();
++		ChtSupport::big5ToLowercase(vocab, chtOn);
+ 		break;
+ 	case kUpperAndLower:
+-		vocab.toLowercase();
+-		vocab.setChar(toupper(vocab[0]), 0);
++		ChtSupport::big5ToLowercase(vocab, chtOn);
++		ChtSupport::big5CapitalizeFirst(vocab, chtOn);
+ 	default:
+ 		break;
+ 	}
+@@ -234,13 +242,19 @@ bool DialogsNebular::textNoun(Common::String &dest, int nounId, const Common::St
+ 	Common::String vocab = _vm->_dialogs->getVocab(action._activeAction._verbId);
+ 	Common::String *str;
+ 
+-	if (vocab.hasSuffix("s") || vocab.hasSuffix("S")) {
++	// [CHT] hasSuffix("s") 是在判英文複數。中文譯文的最後一個位元組是 trail byte，
++	// 可能剛好是 's'(0x73)（「快存」= A7 D6 A6 73），會被誤判成複數而挑錯句型。
++	const bool chtOn2 = _vm->_cht && _vm->_cht->enabled();
++	if (ChtSupport::big5EndsWithChar(vocab, 's', chtOn2) ||
++			ChtSupport::big5EndsWithChar(vocab, 'S', chtOn2)) {
+ 		str = &param2;
+ 	} else {
+ 		str = &param1;
+ 
+-		if (param1 == "a ") {
+-			switch (toupper(vocab[0])) {
++		// 冠詞 a/an 的母音判斷對中文沒有意義，而且 vocab[0] 是 Big5 lead byte 時
++		// 傳給 toupper() 是 UB（char 為 signed）。中文開頭就直接跳過這段。
++		if (param1 == "a " && !ChtSupport::big5StartsWide(vocab, chtOn2)) {
++			switch (toupper((byte)vocab[0])) {
+ 			case 'A':
+ 			case 'E':
+ 			case 'I':
+@@ -780,7 +794,10 @@ void GameDialog::addLine(const Common::String &msg, DialogTextAlign align,
  
  	case ALIGN_AT_CENTER: {
  		const char *msgP = msg.c_str();
@@ -1130,10 +1310,18 @@ index 97d360ad..359d337c 100644
  extern const char *const kGameReleaseTitleStr;
  
 diff --git a/engines/mads/user_interface.cpp b/engines/mads/user_interface.cpp
-index e77c949d..525cb35e 100644
+index e77c949d..75cbc58b 100644
 --- a/engines/mads/user_interface.cpp
 +++ b/engines/mads/user_interface.cpp
-@@ -27,6 +27,30 @@
+@@ -20,6 +20,7 @@
+  */
+ 
+ #include "common/scummsys.h"
++#include "mads/cht.h"
+ #include "mads/mads.h"
+ #include "mads/compression.h"
+ #include "mads/user_interface.h"
+@@ -27,6 +28,30 @@
  
  namespace MADS {
  
@@ -1164,7 +1352,7 @@ index e77c949d..525cb35e 100644
  UISlot::UISlot() {
  	_flags = IMG_STATIC;
  	_segmentId = 0;
-@@ -479,7 +503,7 @@ void UserInterface::drawActions() {
+@@ -479,7 +504,7 @@ void UserInterface::drawActions() {
  }
  
  void UserInterface::drawInventoryList() {
@@ -1173,11 +1361,37 @@ index e77c949d..525cb35e 100644
  	for (int idx = _inventoryTopIndex; idx < endIndex; ++idx) {
  		writeVocab(CAT_INV_LIST, idx);
  	}
-@@ -756,18 +780,21 @@ void UserInterface::loadElements() {
+@@ -615,7 +640,7 @@ void UserInterface::writeVocab(ScrCategory category, int id) {
+ 			_vm->_font->setColorMode(id == _selectedActionIndex ? SELMODE_SELECTED : SELMODE_UNSELECTED);
+ 		}
+ 		vocabStr = scene.getVocab(vocabId);
+-		vocabStr.setChar(toupper(vocabStr[0]), 0);
++		ChtSupport::big5CapitalizeFirst(vocabStr, _vm->_cht && _vm->_cht->enabled());
+ 		font->writeString(this, vocabStr, Common::Point(bounds.left, bounds.top));
+ 		break;
+ 
+@@ -629,7 +654,7 @@ void UserInterface::writeVocab(ScrCategory category, int id) {
+ 		}
+ 
+ 		vocabStr = scene.getVocab(vocabId);
+-		vocabStr.setChar(toupper(vocabStr[0]), 0);
++		ChtSupport::big5CapitalizeFirst(vocabStr, _vm->_cht && _vm->_cht->enabled());
+ 		font->writeString(this, vocabStr, Common::Point(bounds.left, bounds.top));
+ 		break;
+ 
+@@ -672,7 +697,7 @@ void UserInterface::writeVocab(ScrCategory category, int id) {
+ 		} else {
+ 			_vm->_font->setColorMode(id == _selectedInvIndex ? SELMODE_SELECTED : SELMODE_UNSELECTED);
+ 			vocabStr = scene.getVocab(vocabId);
+-			vocabStr.setChar(toupper(vocabStr[0]), 0);
++			ChtSupport::big5CapitalizeFirst(vocabStr, _vm->_cht && _vm->_cht->enabled());
+ 			font->writeString(this, vocabStr, Common::Point(bounds.left, bounds.top));
+ 			break;
+ 		}
+@@ -756,18 +781,20 @@ void UserInterface::loadElements() {
  bool UserInterface::getBounds(ScrCategory category, int v, Common::Rect &bounds) {
  	int heightMultiplier, widthMultiplier;
  	int leftStart, yOffset, widthAmt;
-+	const bool cht = _vm->_cht && _vm->_cht->enabled();
 +	const int rows = chtRows();
 +	const int rowH = chtRowHeight();
  
